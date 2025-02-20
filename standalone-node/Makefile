@@ -28,11 +28,14 @@ coverage:
 	@echo "---MAKEFILE COVERAGE---"
 	echo $@
 	@echo "---END MAKEFILE COVERAGE---"
+license:
+## Check licensing with the reuse tool.
+        #reuse --version
+        #reuse --root . lint
+	@echo "---MAKEFILE LICENSE---"
+	echo $@
+	@echo "---END MAKEFILE LICENSE---"
 
-license: 
-	## Check licensing with the reuse tool.
-	reuse --version
-	reuse --root . lint
 
 list: 
 	@# Help: displays make targets
