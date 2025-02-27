@@ -9,6 +9,7 @@ build:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE BUILD---"
 	echo $@
+	cd host_os && ./download_tmv.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 
 lint:
@@ -35,7 +36,11 @@ license:
 	@echo "---MAKEFILE LICENSE---"
 	echo $@
 	@echo "---END MAKEFILE LICENSE---"
-
+clean:
+	@# Clean: Remove build files
+	@echo "---MAKEFILE CLEAN---"
+	cd host_os && rm -f *.gz *.sha256sum *.der
+	@echo "---END MAKEFILE CLEAN---"
 
 list: 
 	@# Help: displays make targets
