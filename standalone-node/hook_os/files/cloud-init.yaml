@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Create a new user and runs a custom shell script to install few packages
+# and configure the system.
+users:
+  - name: user
+    gecos: "New User"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAr... your-public-key-here
+
+# Run the cluster creation shell script
+runcmd:
+  - /opt/bin/install-k8s-cluster.sh

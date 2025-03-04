@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+#####################################################################################
+# Provide the following inputs
+#####################################################################################
+
+## Organizationonal proxy config (default is intel)
+http_proxy=""
+https_proxy=""
+ftp_proxy=""
+socks_proxy=""
+no_proxy=""
+
