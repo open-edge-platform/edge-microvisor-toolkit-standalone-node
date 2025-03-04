@@ -23,7 +23,7 @@ pipeline {
         GIT_SHORT_URL=env.GIT_URL.split('/')[4].toString().replaceAll('.git','')
         PROJECT_NAME = "${GIT_SHORT_URL}"
         authorEmail = sh (script: 'git --no-pager show -s --format=\'%ae\'',returnStdout: true).trim()
-        SDLE_UPLOAD_PROJECT_ID = '12345678' //add your SDL project
+        SDLE_UPLOAD_PROJECT_ID = '22937' //add your SDL project
     }
     stages {
         stage('Scan Sources'){
