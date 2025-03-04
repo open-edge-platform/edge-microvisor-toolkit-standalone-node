@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# SPDX-License-Identifier: LicenseRef-Intel
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: node-feature-discovery
+  namespace: kube-system
+spec:
+  chartContent:
+  targetNamespace: nfd
+  createNamespace: true
+  valuesContent: |-
+    fullnameOverride: nfd
+    master:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+    worker:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+    gc:
+      enable: false
