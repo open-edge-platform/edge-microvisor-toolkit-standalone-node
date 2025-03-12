@@ -1,5 +1,42 @@
-# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# Standalone Edgenode Makefile
+
+# SPDX-FileCopyrightText: (C) 2023 Intel Corporation
 # SPDX-License-Identifier: LicenseRef-Intel
+
+.DEFAULT_GOAL := help
+.PHONY: build test lint license help generate
+
+##### Variables #####
+
+# Defining the shell, users and groups
+SHELL       := bash -e -o pipefail
+CURRENT_UID := $(shell id -u)
+CURRENT_GID := $(shell id -g)
+
+# Project variables
+PROJECT_NAME := std-edgenode
+BINARY_NAME  := std-edgenode
+
+# Code versions, tags, and so on
+VERSION       ?= $(shell cat VERSION)
+VERSION_MAJOR ?= $(shell cut -c 1 VERSION)
+IMG_NAME      ?= ${PROJECT_NAME}
+IMG_VERSION   ?= $(VERSION)
+GIT_COMMIT    ?= $(shell git rev-parse HEAD)
+DOCKER_ENV              := DOCKER_BUILDKIT=1
+DOCKER_REGISTRY         ?= amr-registry.caas.intel.com
+DOCKER_REPOSITORY       ?= one-intel-edge/maestro-i
+DOCKER_TAG              := ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${IMG_NAME}
+
+# Create the virtualenv with python tools installed
+VENV_NAME = venv_stden
+
+$(VENV_NAME): requirements.txt
+	echo "Creating virtualenv $@"
+	python3 -m venv $@;\
+	. ./$@/bin/activate; set -u;\
+	python3 -m pip install --upgrade pip;\
+	python3 -m pip install -r requirements.txt
 
 all: 
 	@# Help: Runs build, lint, test stages
@@ -12,11 +49,25 @@ build:
 	cd host_os && ./download_tmv.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 
-lint:
-	@# Help: Runs lint stage
-	@echo "---MAKEFILE LINT---"
-	echo $@
+license: $(VENV_NAME) ## Check licensing with the reuse tool.
+	. ./$</bin/activate; set -u;\
+	reuse --version;\
+        reuse download --all
+	reuse --root . lint
+
+YAML_FILES := $(shell find . -type f -name "*.yaml" -print )
+
+lint: $(VENV_NAME)
+	@. $(VENV_NAME)/bin/activate; flake8 --exclude=venv_stden
+	yamllint --version;\
+	yamllint $(YAML_FILES)
 	@echo "---END MAKEFILE LINT---"
+
+#lint:
+#	@# Help: Runs lint stage
+#	@echo "---MAKEFILE LINT---"
+#	echo $@
+#	@echo "---END MAKEFILE LINT---"
 
 test:
 	@# Help: Runs test stage
@@ -29,13 +80,7 @@ coverage:
 	@echo "---MAKEFILE COVERAGE---"
 	echo $@
 	@echo "---END MAKEFILE COVERAGE---"
-license:
-## Check licensing with the reuse tool.
-        #reuse --version
-        #reuse --root . lint
-	@echo "---MAKEFILE LICENSE---"
-	echo $@
-	@echo "---END MAKEFILE LICENSE---"
+
 clean:
 	@# Clean: Remove build files
 	@echo "---MAKEFILE CLEAN---"

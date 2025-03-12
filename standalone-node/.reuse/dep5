@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
-Files: README.md placeholder.txt .github/* artifacts/* VERSION
+Files: Jenkinsfile Makefile README.md placeholder.txt .github/* cluster_installers/* VERSION docs/* requirements.txt *.md hook_os/* host_os/* .sonar/* artifacts/* venv_stden/* Bandit/*
 Copyright: 2023 Intel Corporation
 License: LicenseRef-Intel
