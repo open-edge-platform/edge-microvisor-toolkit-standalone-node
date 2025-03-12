@@ -1,16 +1,63 @@
-# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+datasource:
+    NoCloud:
+        meta-data: |
+            instance-id: l-eadfbe
+        user-data: |
+            #cloud-config
+            ntp:
+              enabled: true
+              ntp_client: systemd-timesyncd
+              servers: [ {{ .NTP_SERVERS }} ]
+            write_files:
+              - path: /etc/pki/ca-trust/source/anchors/orch-ca.crt # CA cert path used by BMAs and all system-level services
+                content: |
+                 {{- .CA_CERT | nindent 17 }}
+              - path: /etc/intel_edge_node/orch-ca-cert/orch-ca.crt # CA cert path used by Prometheus
+                content: |
+                 {{- .CA_CERT | nindent 17 }}
+            runcmd:
+              - |
+                {{- if .EN_HTTP_PROXY }}
+                grep -qF "http_proxy" /etc/environment || echo http_proxy={{ .EN_HTTP_PROXY }} >> /etc/environment
+                {{- end }}
+                {{- if .EN_HTTPS_PROXY }}
+                grep -qF "https_proxy" /etc/environment || echo https_proxy={{ .EN_HTTPS_PROXY }} >> /etc/environment
+                {{- end }}
+                {{- if .EN_FTP_PROXY }}
+                grep -qF "ftp_proxy" /etc/environment || echo ftp_proxy={{ .EN_FTP_PROXY }} >> /etc/environment
+                {{- end }}
+                {{- if .EN_SOCKS_PROXY }}
+                grep -qF "socks_server" /etc/environment || echo socks_proxy={{ .EN_SOCKS_PROXY }} >> /etc/environment
+                {{- end }}
+                {{- if .EN_NO_PROXY }}
+                grep -qF "no_proxy" /etc/environment || echo no_proxy={{ .EN_NO_PROXY }} >> /etc/environment
+                {{- end }}
+                . /etc/environment
+                export http_proxy https_proxy ftp_proxy socks_server no_proxy
 
-# Create a new user and runs a custom shell script to install few packages
-# and configure the system.
-users:
-  - name: user
-    gecos: "New User"
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-    ssh-authorized-keys:
-      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAr... your-public-key-here
+                cd /etc/pki/ca-trust/source/anchors
+                curl -o tmp.zip https://certificates.intel.com/repository/certificates/IntelSHA2RootChain-Base64.zip
+                unzip tmp.zip && rm -f tmp.zip
 
-# Run the cluster creation shell script
-runcmd:
-  - /opt/bin/install-k8s-cluster.sh
+                update-ca-trust
+
+                systemctl restart caddy.service # workaround for caddy issue. Remove the line once Image is ready with caddy changes.
+                SERVICES=("caddy.service" "node-agent.service" "cluster-agent.service" "hardware-discovery-agent.service" "platform-observability-collector.service" "platform-observability-health-check.service" "platform-observability-logging.service" "platform-observability-metrics.service" "platform-telemetry-agent.service" "platform-update-agent.service" "rasdaemon.service")
+                for SERVICE in "${SERVICES[@]}"
+                do
+                    #enable and start the services one after other
+                    systemctl enable "$SERVICE"
+                    systemctl start  "$SERVICE" &
+                done
+
+                # Start the K8* scripts
+                cd /opt && mkdir -p /tmp/rke2-artifacts/ && tar -xf sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/  
+           
+                cd /tmp/rke2-artifacts/
+
+                chmod +x sen-rke2-installer.sh
+                
+                bash sen-rke2-installer.sh >> /var/log/cluster-logs.txt 
+
+
+

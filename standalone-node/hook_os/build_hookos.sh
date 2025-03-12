@@ -15,8 +15,6 @@ if [ "$HOOK_KERNEL" == "5.10" ]; then
 fi
 
 BASE_DIR=$PWD
-STORE_ALPINE=$PWD/alpine_image/
-
 
 # set this to `gsed` if on macos
 SED_CMD=sed
@@ -36,11 +34,8 @@ build_hook() {
             # Non harbor Image
             continue
         fi
-        $SED_CMD -i "s/$image:latest/$image:$ver/g" hook-os.yaml
     done
 
-    # copy fluent-bit related files
-    copy_fluent_bit_files
     echo "starting to build kernel...................................................."
 
     if [ "$HOOK_KERNEL" == "6.6" ]; then
@@ -80,9 +75,6 @@ build_hook() {
         fi
     fi
 
-    #update the hook.yaml file to point to new kernel
-    #$SED_CMD -i "s|quay.io/tinkerbell/hook-kernel:5.10.85-d1225df88208e5a732e820a182b75fb35c737bdd|quay.io/tinkerbell/hook-kernel:5.10.85-298651addd526baaf516da71f76997a3e7c8459d|g" hook.yaml
-
     # get the client_auth files and container before running the hook os build.
     if [ "$HOOK_KERNEL" == "6.6" ]; then
         ./build.sh build hook-latest-lts-amd64
@@ -90,12 +82,9 @@ build_hook() {
         ./build.sh
     fi
 
-    mkdir -p $STORE_ALPINE
-
     if [ "$HOOK_KERNEL" == "6.6" ]; then
         mv $PWD/out/hook_latest-lts-x86_64.tar.gz $PWD/out/hook_x86_64.tar.gz
     fi
-    cp $PWD/out/hook_x86_64.tar.gz $STORE_ALPINE
 
     if [ $? -ne 0 ]; then
         echo "Build of HookOS failed!"
@@ -105,12 +94,32 @@ build_hook() {
     echo "Build of HookOS succeeded!"
 }
 
+build_debian_img()
+{
+# Create the debian image for os installation
+pushd images/hook-debian/
+docker build  -t debian:latest .
+
+if [ $? -ne 0 ]; then
+    echo "Debian image generation failed"
+    popd > /dev/null
+    exit 1
+else
+    echo "Debian image build success"
+fi
+popd
+
+}
+
+
 main() {
 
     sudo apt install -y build-essential bison flex
+    sudo apt install -y grub2-common xorriso mtools dosfstools
+
+    build_debian_img
 
     build_hook
-
 }
 
 main

@@ -41,6 +41,13 @@ $(VENV_NAME): requirements.txt
 all: 
 	@# Help: Runs build, lint, test stages
 	build lint test 	
+
+iso:
+	@# Help: Runs build stage
+	@echo "---MAKEFILE ISO BUILD---"
+	echo $@
+	cd installation_scripts && ./build-alpine-iso.sh && cd .. 
+	@echo "---END MAKEFILE Build---"
 	
 build:
 	@# Help: Runs build stage

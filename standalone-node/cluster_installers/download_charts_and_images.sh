@@ -135,9 +135,14 @@ copy_other_manifests_from_template_dir () {
 	mkdir -p ${EXT_DIR}
 	find ${TPL_DIR} -type f ! -exec grep -q "kind: HelmChart" {} \; -exec cp {} ${EXT_DIR} \;
 }
+# Install required packages for download the images
+install_pkgs () {
+    sudo apt update
+    sudo apt install -y podman libarchive-tools
+}
 
 # Main
-
+install_pkgs
 download_rke2_artifacts
 download_extension_charts
 download_extension_images
