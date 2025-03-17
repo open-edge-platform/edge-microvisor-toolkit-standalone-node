@@ -1,6 +1,6 @@
-# RI/Application/Microservice Name (replace this with the approved name)
+# Standalone Edge Node 
 
-Add a short description without including the name of the RI/Application/microservice in the description. Ensure it's at least 50 characters (excluding spaces) and doesn't exceed 150 characters (excluding spaces). This will enable the content to be properly displayed in the catalog's card layout.
+The standalone edge node is an edge device powered by the Tiber Microvisor, which can be set up using a USB bootable drive. This installation includes all essential Kubernetes extensions, such as device plugins, scheduler extensions, CNIs, and CSIs. Ultimately, this Tiber Microvisor-based standalone edge node enables customers to deploy their workloads in an independent cluster without requiring an external orchestrator.
 
 ## Overview
 

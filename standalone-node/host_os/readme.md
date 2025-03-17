@@ -9,7 +9,7 @@ This folder is created for managing and organizing various host operating system
 - Documentation
 
 ## Usage
-Execute the download_tmv.sh script to download the Tiber Microvisor OS, sh256sum and der files.
+Execute the download_tmv.sh script to download the Tiber Microvisori and sh256sum files.
 
 ## Contributing
 
