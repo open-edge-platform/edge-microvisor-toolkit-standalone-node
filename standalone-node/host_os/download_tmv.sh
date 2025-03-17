@@ -6,8 +6,8 @@
 # The file server URL is defined in FILE_RS_URL
 FILE_RS_URL="https://af01p-png.devtools.intel.com"
 TMV_VERSION=3.0
-TMV_BUILD_DATE=20250219
-TMV_BUILD_NO=2225
+TMV_BUILD_DATE=20250305
+TMV_BUILD_NO=2205
 TMV_FILE_NAME="tiber-readonly-${TMV_VERSION}.${TMV_BUILD_DATE}.${TMV_BUILD_NO}-signed"
 TMV_RAW_GZ="${TMV_FILE_NAME}.raw.gz"
 TMV_DER="${TMV_FILE_NAME}.der"
