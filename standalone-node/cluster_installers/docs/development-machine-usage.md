@@ -262,6 +262,11 @@ PS C:\Users\user> kubectl get nodes -o jsonpath="{range .items[*]}{.status.addre
 PS C:\Users\user> kubectl -n pdd get svc multimodal-data-visualization -o jsonpath="{.spec.ports[0].nodePort}`n"
 <port>
 ```
+If your edge node isn't externally accessible you can also port forward the service like so
+```shell
+PS C:\Users\user> kubectl port-forward -n pdd svc/multimodal-data-visualization 30101:3000 --address 0.0.0.0
+```
+Using this method you can access grafana on ``localhost:30101``.
 
 8. Access the PDD application `grafana` dashboard from browser using the `<IP>` and `<port>` to form the URL `http://<IP>:<port>`
 
@@ -323,4 +328,24 @@ PS C:\Users\user>  Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -B
 
 ## Accessing metrics from Standalone Edge Node
 
-TBD
+First you'll need access to a grafana installation. 
+You can either install it on the cluster yourself or use an existing grafana setup like the pdd example above.
+Next you'll need the prometheus TLS credentials.
+**Note**: The following commands are in powershell but using ``base64 --decode`` on a linux setup works just as well.
+```shell
+PS C:\Users\user> $key=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}"
+PS C:\Users\user> $cert=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}"
+PS C:\Users\user> $ca=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}"
+PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($key)) 
+<key>
+PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($cert)) 
+<cert>
+PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($ca)) 
+<ca>
+```
+In grafana navigate to ``connections/Data sources`` and add a new prometheus data source.
+
+![Prometheus data source](./images/data-source.png "Prometheus data source")
+
+Configure the data source like so, filling in the ca, cert and key you gathered earlier. Be sure to set the url and server name as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``
+You should now be able to query the prometheus data source.

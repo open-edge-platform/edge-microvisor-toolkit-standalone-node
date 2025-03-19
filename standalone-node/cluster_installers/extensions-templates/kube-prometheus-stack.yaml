@@ -189,14 +189,6 @@ spec:
                 key: tls.crt
                 name: prometheus-tls
             clientAuthType: RequestClientCert
-        remoteWrite:
-          - headers:
-              X-Scope-OrgID:
-                global.fleet.clusterLabels.cluster.orchestration.io/project-id
-            authorization:
-              type: Bearer
-              credentialsFile: /etc/intel_edge_node/tokens/prometheus/access_token
-            url: https://${.ClusterLabels.prometheusMetricsURL}:443/api/v1/push
         volumeMounts:
           - name: prometheus-tls
             mountPath: "/etc/intel_edge_node/certs"

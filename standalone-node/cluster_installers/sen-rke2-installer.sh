@@ -4,6 +4,12 @@
 #!/bin/bash
 
 RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
+# for basic testing on a coder setup
+if grep -q "Ubuntu" /etc/os-release; then
+	export IS_UBUNTU=true
+else
+	export IS_UBUNTU=false
+fi
 
 #Configure RKE2
 sudo mkdir -p /etc/rancher/rke2
@@ -99,8 +105,11 @@ fi
 # Copy extensions (HelmChart definitions - charts encoded in yaml)
 sudo cp ./extensions/* /var/lib/rancher/rke2/server/manifests
 
-# Point to proxy
-sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/rke2-server.service
+if [ "$IS_UBUNTU" = true ]; then
+  sudo sed -i '14i EnvironmentFile=-/etc/environment' /usr/local/lib/systemd/system/rke2-server.service
+else
+  sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/rke2-server.service
+fi
 
 # Start RKE2
 sudo systemctl enable --now rke2-server.service
@@ -108,8 +117,8 @@ sudo systemctl enable --now rke2-server.service
 until sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
 
 # Label node as a worker
-host=$(sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get nodes | grep -ohE 'host[^ ]*')
-sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node ${host} node-role.kubernetes.io/worker=true
+hostname=$(hostname)
+sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node $hostname node-role.kubernetes.io/worker=true
 
 ## This is a workaround for missing namespaces preventing netowork-policy chart to complete
 sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl create ns cattle-system
