@@ -42,14 +42,14 @@ all:
 	@# Help: Runs build, lint, test stages
 	build lint test 	
 
-iso:
+build:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-alpine-iso.sh && cd .. 
+	cd installation_scripts && ./build-hook-os-iso.sh && cd .. 
 	@echo "---END MAKEFILE Build---"
 	
-build:
+image:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE BUILD---"
 	echo $@
@@ -91,7 +91,9 @@ coverage:
 clean:
 	@# Clean: Remove build files
 	@echo "---MAKEFILE CLEAN---"
-	cd host_os && rm -f *.gz *.sha256sum *.der
+	cd host_os && rm -f *.gz *.sha256sum *.der && cd ..
+	cd hook_os && make clean && cd ..
+	cd installation_scripts && rm -rf out && cd ..
 	@echo "---END MAKEFILE CLEAN---"
 
 list: 

@@ -1,15 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-set -x
+
+#set -x
+source proxy_ssh_config
 
 working_dir=$(pwd)
 # Usage info for user 
 usage() {
     
-    echo "Usage: $0 <usb> <usb-bootable-files.tar.gz>"
-    echo "Example: $0 /dev/sda usb-bootable-files.tar.gz"
+    echo "Usage: $0 <usb> <usb-bootable-files.tar.gz> <proxy_ssh_config>"
+    echo "Example: $0 /dev/sda usb-bootable-files.tar.gz proxy_ssh_config"
     exit 1
 }
 
@@ -19,7 +21,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Validate the inputs
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     usage
 else
    if ! echo "$1" | grep -Eq '^/dev/(sd[a-z]+|nvme[0-9]+n[0-9]+|vd[a-z]+)$'; then
@@ -28,6 +30,11 @@ else
    fi
    if ! echo "$2" | grep -Eq '^usb-bootable-files\.tar\.gz$'; then
        echo "Error: '$2' is NOT a valid usb-bootable-files!"
+       exit 1
+   fi
+
+   if ! echo "$3" | grep -Eq '^proxy_ssh_config$'; then
+       echo "Error: '$3' is NOT a valid proxy_ssh_config file!"
        exit 1
    fi
 
@@ -41,6 +48,38 @@ if echo "$rootfs" |  grep -q "$1"; then
     exit 1
 fi
 
+# Check if proxy and SSH config files inputs provided or not.
+if [  -z "$http_proxy" ] && [  -z "$https_proxy" ] && [  -z "$no_proxy" ] && [  -z "$HTTP_PROXY" ] &&  [  -z "$HTTPS_PROXY" ] &&  [  -z "$NO_PROXY" ]; then
+   
+    printf "No proxy settings updated under proxy_ssh_config file,do you want to continue (y/n)"
+    read -r ANSWER
+    if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+        echo "Looks proxy Settings not required,Proceeding for next steps"
+    else
+	exit 1
+    fi
+fi
+
+# Check for the SSH Key
+if [  -z "$ssh_key" ]; then
+    echo "SSH Key is empty under proxy_ssh_config file,do you want to continue (y/n)"
+    read -r ANSWER
+    if [ "$ANSWER" = "y" ] || [ "$ANSWER" = "Y" ]; then
+        echo "NO SSH Key inputs provide,looks not required && proceeding for next steps!!"
+    else
+	exit 1
+    fi
+fi 
+
+# Check at least http_proxy && https_prory (or) HTTP_PROXY && HTTPS_PROXY variables set
+if { [ -n "$http_proxy" ] && [ -n "$https_proxy" ]; } || { [ -n "$HTTP_PROXY" ] && [ -n "$HTTPS_PROXY" ]; }; then
+    echo ""
+else
+    echo "Please check. one of http_proxy && https_proxy or HTTP_PROXY && HTTPS_PROXY variable are not set in proxy_ssh_config file"
+    exit 1
+fi
+
+echo "Untaring the usb-bootable-files.tar.gz file"
 # Untar the usb-bootable-files.tar.gz and extract the files
 if [ -d usb_files ]; then
     rm -rf usb_files
@@ -58,10 +97,11 @@ if [ "$?" -eq 0 ]; then
 else
     echo "Failure in USB bootable files extraction,please check!!!"
     exit 1
-    cd "$working_dir" 
+    cd "$working_dir"
 fi
 cd "$working_dir"
 
+echo "Preparing the USB bootable device,please wait!!!"
 # Variables
 USB_DEVICE="$1"
 ISO="usb_files/hook-os.iso"
@@ -98,7 +138,7 @@ else
     echo "OS image storage partition Successfull"
 fi
 os_part_num=$(sudo parted ${USB_DEVICE} -ms print | tail -n 1 | awk -F: '{print $1}')
-echo y | mkfs.ext4 ${USB_DEVICE}${os_part_num} 
+echo y | mkfs.ext4 ${USB_DEVICE}${os_part_num} > /dev/null
 
 if [ $? -ne 0 ]; then
     echo "mkfs faild on /dev/$os_part_num!!!"
@@ -128,7 +168,7 @@ blockdev --rereadpt  ${USB_DEVICE}
 sudo partprobe ${USB_DEVICE}
 sync
 k8_part_num=$(sudo parted ${USB_DEVICE} -ms print | tail -n 1 | awk -F: '{print $1}')
-echo y | mkfs.ext4 ${USB_DEVICE}${k8_part_num}
+echo y | mkfs.ext4 ${USB_DEVICE}${k8_part_num} > /dev/null
 
 if [ $? -ne 0 ]; then
     echo "mkfs faild on /dev/$k8_part_num!!!"
@@ -140,14 +180,17 @@ fi
 sudo partprobe ${USB_DEVICE}
 sync
 
+echo "Copying the OS image to USB device,please wait!!"
 # Copy the OS and K8* scripts to USB device
 sudo mount "${USB_DEVICE}${OS_PART}" /mnt
-sudo cp usb_files/tiber_*.raw.gz  /mnt
+sudo cp usb_files/*.raw.gz  /mnt
 if [ $? -ne 0 ]; then
     echo "tiber microvisor image not copied to USB,please check!!!"
     exit 1
 fi
 sudo umount /mnt
+
+echo "Copying the K8 Scripts to USB device,please wait!!!"
 
 sudo mount "${USB_DEVICE}${K8_PART}" /mnt
 sudo cp usb_files/sen-rke2-package.tar.gz /mnt
@@ -156,6 +199,13 @@ if [ $? -ne 0 ]; then
     echo "k8-scripts not copied to USB,please check!!!"
     exit 1
 fi
+sudo cp proxy_ssh_config /mnt
+
+if [ $? -ne 0 ]; then
+    echo "proxy_ssh_config file not copied to USB,please check!!!"
+    exit 1
+fi
+
 sudo umount /mnt
 sync
 

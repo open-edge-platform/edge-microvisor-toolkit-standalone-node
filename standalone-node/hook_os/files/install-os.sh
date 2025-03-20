@@ -68,7 +68,7 @@ mount -o ro "${usb_disk}${os_part}" /mnt
 
 if ! ls /mnt/*.raw.gz >/dev/null 2>&1; then
     echo "OS Image File not Found,exiting the installation"
-    umont /mnt
+    umount /mnt
     exit 1
 else
     umount /mnt
@@ -80,6 +80,11 @@ if ! ls /mnt/sen*.tar.gz >/dev/null 2>&1; then
     umount /mnt
     exit 1
 else
+    if ! ls /mnt/proxy_ssh_config >/dev/null 2>&1; then 
+        echo "Proxy configuration file not Found,exiting the installation"
+	umount /mnt
+	exit 1
+    fi
     umount /mnt
 fi
 
@@ -110,6 +115,12 @@ else
     os_disk="$min_size_disk"
 fi
 
+# Clear the disk partitons
+for disk_name in ${blk_devices}
+do
+    dd if=/dev/zero of="/dev/$disk_name" bs=100M count=20
+done
+
 }
 
 # Install the OS image 
@@ -121,6 +132,7 @@ echo "HARD DRIVE IS" "$os_disk"
 
 if echo "$os_disk" | grep -q "nvme"; then
   os_rootfs_part="p$os_rootfs_part"
+  os_data_part="p$os_data_part"
 fi
 
 mount "$usb_disk${os_part}" /mnt
@@ -238,6 +250,80 @@ fi
 
 }
 
+# Update the Proxy and SSH config settings
+update_proxy_and_ssh_settings(){
+# Copy the scripts from USB disk to /opt on the disk
+mount -o ro "${usb_disk}${k8_part}" /tmp
+
+# Mount the OS disk
+mount "$os_disk$os_rootfs_part" /mnt
+
+cp /tmp/proxy_ssh_config /mnt/etc/cloud/
+
+umount /tmp
+
+CONFIG_FILE="/mnt/etc/cloud/proxy_ssh_config"
+
+# Copy the proxy settings to /etc/environment file
+
+if grep -q '^http_proxy=' "$CONFIG_FILE"; then
+    http_proxy=$(grep '^http_proxy=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$http_proxy" | grep -q '^""$' &&  echo "http_proxy=$http_proxy" >> /mnt/etc/environment
+fi
+
+if grep -q "https_proxy" "$CONFIG_FILE"; then
+    https_proxy=$(grep '^https_proxy=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$https_proxy" | grep -q '^""$' &&  echo "https_proxy=$https_proxy" >> /mnt/etc/environment
+fi
+
+if grep -q '^no_proxy=' "$CONFIG_FILE"; then
+    no_proxy=$(grep '^no_proxy=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$no_proxy" | grep -q '^""$' &&  echo "no_proxy=$no_proxy" >> /mnt/etc/environment
+fi
+
+if grep -q "HTTP_PROXY" "$CONFIG_FILE"; then
+    HTTP_PROXY=$(grep '^HTTP_PROXY=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$HTTP_PROXY" | grep -q '^""$' &&  echo "HTTP_PROXY=$HTTP_PROXY" >> /mnt/etc/environment
+fi
+
+if grep -q '^HTTPS_PROXY=' "$CONFIG_FILE"; then
+    HTTPS_PROXY=$(grep '^HTTPS_PROXY=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$HTTPS_PROXY" | grep -q '^""$' &&  echo "HTTPS_PROXY=$HTTPS_PROXY" >> /mnt/etc/environment
+fi
+
+if grep -q '^NO_PROXY=' "$CONFIG_FILE"; then
+    NO_PROXY=$(grep '^NO_PROXY=' "$CONFIG_FILE" | cut -d '=' -f2)
+    ! echo "$NO_PROXY" | grep -q '^""$' &&  echo "NO_PROXY=$NO_PROXY" >> /mnt/etc/environment
+fi
+
+# SSH Configure
+if grep -q '^ssh_key=' "$CONFIG_FILE"; then
+    ssh_key=$(sed -n 's/^ssh_key="\?\(.*\)\?"$/\1/p' "$CONFIG_FILE")
+    # Write the SSH key to authorized_keys
+    if  echo "$ssh_key" | grep -q '^""$'; then
+        echo "No SSH Key provided skipping the ssh configuration"
+    else
+        chroot /mnt /bin/bash <<EOT
+        # Configure the SSH
+        su - user
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+	cat <<EOF >> ~/.ssh/authorized_keys
+$ssh_key
+EOF
+        if [ "$?" -ne 0 ]; then
+            echo "SSH-KEY Configuration failed!!!"
+            exit 1
+        else
+            echo "SSH-KEY Configuration Success!!!"
+        fi
+EOT
+    fi
+fi
+umount /mnt
+
+}
+
 # Change the boot order to disk
 boot_order_chage_to_disk(){
 usb_boot_number=$(efibootmgr | grep -i "Bootcurrent" | awk '{print $2}')
@@ -280,6 +366,20 @@ fi
 
 }
 
+# Enable dm-verity on tiber os image
+enable_dm_verity(){
+
+dm_verity_script=/etc/scripts/enable-dmv.sh
+bash $dm_verity_script
+
+if [ "$?" -eq 0 ]; then
+    echo "DM Verity and Partitions successful on $os_disk"
+else
+    echo "DM Verity and Partitions failed on $os_disk,Please check"
+    exit 1
+fi
+}
+
 # Set the SE Linux Policy
 set_selinux_policy(){
 mount "$os_disk$os_rootfs_part" /mnt
@@ -314,13 +414,15 @@ create_user
 
 install_cloud_init_file
 
-creat_partitions_on_disk
+#creat_partitions_on_disk
+
+update_proxy_and_ssh_settings
+
+enable_dm_verity
 
 install_k8_script
 
 boot_order_chage_to_disk
-
-set_selinux_policy
 
 }
 #####@main@@
@@ -329,6 +431,3 @@ main
 echo "Successfully completed the provisioning flow, Rebooting to OS disk!!!!!!!!"
 echo b > /host/proc/sysrq-trigger
 reboot -f
-
-
-

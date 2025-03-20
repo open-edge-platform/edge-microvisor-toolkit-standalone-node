@@ -3,6 +3,8 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 set -x
+
+os_filename=""
 # Build the hook os with and generate kernel && initramfs file
 build-hook-os(){
 
@@ -31,7 +33,8 @@ chmod +x download_tmv.sh
 bash download_tmv.sh
 if [ "$?" -eq 0 ]; then
     echo "Tiber microvisor  Image downloaded successfuly!!"
-    mv tiber_*.raw.gz ../installation_scripts/
+    os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
+    mv $os_filename ../installation_scripts/
 else
     echo "Tiber microvisor Image download failed,please chheck!!!"
     popd
@@ -97,15 +100,27 @@ pack-iso-image-k8scripts(){
 
 # Create the tar file for k8 scripts
 
-mv tiber_*.raw.gz out/ 
+mv $os_filename out/ 
+cp bootable-usb-prepare.sh out/
+cp proxy_ssh_config out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null
 
-tar -czf usb-bootable-files.tar.gz hook-os.iso tiber_*.raw.gz sen-rke2-package.tar.gz  > /dev/null
+tar -czf usb-bootable-files.tar.gz hook-os.iso $os_filename sen-rke2-package.tar.gz  > /dev/null
 
 if [ "$?" -eq 0 ]; then
-    echo "usb-bootable-files.tar.gz created under $(pwd)/out"
+    tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh proxy_ssh_config usb-bootable-files.tar.gz
+    if [ "$?" -eq 0 ]; then
+        echo ""
+	echo ""
+	echo ""
+        echo "Standalone Installation files--> sen-installation-files.tar.gz created successfuly, under $(pwd)"
+    else
+	echo "Failed to create Standalone Installation files,Please check!!!"
+	popd
+	exit 1
+    fi
 else
     echo "usb-bootable-files.tar.gz not created,please checke!!!"
     popd

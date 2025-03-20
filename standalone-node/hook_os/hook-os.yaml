@@ -184,8 +184,8 @@ files:
     source: "files/os-partition.sh"
     mode: "0777"
 
-  - path: etc/scripts/config
-    source: "config"
+  - path: etc/scripts/enable-dmv.sh
+    source: "files/enable-dmv.sh"
     mode: "0777"
 
   - path: sbin/setup-dns

@@ -13,7 +13,7 @@ def getEnvFromBranch(branch) {
 pipeline {
     agent {
         docker {
-            label 'docker'
+            label 'oie_spot_executor'
             image 'amr-registry.caas.intel.com/one-intel-edge/rrp-devops/oie_ci_testing:latest'
             alwaysPull true
         }
@@ -23,6 +23,7 @@ pipeline {
         PROJECT_NAME = "${GIT_SHORT_URL}"
         authorEmail = sh (script: 'git --no-pager show -s --format=\'%ae\'',returnStdout: true).trim()
         SDLE_UPLOAD_PROJECT_ID = '23044' //add your SDL project
+        IS_JENKINS_BUILD =  true
     }
     stages {
         stage('Scan Source') {
@@ -100,9 +101,19 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh '''
+                sh """
+                echo 'http_proxy=http://proxy-dmz.intel.com:911' >> hook_os/config
+                echo 'https_proxy=http://proxy-dmz.intel.com:912' >> hook_os/config
+                echo 'ftp_proxy=http://proxy-dmz.intel.com:911' >> hook_os/config
+                echo 'socks_proxy=socks://proxy-dmz.intel.com:1080' >> hook_os/config
+                echo 'no_proxy=localhost,*.intel.com,*intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock,.internal' >> hook_os/config
+                """
+                sh """
                 make build
-                '''
+                """
+                dir("${WORKSPACE}/installation_scripts/out") {
+                    stash name: "bdba_binary",includes: "*.gz" 
+                }
             }
         }
         stage ('Scan Containers') {
@@ -129,9 +140,14 @@ pipeline {
                     }
                     steps {
                         sh """
-                        mkdir -p build
+                        mkdir -p binary
+                        """
+                        dir("${WORKSPACE}/binary") {
+                            unstash "bdba_binary"
+                        }
+                        sh """
                         [ -d "BDBA" ] || mkdir BDBA
-                        tar -zcvf BDBA/${GIT_SHORT_URL}.tar.gz build 
+                        tar -zcvf BDBA/${GIT_SHORT_URL}.tar.gz binary 
                         """
                         script {
                             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {

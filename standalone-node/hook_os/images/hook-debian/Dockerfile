@@ -15,6 +15,6 @@ RUN apt update && apt install -y \
                       procps \
     		      bc \
 		      lvm2 \
-                      systemd-sysv \
-		      busybox \
+		      fdisk \
+		      cryptsetup-bin \
     		      && rm -rf /var/lib/apt/lists/*

@@ -55,9 +55,6 @@ build_hook() {
             ./build.sh kernel hook-latest-lts-amd64
         fi
     else
-        if docker image inspect quay.io/tinkerbell/hook-kernel:5.10.228-e0637f99 >/dev/null 2>&1; then
-            echo "Rebuild of kernel not required, since its already present in docker images"
-        else
             # i255 igc driver issue fix
             pushd kernel/
             echo "Going to remove patches DIR if any"
@@ -72,7 +69,6 @@ build_hook() {
 
             #    ./build.sh kernel default
             ./build.sh kernel
-        fi
     fi
 
     # get the client_auth files and container before running the hook os build.
