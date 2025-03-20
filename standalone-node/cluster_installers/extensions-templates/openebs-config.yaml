@@ -7,6 +7,6 @@ metadata:
   name: openebs-config
   namespace: kube-system
 spec:
-  chartContent: 
+  chartContent:
   targetNamespace: openebs
   createNamespace: true

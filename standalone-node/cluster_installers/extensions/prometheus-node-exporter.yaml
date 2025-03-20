@@ -13,7 +13,7 @@ spec:
     minimalMetricSet:
       # yamllint disable-line rule:line-length
       nodeExporter: &nodeExporter "node_boot_time_seconds|node_context_switches_total|node_cpu_seconds_total|node_filefd_allocated|node_filefd_maximum|node_intr_total|node_load1|node_load15|node_load5|node_memory_Buffers_bytes|node_memory_Cached_bytes|node_memory_MemAvailable_bytes|node_memory_MemFree_bytes|node_memory_MemTotal_bytes|node_memory_SwapFree_bytes|node_memory_SwapTotal_bytes|node_netstat_Tcp_CurrEstab|node_network_receive_bytes_total|node_network_receive_drop_total|node_network_receive_errs_total|node_network_receive_packets_total|node_network_transmit_bytes_total|node_network_transmit_drop_total|node_network_transmit_errs_total|node_network_transmit_packets_total|node_nf_conntrack_entries|node_nf_conntrack_entries_limit|node_time_seconds|node_timex_estimated_error_seconds|node_timex_maxerror_seconds|scrape_samples_scraped|up"
-    
+
     prometheus-node-exporter:
       resources:
         limits:
@@ -34,51 +34,53 @@ spec:
             - SYS_TIME
       ## If true, create & use Pod Security Policy resources
       ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-      ## Intentionally disabled because PodSecurityPolicy was deprecated in Kubernetes v1.21, and
+      ## Intentionally disabled because PodSecurityPolicy
+      ## was deprecated in Kubernetes v1.21, and
       ## removed from Kubernetes in v1.25
       rbac:
         pspEnabled: false
-      # Work in host's network (it's required in order to get host's network data)
+      # Work in host's network
+      # (it's required in order to get host's network data)
       hostNetwork: false
       # Work in host's PID space (required to access host's /proc info)
       hostPID: false
       # Get access to host's root space (to for example scrape disk data)
       hostRootFsMount:
         enabled: false
-    
+
       # Pod  should be running on every node
       tolerations:
         - effect: NoSchedule
           operator: Exists
-    
+
       # Additional commands for node-exporter
       extraArgs:
-        - --web.config.file=/opt/node-exporter/web-config.yml  # Path for TLS configuration
+        - --web.config.file=/opt/node-exporter/web-config.yml  # Path for TLS
         - --no-collector.filesystem
-    
+
       # TLS secret for NodeExporter
       secrets:
         - name: node-exporter-tls
           mountPath: /opt/node-exporter/certs
-    
+
       # Additional configmaps for NodeExporter
       configmaps:
         # TLS config
         - name: node-exporter-web-config
           mountPath: /opt/node-exporter
-    
+
       service:
         port: 9100
         targetPort: 9100
-    
+
       livenessProbe:
         httpGet:
           scheme: https
-    
+
       readinessProbe:
         httpGet:
           scheme: https
-    
+
       prometheus:
         monitor:
           enabled: true
@@ -116,7 +118,7 @@ spec:
             - sourceLabels: [__meta_kubernetes_pod_name]
               action: replace
               targetLabel: kubernetes_pod_name
-    
+
     extraManifests:
       # node-exporter
       - |

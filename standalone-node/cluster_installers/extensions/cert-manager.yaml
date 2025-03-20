@@ -121,4 +121,3 @@ spec:
             helm.sh/hook-weight: "1"
         spec:
           selfSigned: {}
-

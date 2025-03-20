@@ -1,0 +1,7 @@
+extends: default
+
+rules:
+  line-length:
+    ignore: |
+      cluster_installers/extensions/
+      cluster_installers/extensions-templates/

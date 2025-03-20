@@ -7,6 +7,6 @@ metadata:
   name: observability-config
   namespace: kube-system
 spec:
-  chartContent: 
+  chartContent:
   targetNamespace: observability
   createNamespace: true

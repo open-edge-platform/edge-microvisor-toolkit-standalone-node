@@ -11,15 +11,15 @@ spec:
     matchLabels:
       app.kubernetes.io/name: gatekeeper
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: gatekeeper
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gatekeeper
   egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: gatekeeper
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: gatekeeper

@@ -14,7 +14,7 @@ spec:
     nodeUUID: global.fleet.clusterLabels.device-guid
     # yamllint disable-line rule:line-length
     systemNamespacesRegex: ^(?!.*(akri|calico-system|calico-fleet-system|calico-impersonation-system|cattle-fleet-system|cattle-system|cdi|edge-system|kube-node-lease|kube-public|kube-system|kubevirt|local|metallb-system|observability|openebs|sriov-network-operator|tigera-operator|cert-manager|istio-operator|storageos)).*$
-    
+
     image:
       tag: 3.1.9
     extraVolumeMounts:
@@ -65,7 +65,7 @@ spec:
         hostPath:
           path: /run/platform-observability-agent/fluent-bit
           type: Directory
-    
+
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
@@ -104,7 +104,7 @@ spec:
           Read_from_Head true
           Mem_Buf_Limit 25MB
           Skip_Long_Lines On
-    
+
         [INPUT] ## Input for auth.log
           Name           tail
           Tag            EdgeNode_AuthLog
@@ -113,7 +113,7 @@ spec:
           Read_from_Head true
           Mem_Buf_Limit 25MB
           Skip_Long_Lines On
-    
+
         [INPUT] ## Input for container logs
           Name           tail
           Tag            Container.*
@@ -122,14 +122,14 @@ spec:
           Read_from_Head true
           Mem_Buf_Limit 25MB
           Skip_Long_Lines On
-    
+
         [INPUT] ## Input for Rancher agent log (kubelet log)
           Name           tail
           Tag            EdgeNode_KubeletLog
           Path           /var/lib/rancher/rke2/agent/logs/kubelet.log
           Mem_Buf_Limit 25MB
           Read_from_Head true
-    
+
         [INPUT] ## Input for logs/traces received on port
           Name         opentelemetry
           Tag          EdgeNode_OtelLogs
@@ -146,22 +146,22 @@ spec:
           Name   record_modifier
           Match  EdgeNode_Syslog
           Record FileType SystemLog
-    
+
         [FILTER] ## Filter for auth log tagging
           Name   record_modifier
           Match  EdgeNode_AuthLog
           Record FileType AuthLog
-    
+
         [FILTER] ## Filter for Rancher agent log (kubelet log) tagging
           Name   record_modifier
           Match  EdgeNode_KubeletLog
           Record FileType KubeletLog
-    
+
         [FILTER] ## Filter for logs/traces received on port
           Name   record_modifier
           Match  EdgeNode_OtelLogs
           Record FileType OpenTelemetryLogs
-    
+
         [FILTER] ## Filter for adding kubernetes metadata for containers
           Name            kubernetes
           Match           Container.*
@@ -171,33 +171,33 @@ spec:
           Kube_Tag_Prefix Container.var.log.containers.
           Labels          off
           Annotations     off
-    
+
         [FILTER] ## Rewrite the tag for logs that do not originate from an edgenode system namespace.  These logs will be considered application logs
           Name            rewrite_tag
           Match           Container.*
           Rule $kubernetes['namespace_name'] ^(?!.*(akri|calico-system|calico-fleet-system|calico-impersonation-system|cattle-fleet-system|cattle-system|cdi|edge-system|kube-node-lease|kube-public|kube-system|kubevirt|local|metallb-system|observability|openebs|sriov-network-operator|tigera-operator|cert-manager|istio-operator|storageos)).*$ Application_EdgeNode.var.log.containers.$TAG[4].log false
-    
+
         [FILTER] ## Filter for adding host name of Edge Node to all logs
           Name   record_modifier
           Match  *
           Record Hostname global.fleet.clusterLabels.cluster.orchestration.io/clustername
-    
+
         [FILTER] ## Filter for adding UUID of Edge Node to all logs
           Name   record_modifier
           Match  *
           Record UUID global.fleet.clusterLabels.device-guid
-    
+
       outputs: |
         [OUTPUT] ## Output Edge Node Container logs.
           Name      forward
           Match     Container.*
           Unix_Path /run/platform-observability-agent/fluent-bit/container-logs.sock
-    
+
         [OUTPUT] ## Output Edge Node System logs.
           Name      forward
           Match     EdgeNode_*
           Unix_Path /run/platform-observability-agent/fluent-bit/host-logs.sock
-    
+
         [OUTPUT] ## Output container logs for edgenode applications. Logs not originating from an edgenode system namespace will be considered application logs
           Name      forward
           Match     Application_EdgeNode.*

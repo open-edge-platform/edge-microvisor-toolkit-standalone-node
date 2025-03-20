@@ -7,7 +7,7 @@ metadata:
   name: telegraf
   namespace: kube-system
 spec:
-  chartContent: 
+  chartContent:
   targetNamespace: observability
   valuesContent: |-
     volumes:
@@ -24,7 +24,7 @@ spec:
         readOnly: true
       - name: certs
         mountPath: /opt/telegraf/certs
-    
+
     resources:
       requests:
         memory: 128Mi
@@ -32,13 +32,12 @@ spec:
       limits:
         memory: 128Mi
         cpu: 100m
-    
-    
+
     containerPorts:
       - name: metrics
         containerPort: 9105
         protocol: TCP
-    
+
     image:
       pullPolicy: IfNotPresent
     args:
