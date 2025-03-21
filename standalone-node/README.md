@@ -1,35 +1,65 @@
-#Pre-conditions for build env
-Make sure docker installed and all required settings (to resolve proxies) must be done.
-NOTE: Ubuntu 22.04 is prefeed OS for build setup.
+# Pre-conditions for Build Environment
 
-# Create the Standalone Installation tar file with all required files for preparing bootable USB device
-# run below command and it will build hook os and generate the sen-installation-files.tar.gz file
-# sen-installation-files.tar.gz will be present under $(pwd)/installation scripts/out directory
+Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
+**Note:** Ubuntu 22.04 is the preferred OS for the build setup.
+
+---
+
+## Create the Standalone Installation Tar File
+
+To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command:
+
+```bash
 make build
+```
 
-# Copy sen-installation-files.tar.gz  to Linux system to prepare the bootable USB
+This will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
+The file will be located under the `$(pwd)/installation-scripts/out` directory.
+
+---
+
+## Copy Files to Prepare the Bootable USB
+
+Extract the contents of `sen-installation-files.tar.gz`:
+
+```bash
 tar -xzf sen-installation-files.tar.gz
-|
-|------ usb-bootable-files.tar.gz
-|------ proxy_ssh_config 
-|
-# Prepare the bootable USB device for OS installation on Edge node
-bootable-usb-prepare.sh is to
-   i) Generate the bootable USB device for booting the hook OS on RAM and install OS on the edge node.
-   ii) Please provide valid inputs for the scripts such as
-       usb -> valid usb device with name ex. /dev/sda
-       usb-bootable-files.tar.gz  
-       proxy_ssh_config -> this is to configure proxy settings if the edge node behind the firewall
-                           ssh_key  is your Linux device id_ras.pub key ( from where you want to do remote ssh) for password less ssh connection with Edge node.
+```
 
-        NOTE: It's not mandatory to provide proxy's  provided if your Edge node not required such proxy settings to access internet services from outside.
-             
+The extracted files will include:
 
-    ex: sudo ./bootable-usb-prepare.sh /dev/sda usb-bootable-files.tar.gz proxy_ssh_config
+- `usb-bootable-files.tar.gz`
+- `proxy_ssh_config`
 
-   iii) Once script creates the bootable USB device it ready for installation.
+---
 
-# Login to Edge node after Successful installation
-login details:
- -username: "user"
- -password: "user"
+## Prepare the Bootable USB Device
+
+Use the `bootable-usb-prepare.sh` script to:
+
+1. Generate a bootable USB device for booting the hook OS into RAM.
+2. Install the OS on the edge node.
+
+### Required Inputs for the Script:
+
+- **`usb`**: A valid USB device name (e.g., `/dev/sda`).
+- **`usb-bootable-files.tar.gz`**: The tar file containing bootable files.
+- **`proxy_ssh_config`**: Configuration file for proxy settings (if the edge node is behind a firewall).  
+    - Includes `ssh_key`, which is your Linux device's `id_rsa.pub` key for passwordless SSH access to the edge node.
+
+**Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
+
+### Example Command:
+
+```bash
+sudo ./bootable-usb-prepare.sh /dev/sda usb-bootable-files.tar.gz proxy_ssh_config
+```
+
+Once the script completes, the bootable USB device will be ready for installation.
+
+---
+
+## Login to the Edge Node After Successful Installation
+
+Use the credentials provided as input while preparing the bootable usb drive
+
