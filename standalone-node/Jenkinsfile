@@ -32,6 +32,7 @@ pipeline {
                     environment {
                         SCANNERS            = getEnvFromBranch(env.BRANCH_NAME)
                         PROTEX_PROJECT_NAME = "${GIT_SHORT_URL}"
+                        BANDIT_EXCLUDE_PATH = '*/venv_stden/*'
                     }
                     when {
                         anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; changeRequest();}
@@ -112,7 +113,7 @@ pipeline {
                 make build
                 """
                 dir("${WORKSPACE}/installation_scripts/out") {
-                    stash name: "bdba_binary",includes: "*.gz" 
+                    stash name: "bdba_binary",includes: "hook*.gz" 
                 }
             }
         }
@@ -133,7 +134,7 @@ pipeline {
             parallel {             
                 stage('BDBA'){
                     environment {
-                       SCANNERS                     = 'bdba'
+                       SCANNERS  = 'bdba'
                     }
                     when {
                         anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; changeRequest();}
