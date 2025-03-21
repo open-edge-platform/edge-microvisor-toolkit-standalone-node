@@ -123,3 +123,45 @@ sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl
 ## This is a workaround for missing namespaces preventing netowork-policy chart to complete
 sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl create ns cattle-system
 sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl create ns local
+
+# Wait for the deployment to complete
+
+## First wait for all namespaces to be created
+namespaces=("calico-system"
+	"cert-manager"
+	"gatekeeper-system"
+	"kube-node-lease"
+	"kube-public"
+	"kube-system"
+	"kubernetes-dashboard"
+	"nfd"
+	"observability"
+	"openebs"
+	"tigera-operator")
+
+while true; do
+  all_exist=true
+  for ns in "${namespaces[@]}"; do
+    sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get namespace "$ns" &> /dev/null || all_exist=false
+  done
+  $all_exist && break
+  echo "Waiting for namespaces to be created..."
+  sleep 5
+done
+
+## Wait for all pods to deploy
+
+echo "Waiting for all extensions to complete the deployment..."
+while sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
+  echo "Some pods are still not ready. Checking again in 5 seconds..."
+  sleep 5
+done
+
+## Add kubectl to path
+sed 's|PATH="|PATH="/var/lib/rancher/rke2/bin:|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
+source /etc/environment
+export KUBECONFIG
+
+# All pods deployed - write to log
+echo "$(date): The cluster installation is complete" | sudo tee /var/log/cluster-init.log > /dev/null
+echo "$(date): The cluster installation is complete!"
