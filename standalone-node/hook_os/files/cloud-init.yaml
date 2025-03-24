@@ -1,17 +1,15 @@
-# Cloud-config file start the rke2 cluster. 
+---
+# Cloud-config file to start the rke2 cluster.
 runcmd:
   - |
     source /etc/environment
 
     # Start the K8* scripts
-    mkdir -p /tmp/rke2-artifacts/ 
-    tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/  
-           
+    mkdir -p /tmp/rke2-artifacts/
+    tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/
+
     cd /tmp/rke2-artifacts/
 
     chmod +x sen-rke2-installer.sh
-                
-    bash sen-rke2-installer.sh  
 
-
-
+    bash sen-rke2-installer.sh

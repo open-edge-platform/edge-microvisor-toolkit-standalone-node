@@ -102,7 +102,7 @@ pack-iso-image-k8scripts(){
 
 mv $os_filename out/ 
 cp bootable-usb-prepare.sh out/
-cp proxy_ssh_config out/
+cp config-file out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null
@@ -110,7 +110,7 @@ pushd out > /dev/null
 tar -czf usb-bootable-files.tar.gz hook-os.iso $os_filename sen-rke2-package.tar.gz  > /dev/null
 
 if [ "$?" -eq 0 ]; then
-    tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh proxy_ssh_config usb-bootable-files.tar.gz
+    tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz
     if [ "$?" -eq 0 ]; then
         echo ""
 	echo ""

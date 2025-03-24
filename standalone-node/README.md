@@ -29,8 +29,8 @@ tar -xzf sen-installation-files.tar.gz
 The extracted files will include:
 
 - `usb-bootable-files.tar.gz`
-- `proxy_ssh_config`
-
+- `config-file` 
+- `bootable-usb-prepare.sh`
 ---
 
 ## Prepare the Bootable USB Device
@@ -44,15 +44,16 @@ Use the `bootable-usb-prepare.sh` script to:
 
 - **`usb`**: A valid USB device name (e.g., `/dev/sda`).
 - **`usb-bootable-files.tar.gz`**: The tar file containing bootable files.
-- **`proxy_ssh_config`**: Configuration file for proxy settings (if the edge node is behind a firewall).  
+- **`config-file`**: Configuration file for proxy settings (if the edge node is behind a firewall).  
     - Includes `ssh_key`, which is your Linux device's `id_rsa.pub` key for passwordless SSH access to the edge node.
+    - User credentials: set the user name and password for edge node.
 
 **Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
 
 ### Example Command:
 
 ```bash
-sudo ./bootable-usb-prepare.sh /dev/sda usb-bootable-files.tar.gz proxy_ssh_config
+sudo ./bootable-usb-prepare.sh /dev/sda usb-bootable-files.tar.gz config-file
 ```
 
 Once the script completes, the bootable USB device will be ready for installation.
@@ -63,3 +64,8 @@ Once the script completes, the bootable USB device will be ready for installatio
 
 Use the credentials provided as input while preparing the bootable usb drive
 
+## For Kubernetes pods status run bellow command
+
+source /etc/environment && export KUBECONFIG
+
+kubectl get pods 

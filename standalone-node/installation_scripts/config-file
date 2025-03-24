@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+##############################################################
+#                      Configuration File                    #
+##############################################################
+#
+# This configuration file provides inputs for:
+# - Proxy values: If the Edge node is behind a firewall.
+# - SSH key: For password-less SSH connection from a remote server 
+#            to the edge node.
+# - User credentials: Set the username and password for the edge node.
+#
+##############################################################
+
+# -------------------- Proxy Configuration --------------------
+# Example: http_proxy="http://proxy-org.com:port-number"
+
+http_proxy=""
+https_proxy=""
+no_proxy=""
+HTTP_PROXY=""
+HTTPS_PROXY=""
+NO_PROXY=""
+
+# -------------------- SSH Configuration ---------------------
+# Example: Use `cat ~/.ssh/id_rsa.pub` or `cat ~/.ssh/id_ed25519.pub` 
+#          to get the public key, or use any public key available 
+#          under the `.ssh` directory.
+# Copy the full key string and set it under the `ssh_key` variable.
+
+ssh_key=""
+
+# ------------------ User Credentials ------------------------
+# Choose credentials as you wish. Ensure the password is strong.
+# Example: user_name="user", passwd="user@1234!"
+
+user_name=""
+passwd=""

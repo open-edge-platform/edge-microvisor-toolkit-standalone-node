@@ -1,4 +1,6 @@
-# Attention, this is a template that is run through envsubst, but with a specific list of variables to replace. Thus:
+---
+# Attention, this is a template that is run through envsubst
+# but with a specific list of variables to replace. Thus:
 # - HOOK_VERSION: ${HOOK_VERSION} (a simple 1.2.3 string, no 'v')
 # - HOOK_KERNEL_IMAGE: ${HOOK_KERNEL_IMAGE}
 # - HOOK_KERNEL_ID: ${HOOK_KERNEL_ID}
@@ -9,7 +11,8 @@
 # - HOOK_CONTAINER_CONTAINERD_IMAGE: ${HOOK_CONTAINER_CONTAINERD_IMAGE}
 # - HOOK_CONTAINER_RUNC_IMAGE: ${HOOK_CONTAINER_RUNC_IMAGE}
 # - HOOK_CONTAINER_EMBEDDED_IMAGE: ${HOOK_CONTAINER_EMBEDDED_IMAGE}
-# - Other variables are not replaced: for example this is a literal dollarsign-SOMETHING: $SOMETHING and with braces: ${SOMETHING}
+# - Other variables are not replaced: for example this is a
+# - literal dollarsign-SOMETHING:$SOMETHING and with braces: ${SOMETHING}
 
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
@@ -24,23 +27,23 @@ init:
   - "${HOOK_CONTAINER_RUNC_IMAGE}"
   - "${HOOK_CONTAINER_CONTAINERD_IMAGE}"
   - linuxkit/ca-certificates:v1.0.0
-  - linuxkit/firmware:24402a25359c7bc290f7fc3cd23b6b5f0feb32a5 # "Some" firmware from Linuxkit pkg; see https://github.com/linuxkit/linuxkit/blob/master/pkg/firmware/Dockerfile
+  - linuxkit/firmware:24402a25359c7bc290f7fc3cd23b6b5f0feb32a5
   - "${HOOK_CONTAINER_EMBEDDED_IMAGE}"
 
 onboot:
   - name: rngd1
     image: linuxkit/rngd:v1.0.0
-    command: [ "/sbin/rngd", "-1" ]
+    command: ["/sbin/rngd", "-1"]
 
   - name: sysctl
     image: linuxkit/sysctl:v1.0.0
-    
+
   - name: sysfs
     image: linuxkit/sysfs:v1.0.0
 
   - name: modprobe
     image: linuxkit/modprobe:v1.0.0
-    command: [ "modprobe", "cdc_ncm" ] # for usb ethernet dongles
+    command: ["modprobe", "cdc_ncm"]
 
 services:
   - name: rngd
@@ -48,7 +51,7 @@ services:
 
   - name: mdev
     image: "${HOOK_CONTAINER_MDEV_IMAGE}"
-    command: [ "mdev", "-v", "-S", "-df" ]
+    command: ["mdev", "-v", "-S", "-df"]
     capabilities:
       - all
     binds:
@@ -138,7 +141,7 @@ services:
 
   - name: dhcpcd-daemon
     image: linuxkit/dhcpcd:v1.0.0
-    command: [ "/etc/ip/dhcp.sh", "false" ] # 2nd paramter is one-shot true/false: true for onboot, false for services
+    command: ["/etc/ip/dhcp.sh", "false"]
     capabilities:
       - all
     binds.add:
@@ -151,8 +154,8 @@ services:
         - /var/lib/dhcpcd
 
   - name: os-installer
-    image: debian:latest 
-    command: [ "/bin/bash" , "/etc/scripts/install-os.sh" ]
+    image: debian:latest
+    command: ["/bin/bash", "/etc/scripts/install-os.sh"]
     capabilities:
       - all
     net: host
@@ -162,7 +165,7 @@ services:
       - /etc/scripts:/etc/scripts/
       - /:/host
       - /etc/scripts/install-os.sh:/etc/scripts/install-os.sh
-    runtime: 
+    runtime:
       mkdir:
         - /var/lib/os-installd
     devices:
@@ -170,7 +173,7 @@ services:
       type: b
     - path: all
       type: c
-   
+
 files:
   - path: etc/scripts/install-os.sh
     source: "files/install-os.sh"

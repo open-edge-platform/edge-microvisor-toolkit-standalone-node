@@ -80,8 +80,8 @@ if ! ls /mnt/sen*.tar.gz >/dev/null 2>&1; then
     umount /mnt
     exit 1
 else
-    if ! ls /mnt/proxy_ssh_config >/dev/null 2>&1; then 
-        echo "Proxy configuration file not Found,exiting the installation"
+    if ! ls /mnt/config-file >/dev/null 2>&1; then 
+        echo "configuration file not Found,exiting the installation"
 	umount /mnt
 	exit 1
     fi
@@ -172,11 +172,16 @@ create_user()
 # Mount all required partitions and do chroot to OS 
 mount "$os_disk$os_rootfs_part" /mnt
 
+CONFIG_FILE="/mnt/etc/cloud/config-file"
+
+user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
+passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
+
 chroot /mnt /bin/bash <<EOT
 
-# Create the user as user and add to sudo and don't ask password while sudo
+# Create the user as $user_name and add to sudo and don't ask password while sudo
 
-useradd -m -s /bin/bash user && echo "user:user" | chpasswd && echo 'user ALL=(ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/user
+useradd -m -s /bin/bash $user_name && echo "$user_name:$passwd" | chpasswd && echo '$user_name ALL=(ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/$user_name
 
 if [ "$?" -eq 0 ]; then
     echo "Successfully created the user!!!"
@@ -258,11 +263,11 @@ mount -o ro "${usb_disk}${k8_part}" /tmp
 # Mount the OS disk
 mount "$os_disk$os_rootfs_part" /mnt
 
-cp /tmp/proxy_ssh_config /mnt/etc/cloud/
+cp /tmp/config-file /mnt/etc/cloud/
 
 umount /tmp
 
-CONFIG_FILE="/mnt/etc/cloud/proxy_ssh_config"
+CONFIG_FILE="/mnt/etc/cloud/config-file"
 
 # Copy the proxy settings to /etc/environment file
 
@@ -299,18 +304,20 @@ fi
 # SSH Configure
 if grep -q '^ssh_key=' "$CONFIG_FILE"; then
     ssh_key=$(sed -n 's/^ssh_key="\?\(.*\)\?"$/\1/p' "$CONFIG_FILE")
+    user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
     # Write the SSH key to authorized_keys
     if  echo "$ssh_key" | grep -q '^""$'; then
         echo "No SSH Key provided skipping the ssh configuration"
     else
         chroot /mnt /bin/bash <<EOT
         # Configure the SSH
-        su - user
+        su - $user_name 
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
 	cat <<EOF >> ~/.ssh/authorized_keys
 $ssh_key
 EOF
+        chmod 600 ~/.ssh/authorized_keys
         if [ "$?" -ne 0 ]; then
             echo "SSH-KEY Configuration failed!!!"
             exit 1
@@ -410,13 +417,13 @@ get_block_device_details
 
 install_os_on_disk
 
-create_user
-
 install_cloud_init_file
 
 #creat_partitions_on_disk
 
 update_proxy_and_ssh_settings
+
+create_user
 
 enable_dm_verity
 
