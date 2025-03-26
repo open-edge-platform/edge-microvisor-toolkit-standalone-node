@@ -169,14 +169,22 @@ fi
 # Create the USER for the target OS
 create_user()
 {
-# Mount all required partitions and do chroot to OS 
+# Copy the config-file from usb device to disk 
+mount -o ro "${usb_disk}${k8_part}" /tmp
+
+# Mount the OS disk
 mount "$os_disk$os_rootfs_part" /mnt
+
+cp /tmp/config-file /mnt/etc/cloud/
+
+umount /tmp
 
 CONFIG_FILE="/mnt/etc/cloud/config-file"
 
 user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
 passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
 
+# Mount all required partitions and do chroot to OS
 chroot /mnt /bin/bash <<EOT
 
 # Create the user as $user_name and add to sudo and don't ask password while sudo
@@ -189,6 +197,9 @@ else
     echo "Failed to create the user!!!"
     exit 1
 fi
+# Update the proxy settings to yes /etc/profile.d
+sed -i 's/PROXY_ENABLED="no"/PROXY_ENABLED="yes"/g' /etc/sysconfig/proxy
+
 EOT
 #unmount the partitions
 umount /mnt
@@ -205,6 +216,7 @@ if [ "$?" -eq 0 ]; then
     echo "Successfuly copied the cloud-init file"
 else
     echo "Fail to copy the cloud-init file,please check!!!"
+    umount /mnt
     exit 1
 fi
 
@@ -257,15 +269,9 @@ fi
 
 # Update the Proxy and SSH config settings
 update_proxy_and_ssh_settings(){
-# Copy the scripts from USB disk to /opt on the disk
-mount -o ro "${usb_disk}${k8_part}" /tmp
 
 # Mount the OS disk
 mount "$os_disk$os_rootfs_part" /mnt
-
-cp /tmp/config-file /mnt/etc/cloud/
-
-umount /tmp
 
 CONFIG_FILE="/mnt/etc/cloud/config-file"
 
@@ -301,6 +307,9 @@ if grep -q '^NO_PROXY=' "$CONFIG_FILE"; then
     ! echo "$NO_PROXY" | grep -q '^""$' &&  echo "NO_PROXY=$NO_PROXY" >> /mnt/etc/environment
 fi
 
+# update the rke2 path
+sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/rke2/bin"|' /mnt/etc/environment
+
 # SSH Configure
 if grep -q '^ssh_key=' "$CONFIG_FILE"; then
     ssh_key=$(sed -n 's/^ssh_key="\?\(.*\)\?"$/\1/p' "$CONFIG_FILE")
@@ -310,7 +319,7 @@ if grep -q '^ssh_key=' "$CONFIG_FILE"; then
         echo "No SSH Key provided skipping the ssh configuration"
     else
         chroot /mnt /bin/bash <<EOT
-        # Configure the SSH
+        # Configure the SSH for the user $user_name
         su - $user_name 
         mkdir -p ~/.ssh
         chmod 700 ~/.ssh
@@ -324,6 +333,10 @@ EOF
         else
             echo "SSH-KEY Configuration Success!!!"
         fi
+        # export the /etc/enviroment values to .bashrc
+	echo "source /etc/environment" >> /home/$user_name/.bashrc
+        #exit the su -$user_name
+        exit
 EOT
     fi
 fi
@@ -421,9 +434,9 @@ install_cloud_init_file
 
 #creat_partitions_on_disk
 
-update_proxy_and_ssh_settings
-
 create_user
+
+update_proxy_and_ssh_settings
 
 enable_dm_verity
 
