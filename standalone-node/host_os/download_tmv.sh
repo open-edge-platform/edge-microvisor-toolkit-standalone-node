@@ -2,18 +2,18 @@
 # SPDX-FileCopyrightText: (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Download the tiber Microvisor from open source no-auth file server
+# Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
-FILE_RS_URL="https://open-file.espdprod.infra-host.com"
-TMV_VERSION=3.0
-TMV_BUILD_DATE=20250309
-TMV_BUILD_NO=2206
-TMV_FILE_NAME="tiber-readonly-${TMV_VERSION}.${TMV_BUILD_DATE}.${TMV_BUILD_NO}-signed"
-TMV_RAW_GZ="${TMV_FILE_NAME}.raw.gz"
-TMV_SHA256SUM="${TMV_FILE_NAME}.raw.gz.sha256sum"
+FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
+EMT_VERSION=3.0
+EMT_BUILD_DATE=20250328
+EMT_BUILD_NO=1439
+EMT_FILE_NAME="edge-readonly-dev-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
+EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
+EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-wget --no-check-certificate ${FILE_RS_URL}/files-edge-orch/repository/TiberMicrovisor/TiberMicrovisor_nonRT/${TMV_RAW_GZ} -O tiber_microvisor.raw.gz
-wget --no-check-certificate ${FILE_RS_URL}/files-edge-orch/repository/TiberMicrovisor/TiberMicrovisor_nonRT/${TMV_SHA256SUM} -O tiber_microvisor.raw.gz.sha256sum
+curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dev/non_rt/${EMT_RAW_GZ} -o tiber_microvisor.raw.gz
+curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dev/non_rt/${EMT_SHA256SUM} -o tiber_microvisor.raw.gz.sha256sum
 
 # Verify the SHA256 checksum
 echo "Verifying SHA256 checksum..."
