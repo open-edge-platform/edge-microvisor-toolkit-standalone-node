@@ -69,7 +69,6 @@ spec:
     nodeExporter:
       enabled: false  # We already have node-exporter installation in separate chart
 
-
     fullnameOverride: "prometheus"  # do not use kube-prometheus-stack
 
     # Prometheus Operator

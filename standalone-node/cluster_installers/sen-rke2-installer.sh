@@ -11,7 +11,11 @@ else
 	export IS_UBUNTU=false
 fi
 
+#Remove log file
+sudo rm -rf /var/log/cluster-init.log
+
 #Configure RKE2
+echo "$(date): Configuring RKE2 1/12" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo mkdir -p /etc/rancher/rke2
 sudo bash -c 'cat << EOF >  /etc/rancher/rke2/config.yaml
 write-kubeconfig-mode: "0644"
@@ -91,9 +95,11 @@ spec:
 EOF'
 
 # Install RKE2
+echo "$(date): Installing RKE2 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo INSTALL_RKE2_ARTIFACT_PATH=${RKE_INSTALLER_PATH} sh install.sh
 
 # Copy the cni tarballs
+echo "$(date): Copying images and extensions 3/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo cp rke2-images-multus.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
 sudo cp rke2-images-calico.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
 
@@ -112,12 +118,14 @@ else
 fi
 
 # Start RKE2
+echo "$(date): Starting RKE2 4/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo systemctl enable --now rke2-server.service
 
+echo "$(date): Waiting for RKE2 to start 5/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 until sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
-
+echo "$(date): RKE2 started 6/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Label node as a worker
-hostname=$(hostname)
+hostname=$(hostname | tr '[:upper:]' '[:lower:]')
 sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node $hostname node-role.kubernetes.io/worker=true
 
 ## This is a workaround for missing namespaces preventing netowork-policy chart to complete
@@ -138,7 +146,7 @@ namespaces=("calico-system"
 	"observability"
 	"openebs"
 	"tigera-operator")
-
+echo "$(date): Waiting for namespaces to be created 7/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
   all_exist=true
   for ns in "${namespaces[@]}"; do
@@ -149,19 +157,51 @@ while true; do
   sleep 5
 done
 
-## Wait for all pods to deploy
+echo "$(date): Namespaces created 8/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
+## Wait for all pods to deploy
+echo "$(date): Waiting for all extensions to deploy 9/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "Waiting for all extensions to complete the deployment..."
 while sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
   echo "Some pods are still not ready. Checking again in 5 seconds..."
   sleep 5
 done
+echo "$(date): All extensions deployed 10/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
+echo "$(date): Configuring environment 11/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 ## Add kubectl to path
 sed 's|PATH="|PATH="/var/lib/rancher/rke2/bin:|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
 source /etc/environment
 export KUBECONFIG
 
 # All pods deployed - write to log
-echo "$(date): The cluster installation is complete" | sudo tee /var/log/cluster-init.log > /dev/null
+echo "$(date): The cluster installation is complete 12/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "$(date): The cluster installation is complete!"
+
+# Print banner
+IP=$(sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
+
+banner="
+===================================================================
+Edge Microvisor Toolkit - cluster installation complete
+Logs located at:
+	/var/log/cluster-init.log
+
+For RKE2 logs run:
+	sudo journalctl -fu rke2-server
+
+IP address of the Node:
+	$IP - Ensure IP address is persistent across the reboots
+
+To access and view the cluster's pods run:
+	source /etc/environment
+	export KUBECONFIG
+	kubectl get pods -A
+
+KUBECONFIG available at:
+	/etc/rancher/rke2/rke2.yaml
+===================================================================
+"
+
+# Print the banner
+echo "$banner" | sudo tee /dev/tty0

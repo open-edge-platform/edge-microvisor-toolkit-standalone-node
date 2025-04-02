@@ -36,7 +36,6 @@ images=(
 	quay.io/prometheus-operator/prometheus-config-reloader:v0.77.2
 	quay.io/prometheus/node-exporter:v1.8.2
 	docker.io/library/telegraf:1.32-alpine
-	cr.fluentbit.io/fluent/fluent-bit:3.1.9
 	registry.k8s.io/nfd/node-feature-discovery:v0.17.0
 	docker.io/kubernetesui/dashboard:v2.7.0
 	docker.io/kubernetesui/metrics-scraper:v1.0.8
@@ -54,7 +53,6 @@ charts=(
 	"network-policies:intel-rs:oci://amr-registry.caas.intel.com/one-intel-edge/edge-node:0.1.11"
 	"prometheus-node-exporter:node-exporter:https://prometheus-community.github.io/helm-charts:4.43.1"
 	"telegraf:telegraf:https://helm.influxdata.com/:1.8.55"
-	"fluent-bit:fluent-bit:https://fluent.github.io/helm-charts:0.48.4"
 	"node-feature-discovery:node-feature-discovery:https://kubernetes-sigs.github.io/node-feature-discovery/charts:0.17.0"
 )
 
