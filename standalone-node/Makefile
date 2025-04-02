@@ -62,7 +62,7 @@ license: $(VENV_NAME) ## Check licensing with the reuse tool.
         reuse download --all
 	reuse --root . lint
 
-YAML_FILES := $(shell find . -type f -name "*.yaml" -print )
+YAML_FILES := $(shell find . -path './.github' -prune -o -type f -name "*.yaml" -print )
 
 lint: $(VENV_NAME)
 	@. $(VENV_NAME)/bin/activate; flake8 --exclude=venv_stden

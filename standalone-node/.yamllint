@@ -5,3 +5,7 @@ rules:
     ignore: |
       cluster_installers/extensions/
       cluster_installers/extensions-templates/
+
+  indentation:
+    level: warning
+    spaces: 4 # adjust the expected indentation level
