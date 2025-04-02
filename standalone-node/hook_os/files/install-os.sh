@@ -41,6 +41,14 @@ failure() {
     echo -e "${RED}Exit the Installation. Please check /var/log/os-installer.log file for more details.${NC}" | tee /dev/tty0
 }
 
+# Check if mnt is already mounted,if yes unmount it
+check_mnt_mount_exist() {
+    mounted=$(lsblk -o MOUNTPOINT | grep "/mnt")
+    if [ -n "$mounted" ]; then
+        umount -l /mnt
+    fi
+}
+
 # Wait for a few seconds for USB emulation as hook OS boots fast
 detect_usb() {
     for attempt in {1..15}; do
@@ -71,6 +79,7 @@ get_usb_details() {
     success "Found the USB Device $usb_disk"
 
     # Check partition 5 and 6 for OS and K8 Scripts data, if not exit the installation
+    check_mnt_mount_exist
     mount -o ro "${usb_disk}${os_part}" /mnt
     if ! ls /mnt/*.raw.gz >/dev/null 2>&1; then
         failure "OS Image File not Found, exiting the installation."
@@ -79,7 +88,7 @@ get_usb_details() {
     else
         umount /mnt
     fi
-
+    check_mnt_mount_exist
     mount -o ro "${usb_disk}${k8_part}" /mnt
     if ! ls /mnt/sen*.tar.gz >/dev/null 2>&1; then
         failure "K8* Script File not Found, exiting the installation."
@@ -131,7 +140,7 @@ install_os_on_disk() {
         os_rootfs_part="p$os_rootfs_part"
         os_data_part="p$os_data_part"
     fi
-
+    check_mnt_mount_exist
     mount "$usb_disk${os_part}" /mnt
     os_file=$(find /mnt -type f -name "*.raw.gz" | head -n 1)
 
@@ -164,13 +173,16 @@ install_os_on_disk() {
 create_user() {
 
 # Copy the config-file from usb device to disk 
-mount -o ro "${usb_disk}${k8_part}" /tmp
+mkdir -p /mnt1
+mount -o ro "${usb_disk}${k8_part}" /mnt1
 
 # Mount the OS disk
+check_mnt_mount_exist
 mount "$os_disk$os_rootfs_part" /mnt
-cp /tmp/config-file /mnt/etc/cloud/
+cp /mnt1/config-file /mnt/etc/cloud/
 
-umount /tmp
+umount /mnt1
+rm -rf /mnt1
 
 CONFIG_FILE="/mnt/etc/cloud/config-file"
 
@@ -203,6 +215,7 @@ install_cloud_init_file() {
 # Copy the cloud init file from Hook OS to target OS
 echo -e "${BLUE}Installing the Cloud-init file!!${NC} [4/9]" | tee /dev/tty0
 
+check_mnt_mount_exist
 mount "$os_disk$os_rootfs_part" /mnt
 cp /etc/scripts/cloud-init.yaml /mnt/etc/cloud/cloud.cfg.d/installer.cfg
 chmod +x /mnt/etc/cloud/cloud.cfg.d/installer.cfg
@@ -230,11 +243,13 @@ umount /mnt
 install_k8_script() {
 echo -e "${BLUE}Copying the K8 Cluster Scripts!!${NC} [8/9]" | tee /dev/tty0
 # Copy the scripts from USB disk to /opt on the disk
-mount -o ro "${usb_disk}${k8_part}" /tmp
+mkdir -p /mnt2
+mount -o ro "${usb_disk}${k8_part}" /mnt2
 
 # Mount the OS disk 
+check_mnt_mount_exist
 mount "$os_disk$os_data_part" /mnt
-cp /tmp/sen-rke2-package.tar.gz /mnt/
+cp /mnt2/sen-rke2-package.tar.gz /mnt/
 
 if [ "$?" -eq 0 ]; then
     success "Successfuly copied the K8 scripts to /opt on the disk"
@@ -242,8 +257,9 @@ else
     failure "Fail to copy the K8 scripts to /opt on the disk,please check!!!"
     exit 1
 fi
-umount /tmp
+umount /mnt2
 umount /mnt
+rm -rf /mnt2
 }
 
 # Update the Proxy and SSH config settings
@@ -251,6 +267,7 @@ update_proxy_and_ssh_settings() {
 echo -e "${BLUE}Updating the PROXY && SSH Settings!!${NC} [6/9]" | tee /dev/tty0
 
 # Mount the OS disk
+check_mnt_mount_exist
 mount "$os_disk$os_rootfs_part" /mnt
 
 CONFIG_FILE="/mnt/etc/cloud/config-file"
