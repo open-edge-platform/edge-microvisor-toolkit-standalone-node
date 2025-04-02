@@ -106,8 +106,20 @@ cp config-file out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null
+checksum_file="checksums.md5"
+{
+    md5sum hook-os.iso
+    md5sum tiber_microvisor.raw.gz
+    md5sum sen-rke2-package.tar.gz
+} >> $checksum_file
 
-tar -czf usb-bootable-files.tar.gz hook-os.iso $os_filename sen-rke2-package.tar.gz  > /dev/null
+if [ "$?" -eq 0 ]; then
+    echo "Checksum file $checksum_file created successfully in $(pwd)"
+else
+    echo "Failed to create checksum file, please check!"
+    exit 1
+fi
+tar -czf usb-bootable-files.tar.gz hook-os.iso $os_filename sen-rke2-package.tar.gz $checksum_file > /dev/null
 
 if [ "$?" -eq 0 ]; then
     tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz

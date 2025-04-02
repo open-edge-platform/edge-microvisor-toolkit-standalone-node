@@ -80,6 +80,32 @@ cd usb_files || exit 1
 tar -xzvf "$USB_FILES" || { echo "Error: Failed to extract USB bootable files!"; exit 1; }
 cd "$working_dir" || exit 1
 
+# Verify MD5 checksum of required files
+echo "Verifying MD5 checksum of required files..."
+checksum_file="usb_files/checksums.md5"
+if [ -f "$checksum_file" ]; then
+    pushd usb_files > /dev/null || exit
+    for file in hook-os.iso tiber_microvisor.raw.gz sen-rke2-package.tar.gz; do
+        if [ -f "$file" ]; then
+            calculated_md5=$(md5sum "$file" | awk '{print $1}')
+            expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
+            if [ "$calculated_md5" != "$expected_md5" ]; then
+                echo "Error: MD5 checksum mismatch for $file!"
+                exit 1
+            else
+                echo "MD5 checksum verified for $file."
+            fi
+        else
+            echo "Error: $file not found!"
+            exit 1
+        fi
+    done
+    popd > /dev/null || exit
+else
+    echo "Error: Checksum file $checksum_file not found!"
+    exit 1
+fi
+
 # Prepare USB device
 echo "Preparing the USB bootable device..."
 ISO="usb_files/hook-os.iso"
@@ -94,7 +120,7 @@ echo "Write the ISO to USB"
 
 sudo dd if="$ISO" of="$USB_DEVICE" bs=4M status=progress && sudo sync
 sudo sgdisk -e "$USB_DEVICE" > /dev/null 2>&1
-blockdev --rereadpt  ${USB_DEVICE} 
+blockdev --rereadpt  "${USB_DEVICE}"
 printf "fix\nq\n" | sudo parted "$USB_DEVICE" print > /dev/null 2>&1
 
 # Wait for the newly created partition for next operation from userspace
