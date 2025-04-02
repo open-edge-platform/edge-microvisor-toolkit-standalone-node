@@ -112,7 +112,7 @@ pipeline {
                 sh """
                 make build
                 """
-                dir("${WORKSPACE}/installation_scripts/out") {
+                dir("${WORKSPACE}/hook_os/out") {
                     stash name: "bdba_binary",includes: "hook*.gz" 
                 }
             }

@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-set -x
+#set -x
 
 os_filename=""
 # Build the hook os with and generate kernel && initramfs file
@@ -76,7 +76,7 @@ else
         set gfxmode=text
 
         menuentry "Alpine Linux" {
-        linux /boot/vmlinuz console=tty0 console=ttS0 ro quite loglevel=3 modloop=none text 
+	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quite loglevel=3 modloop=none text
         initrd /boot/initrd
 }
 EOF
@@ -115,7 +115,15 @@ if [ "$?" -eq 0 ]; then
         echo ""
 	echo ""
 	echo ""
+	# Delete all other generated files other than sen-installation-files.tar.gz
+        find . -mindepth 1 -not -name "sen-installation-files.tar.gz" -delete
+        echo "##############################################################################################"
+        echo "                                                                                              "
+        echo "                                                                                              "
         echo "Standalone Installation files--> sen-installation-files.tar.gz created successfuly, under $(pwd)"
+        echo "                                                                                              "
+        echo "                                                                                              "
+        echo "###############################################################################################"
     else
 	echo "Failed to create Standalone Installation files,Please check!!!"
 	popd

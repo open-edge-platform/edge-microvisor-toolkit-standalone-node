@@ -6,7 +6,7 @@
 #####################################################################################
 ####
 ####
-#set -x
+set -x
 # COMPLETE_DMVERITY set to true default
 COMPLETE_DMVERITY=true
 

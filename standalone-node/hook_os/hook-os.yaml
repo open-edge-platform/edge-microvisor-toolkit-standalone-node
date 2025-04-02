@@ -155,7 +155,7 @@ services:
 
   - name: os-installer
     image: debian:latest
-    command: ["/bin/bash", "/etc/scripts/install-os.sh"]
+    command: ["/bin/bash", "-c", "/etc/scripts/install-os.sh"]
     capabilities:
       - all
     net: host
@@ -164,6 +164,7 @@ services:
       - /run:/run
       - /etc/scripts:/etc/scripts/
       - /:/host
+      - /var/log/os-installer.log:/var/log/os-installer.log
       - /etc/scripts/install-os.sh:/etc/scripts/install-os.sh
     runtime:
       mkdir:
@@ -181,10 +182,6 @@ files:
 
   - path: etc/scripts/cloud-init.yaml
     source: "files/cloud-init.yaml"
-    mode: "0777"
-
-  - path: etc/scripts/os-partition.sh
-    source: "files/os-partition.sh"
     mode: "0777"
 
   - path: etc/scripts/enable-dmv.sh
