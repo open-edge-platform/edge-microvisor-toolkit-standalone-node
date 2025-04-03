@@ -31,6 +31,7 @@ The extracted files will include:
 - `usb-bootable-files.tar.gz`
 - `config-file` 
 - `bootable-usb-prepare.sh`
+- `edgenode-logs-collection.sh`
 ---
 
 ## Prepare the Bootable USB Device
@@ -68,4 +69,12 @@ Use the credentials provided as input while preparing the bootable usb drive
 
 source /etc/environment && export KUBECONFIG
 
-kubectl get pods 
+kubectl get pods -A
+
+## For Collecting the edge node logs from development system (system with SSH Key provided for passwordless access)
+
+### Example Command:
+
+```bash 
+./edgenode-logs-collection.sh <edgenode-username> <edgenode-ip>
+

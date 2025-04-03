@@ -236,6 +236,10 @@ chmod 600 /etc/cloud/ds-identify.cfg
 # Update the proxy settings to yes /etc/profile.d
 sed -i 's/PROXY_ENABLED="no"/PROXY_ENABLED="yes"/g' /etc/sysconfig/proxy
 EOT
+
+# Copy Edge node logs collection script
+cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
+
 umount /mnt
 }
 

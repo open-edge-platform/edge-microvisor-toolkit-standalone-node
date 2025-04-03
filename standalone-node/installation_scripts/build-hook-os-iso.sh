@@ -103,6 +103,7 @@ pack-iso-image-k8scripts(){
 mv $os_filename out/ 
 cp bootable-usb-prepare.sh out/
 cp config-file out/
+cp edgenode-logs-collection.sh out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null
@@ -122,7 +123,7 @@ fi
 tar -czf usb-bootable-files.tar.gz hook-os.iso $os_filename sen-rke2-package.tar.gz $checksum_file > /dev/null
 
 if [ "$?" -eq 0 ]; then
-    tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz
+    tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh
     if [ "$?" -eq 0 ]; then
         echo ""
 	echo ""
