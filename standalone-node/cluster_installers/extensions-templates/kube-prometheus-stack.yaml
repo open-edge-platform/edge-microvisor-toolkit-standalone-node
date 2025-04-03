@@ -76,7 +76,7 @@ spec:
       image:
         registry: quay.io
         repository: prometheus-operator/prometheus-operator
-        tag: v0.77.2
+        tag: v0.81.0
       enabled: true
       resources:
         limits:
@@ -105,15 +105,16 @@ spec:
         image:
           registry: quay.io
           repository: prometheus-operator/prometheus-config-reloader
-          tag: "v0.77.2"
+          tag: "v0.81.0"
       tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/worker
+        # - effect: NoSchedule
+        #   key: node-role.kubernetes.io/worker
         - effect: NoSchedule
           operator: Exists
+    # yamllint disable-line rule:comments-indentation
       # Prometheus Operator should deploy on master node
-      nodeSelector:
-        node-role.kubernetes.io/worker: 'true'
+      # nodeSelector:
+      #   node-role.kubernetes.io/worker: 'true'
 
     prometheus:
       enabled: true
@@ -169,7 +170,7 @@ spec:
         image:
           registry: quay.io
           repository: prometheus/prometheus
-          tag: v2.55.0
+          tag: v3.2.1
         securityContext:
           runAsNonRoot: true
           runAsUser: 501
@@ -234,19 +235,21 @@ spec:
         externalLabels:
           # TODO
           clusterName:
-            global.fleet.clusterLabels.cluster.orchestration.io/clustername
+            global.fleet.clusterLabels.edge-orchestrator.intel.com/clustername
           hostGuid:
-            global.fleet.clusterLabels.device-guid
+            global.fleet.edge-orchestrator.intel.com/host-uuid
           projectId:
-            global.fleet.clusterLabels.cluster.orchestration.io/project-id
+            global.fleet.clusterLabels.edge-orchestrator.intel.com/project-id
         tolerations:
-          - effect: NoSchedule
-            key: node-role.kubernetes.io/worker
+          # TODO have CAPI correctly label worker nodes
+          # - effect: NoSchedule
+          #   key: node-role.kubernetes.io/worker
           - effect: NoSchedule
             operator: Exists
         # Prometheus should deploy on master node
         nodeSelector:
-          node-role.kubernetes.io/worker: 'true'
+        # yamllint disable-line rule:comments-indentation
+          # node-role.kubernetes.io/worker: 'true'
 
         serviceMonitorSelectorNilUsesHelmValues: false
         podMonitorSelectorNilUsesHelmValues: false
@@ -260,7 +263,7 @@ spec:
       image:
         registry: registry.k8s.io
         repository: kube-state-metrics/kube-state-metrics
-        tag: v2.13.0
+        tag: v2.15.0
       resources:
         limits:
           cpu: 100m
@@ -293,11 +296,12 @@ spec:
         image:
           registry: quay.io
           repository: brancz/kube-rbac-proxy
-          tag: v0.18.0
+          tag: v0.19.0
         extraArgs:
           - "--tls-cert-file=/etc/tls/tls.crt"
           - "--tls-private-key-file=/etc/tls/tls.key"
           - "--client-ca-file=/etc/tls/ca.crt"
+          - "--ignore-paths=/livez,/readyz"
         resources:
           limits:
             cpu: 100m
@@ -313,3 +317,5 @@ spec:
         - name: kube-state-rbac-proxy-tls
           secret:
             secretName: kube-state-rbac-proxy-tls
+      selfMonitor:
+        enabled: true

@@ -33,7 +33,6 @@ spec:
         memory: 128Mi
         cpu: 100m
 
-
     containerPorts:
       - name: metrics
         containerPort: 9105

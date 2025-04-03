@@ -8,4 +8,4 @@ rules:
 
   indentation:
     level: warning
-    spaces: 4 # adjust the expected indentation level
+    spaces: 2 # adjust the expected indentation level

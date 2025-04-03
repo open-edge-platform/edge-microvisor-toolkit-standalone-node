@@ -19,7 +19,7 @@ images=(
 	docker.io/openpolicyagent/gatekeeper:v3.17.1
 	docker.io/openpolicyagent/gatekeeper-crds:v3.17.1
 	docker.io/curlimages/curl:8.11.0
-	docker.io/openebs/provisioner-localpv:4.1.1
+	docker.io/openebs/provisioner-localpv:4.2.0
 	registry.k8s.io/sig-storage/csi-resizer:v1.8.0
 	registry.k8s.io/sig-storage/csi-snapshotter:v6.2.2
 	registry.k8s.io/sig-storage/snapshot-controller:v6.2.2
@@ -27,31 +27,30 @@ images=(
 	docker.io/openebs/lvm-driver:1.6.1
 	registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0
 	docker.io/bitnami/kubectl:1.25.15
-	registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0
-	quay.io/brancz/kube-rbac-proxy:v0.18.0
-	quay.io/prometheus-operator/prometheus-operator:v0.77.2
-	quay.io/prometheus/prometheus:v2.55.0
+	registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0
+	quay.io/brancz/kube-rbac-proxy:v0.19.0
+	quay.io/prometheus-operator/prometheus-operator:v0.81.0
+	quay.io/prometheus/prometheus:v3.2.1
 	docker.io/library/busybox:1.35.0
 	docker.io/library/busybox:latest
-	quay.io/prometheus-operator/prometheus-config-reloader:v0.77.2
-	quay.io/prometheus/node-exporter:v1.8.2
+	quay.io/prometheus-operator/prometheus-config-reloader:v0.81.0
+	quay.io/prometheus/node-exporter:v1.9.0
 	docker.io/library/telegraf:1.32-alpine
 	registry.k8s.io/nfd/node-feature-discovery:v0.17.0
 	docker.io/kubernetesui/dashboard:v2.7.0
 	docker.io/kubernetesui/metrics-scraper:v1.0.8
 )
 
-#TODO update the versions and repo locations for intel charts
 charts=(
 	"cert-manager:jetstack:https://charts.jetstack.io:1.16.2"
 	"gatekeeper:gatekeeper:https://open-policy-agent.github.io/gatekeeper/charts:3.17.1"
-	"gatekeeper-constraints:intel-rs:oci://amr-registry.caas.intel.com/one-intel-edge/edge-node:2.0.0"
-	"openebs:openebs:https://openebs.github.io/openebs:4.1.1"
-	"openebs-config:intel-rs:oci://amr-registry.caas.intel.com/one-intel-edge/edge-node:0.0.1"
-	"kube-prometheus-stack:prometheus:https://prometheus-community.github.io/helm-charts:51.3.0"
-	"observability-config:intel-rs:oci://amr-registry.caas.intel.com/one-intel-edge/edge-node:0.0.1"
-	"network-policies:intel-rs:oci://amr-registry.caas.intel.com/one-intel-edge/edge-node:0.1.11"
-	"prometheus-node-exporter:node-exporter:https://prometheus-community.github.io/helm-charts:4.43.1"
+	"gatekeeper-constraints:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:1.0.15"
+	"openebs:openebs:https://openebs.github.io/openebs:4.2.0"
+	"openebs-config:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.0.2"
+	"kube-prometheus-stack:prometheus:https://prometheus-community.github.io/helm-charts:70.3.0"
+	"observability-config:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.0.2"
+	"network-policies:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.1.13"
+	"prometheus-node-exporter:node-exporter:https://prometheus-community.github.io/helm-charts:4.45.0"
 	"telegraf:telegraf:https://helm.influxdata.com/:1.8.55"
 	"node-feature-discovery:node-feature-discovery:https://kubernetes-sigs.github.io/node-feature-discovery/charts:0.17.0"
 )
@@ -70,8 +69,9 @@ download_rke2_artifacts () {
 
 # Download charts and convert to base64 - the charts do not end up in installation package but the encoded base64 will be part of helmchart addon definition elswhere in extensions directory.
 download_extension_charts () {
-	
 	echo "Downloading extension charts"
+	helm repo update
+	unset no_proxy && unset NO_PROXY
 	mkdir -p ${CHRT_DIR}
 	mkdir -p ${EXT_DIR}
 	for chart in "${charts[@]}" ; do
@@ -83,7 +83,7 @@ download_extension_charts () {
 	
 		if [ ${repo} == "intel-rs" ]; then
 			echo Fetching ${name} chart
-			helm fetch -d ${CHRT_DIR} ${url}/${name} --version ${version} --insecure-skip-tls-verify
+			helm fetch -d ${CHRT_DIR} ${url}/${name} --version ${version}
 			base64 -w 0 ${CHRT_DIR}/${name}-$version.tgz > ${CHRT_DIR}/$name.base64
 	
 		else
@@ -92,6 +92,16 @@ download_extension_charts () {
 			helm fetch -d ${CHRT_DIR} ${repo}/${name} --version ${version}
 			if [ ${name} == "cert-manager" ]; then version="v${version}"; fi
 			if [ ${name} == "node-feature-discovery" ]; then version="chart-${version}"; fi
+			base64 -w 0 ${CHRT_DIR}/${name}-${version}.tgz > ${CHRT_DIR}/${name}.base64
+		fi
+		# Remove unnecessary files from kube-prometheus-stack, reason:  then base encoded file becomes to big and cannot be consumed when installing via add-on on RKE2
+		if [ ${name} == "kube-prometheus-stack" ]; then
+			tar -xzf ${CHRT_DIR}/${name}-${version}.tgz -C ${CHRT_DIR}
+			rm -rf ${CHRT_DIR}/${name}-${version}.tgz
+			rm ${CHRT_DIR}/${name}/README.md
+			rm ${CHRT_DIR}/${name}/templates/grafana/dashboards-1.14/*windows*
+			rm -rf ${CHRT_DIR}/${name}/templates/thanos-ruler
+			tar -cf ${CHRT_DIR}/${name}-${version}.tgz --use-compress-program="gzip -9" -C ${CHRT_DIR} ${name}
 			base64 -w 0 ${CHRT_DIR}/${name}-${version}.tgz > ${CHRT_DIR}/${name}.base64
 		fi
 		# Template HelmChart addon manifets using the base64 chart

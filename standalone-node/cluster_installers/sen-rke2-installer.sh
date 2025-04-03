@@ -128,10 +128,6 @@ echo "$(date): RKE2 started 6/12" | sudo tee -a /var/log/cluster-init.log | sudo
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
 sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node $hostname node-role.kubernetes.io/worker=true
 
-## This is a workaround for missing namespaces preventing netowork-policy chart to complete
-sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl create ns cattle-system
-sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl create ns local
-
 # Wait for the deployment to complete
 
 ## First wait for all namespaces to be created
