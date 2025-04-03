@@ -39,6 +39,8 @@ images=(
 	registry.k8s.io/nfd/node-feature-discovery:v0.17.0
 	docker.io/kubernetesui/dashboard:v2.7.0
 	docker.io/kubernetesui/metrics-scraper:v1.0.8
+	docker.io/grafana/grafana:11.6.0
+	docker.io/bats/bats:v1.4.1
 )
 
 charts=(
@@ -53,6 +55,7 @@ charts=(
 	"prometheus-node-exporter:node-exporter:https://prometheus-community.github.io/helm-charts:4.45.0"
 	"telegraf:telegraf:https://helm.influxdata.com/:1.8.55"
 	"node-feature-discovery:node-feature-discovery:https://kubernetes-sigs.github.io/node-feature-discovery/charts:0.17.0"
+	"grafana:grafana:https://grafana.github.io/helm-charts:8.11.1"
 )
 
 # Download RKE2 artifacts
