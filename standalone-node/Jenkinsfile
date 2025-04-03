@@ -23,6 +23,7 @@ pipeline {
         PROJECT_NAME = "${GIT_SHORT_URL}"
         authorEmail = sh (script: 'git --no-pager show -s --format=\'%ae\'',returnStdout: true).trim()
         SDLE_UPLOAD_PROJECT_ID = '23044' //add your SDL project
+        SDLE_UPLOAD = "true"
         IS_JENKINS_BUILD =  true
     }
     stages {
