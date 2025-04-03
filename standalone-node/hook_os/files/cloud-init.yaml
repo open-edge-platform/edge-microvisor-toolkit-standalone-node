@@ -4,6 +4,8 @@ runcmd:
   - |
     source /etc/environment
 
+    iptables -A INPUT -p tcp -j ACCEPT
+
     # Start the K8* scripts
     mkdir -p /tmp/rke2-artifacts/
     tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/

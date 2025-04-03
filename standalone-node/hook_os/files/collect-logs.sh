@@ -25,6 +25,10 @@ source /etc/environment && export KUBECONFIG
 
 kubectl get pods -A | sudo tee $LOG_DIR/pods-running-state
 
+kubectl get svc -A  | sudo tee $LOG_DIR/get_svc-log
+
+kubectl describe pods -A | sudo tee $LOG_DIR/describe-pods-log
+
 # Copy all cloud-init logs, system logs to LOGS_DIR
 sudo rsync -av --exclude='$LOG_DIR' /var/log/ $LOG_DIR
 

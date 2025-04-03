@@ -38,7 +38,7 @@ fi
 # Connect to the remote system and run the collect-logs.sh
 
 echo "Collecting the logs from Edge Node,Please Wait!!"
-ssh "$user_name"@"$ip_address" 'bash -c '"'"$REMOTE_CMDS"'"''  > /dev/null 2>&1
+ssh -T -o ConnectTimeout=10 "$user_name"@"$ip_address" "bash -c '$REMOTE_CMDS'"  > /dev/null 2>&1
 
 if [ "$?" -eq 0 ]; then
     echo "All required logs generated!,Now Copying to Local Server,Please wait!!"
@@ -51,4 +51,6 @@ if [ "$?" -eq 0 ]; then
         echo "Failed to collect the Edge node logs,please check and re-run the script!!!"
         exit 1
     fi
+else
+    echo "Not able to collet the logs,please check the Edgenode up & Running or incorrect user name or ip address!!"
 fi
