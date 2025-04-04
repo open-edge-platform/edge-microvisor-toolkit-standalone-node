@@ -110,9 +110,13 @@ pipeline {
                 echo 'socks_proxy=socks://proxy-dmz.intel.com:1080' >> hook_os/config
                 echo 'no_proxy=localhost,*.intel.com,*intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock,.internal' >> hook_os/config
                 """
-                sh """
-                make build
-                """
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ESPD_DOCKER_HUB_TOKEN', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+                {
+		            sh '''
+                        docker login -u $USERNAME -p $PASSWORD https://index.docker.io/v1/
+                        make build
+		            '''
+                }
                 dir("${WORKSPACE}/hook_os/out") {
                     stash name: "bdba_binary",includes: "hook*.gz" 
                 }
