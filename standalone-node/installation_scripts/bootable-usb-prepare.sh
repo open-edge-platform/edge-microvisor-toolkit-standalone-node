@@ -85,7 +85,7 @@ echo "Verifying MD5 checksum of required files..."
 checksum_file="usb_files/checksums.md5"
 if [ -f "$checksum_file" ]; then
     pushd usb_files > /dev/null || exit
-    for file in hook-os.iso tiber_microvisor.raw.gz sen-rke2-package.tar.gz; do
+    for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
         if [ -f "$file" ]; then
             calculated_md5=$(md5sum "$file" | awk '{print $1}')
             expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')

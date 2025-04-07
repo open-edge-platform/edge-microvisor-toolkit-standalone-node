@@ -110,7 +110,7 @@ pushd out > /dev/null
 checksum_file="checksums.md5"
 {
     md5sum hook-os.iso
-    md5sum tiber_microvisor.raw.gz
+    md5sum edge_microvisor_toolkit.raw.gz
     md5sum sen-rke2-package.tar.gz
 } >> $checksum_file
 
