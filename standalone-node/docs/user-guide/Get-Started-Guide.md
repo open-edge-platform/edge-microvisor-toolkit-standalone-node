@@ -1,101 +1,57 @@
-# Get Started Guide
+# Get Started
 
-> NOTE: The Get Started Guide should cover requirements, start/stop, and
-> first use experience. {Before using this template, read the
-> accompanying [get started template
-> guide](get-started-template-guide)}.
+The installation flow for Intel® Edge Microvisor Toolkit Standalone Node – Edge Software Hub is primarily intended for Public / External users. The Edge Microvisor Toolkit Standalone Node Software is installed through ESC QA (Edge Software Hub). The user logs in to ESC, selects the released package, and can download the installer package. 
+The user extracts and copies the EN install package to the target systems and executes the installer to support Standalone USB based edge node installation of Edge Microvisor Toolkit.
+The installation of the Edge Microvisor  Toolkit should also include installation of Kubernetes, all necessary Kubernetes extensions (device plugins, scheduler extensions, CNIs, CSIs, etc). Ultimately the standalone EN based on Edge Microvisor Toolkit should support customers to deploy their workloads in an independent standalone cluster. Once the customer completes the evaluation the customer should be able to onboard this EN to the backed as part of the product deployment.
 
--   **Time to Complete:**{time} \>NOTE: Provide an accurate time for how
-    long it will take the user to complete the get started guide from
-    start to finish.
--   **Programming Language:**{programming language}
+> NOTE: The software update to the Foundation Edge Nodes is done manually by downloading an Intel updated version of a given Edge Microvisor Toolkit Standalone Node package, hence there is no automatic update process of Edge Nodes in this scenario.
 
-## Get Started
+## Installation Process for Intel® Edge Microvisor Toolkit Standalone Node
 
-NOTE: Provide step-by-step instructions for getting started. Developers
-expect the process to be straightforward. Provide scripts and automation
-to simplify steps.
+![Installation flow](_images/installation_flow.png)
+*<center>Figure 1: Flow for Intel® Edge Microvisor Toolkit Standalone Node</center>*
 
-### Prerequisites
+## Step 1: Prerequisites & System Set-UP
 
-{Use this section to tell users about any prerequisites needed before
-they start, such as:
+Before starting the Edge Node deployment, perform the following steps:-
 
--   Expected prior knowledge.
--   Software or hardware to obtain.
--   Environments to set up and configure.
--   Access codes to obtain. }
+- System bootable to a frESC Ubuntu 22.04.
+- Internet connectivity is available on the Node
+- The target node(s) hostname must be in lowercase, numerals, and hyphen’ – ‘. 
+  - For example: wrk-8 is acceptable; wrk_8, WRK8, and Wrk^8 are not accepted as hostnames.
+- Required proxy settings must be added to the /etc/environment file.
+- Get access to the Edge Software Hub portal.
 
-### Step 1: Build
+## Step 2: Download the ESC Package
 
-Run the command:
+1. Select Configure & Download to download the Intel® Edge Microvisor Toolkit Standalone Node package. <br>
+<a href="https://edge-services-catalog-prod-qa.apps1-bg-int.icloud.intel.com/package/edge_microvisor_toolkit_standalone_node" style="display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #007bff; text-align: center; text-decoration: none; border-radius: 5px; border: none;">Configure & Download</a>
 
-    ```bash
-    code snippet
-    ```
+## Step 3: Configure
 
-### Step 2: Run
+The ESC Package will be downloaded on your Local System in a zip format, labeled as “Edge_Microvisor_Toolkit_Standalone_Node.zip”.
 
-1.  {text}
+1. Copy the ESC package from the Local System to a Edge Node running Ubuntu 22.04 <br>
+   ![Copy Package](_images/copy_pkg.png) <br>
+   *<center>Figure 6: Copy ESC Package to Target System</center>* <br><br>
+2. Proceed to extract the compressed file to obtain the ESC Installer.
+   ```bash
+   $ unzip Edge_Microvisor_Toolkit_Standalone_Node.zip
+   ```
+   ![unzip package](_images/unzip.png) <br>
+   *<center>Figure 7: Unzip the ESC Package</center>* <br><br>
+3. Navigate to the extracted folder & modify the permissions of the ‘edgesoftware’ file to make it executable.
+   ```bash
+   $ chmod +x edgesoftware
+   ```
 
-    ``` bash
-    code snippet
-    ```
+   ![Change Permission](_images/chmod.png) <br>
+   *<center>Figure 8: Change Installer Permission</center>* <br><br>
 
-2.  {text}
+## Step 4:  Deploy
 
-    ``` bash
-    code snippet
-    ```
-
-## Test the Microservice {or Name of a First Use Experience}
-
-A short tutorial with clear objectives: Provide the developer with a
-concrete example of how the software works and its value proposition.
-
-1.  {text}
-
-    ``` bash
-    code snippet
-    ```
-
-2.  {text}
-
-    ``` bash
-    code snippet
-    ```
-
-## Performance
-
-Typical performance metrics and studies include topics such as response
-times, scaling (vertical/horizontal), resource usage, and monitoring.
-
-## Summary
-
-{Use this section to summarize what the user learned in the GSG.}
-
-In this get started guide, you learned how to: - {Build the
-microservice} - {Run the microservice} - {text}
-
-## Learn More
-
--   Follow step-by-step examples to become familiar with the core
-    functionality of the microservice, in
-    [Tutorials](tutorials-template.rst).
--   Use the [API Reference Manual.](api-template.rst)
--   Understand the components, services, architecture, and data flow, in
-    the [Overview](overview-template.rst).
-
-## Troubleshooting
-
-{Provide Troubleshooting steps for issues that might arise while using
-this documentation.}
-
-### Error Logs
-
-{Provide the way to access error logs and what the error messages mean.}
-
-## Known Issues
-
--   {Provide a bullet list of issues}
--   {Provide a bullet list of issues}
+   Execute the ESC Installer to begin the installation process by using the following command.
+   ```bash
+   $ sudo ./edgesoftware install
+   ```
+   ![Folder Strcuter](_images/ESC-install-dir.png) <br>
