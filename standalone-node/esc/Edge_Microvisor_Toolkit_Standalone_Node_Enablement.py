@@ -406,31 +406,35 @@ def main_uninstall(MODULE_PATH, OUTPUT_PATH, TYPE):
 
 
 def masked_input(prompt):
-    """
-    Custom implementation of getpass to display '*' for each character entered.
-        """
-    print(prompt, end='', flush=True)
-    password = ''
-    stdin_file_descriptor = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(stdin_file_descriptor)
+    # Print the prompt
+    sys.stdout.write(prompt)
+    sys.stdout.flush()
+    password = []
+    old_settings = termios.tcgetattr(sys.stdin)
+    tty.setraw(sys.stdin)
+
     try:
-        tty.setraw(stdin_file_descriptor)
         while True:
-            char = sys.stdin.read(1)
-            if char == '\n' or char == '\r':  # Enter key
-                print('')
+            ch = sys.stdin.read(1)
+            if ch == '\r' or ch == '\n':
                 break
-            elif char == '\x7f':  # Backspace key
-                if len(password) > 0:
-                    password = password[:-1]
-                    print('\b \b', end='', flush=True)
+            elif ch == '\x7f':
+                if password:
+                    password.pop()
+                    sys.stdout.write('\b \b')
+                    sys.stdout.flush()
             else:
-                password += char
-                print('*', end='', flush=True)
-    except Exception as e:
-        print("\nAn error occurred while reading input.")
-        raise e
+                password.append(ch)
+                sys.stdout.write('*')
+                sys.stdout.flush()
     finally:
-        termios.tcsetattr(stdin_file_descriptor,
-                          termios.TCSADRAIN, old_settings)
-    return password
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+        sys.stdout.write('\n')
+
+    # Overwrite password elements in memory
+    password_str = ''.join(password)
+    for i in range(len(password)):
+        password[i] = '\0'
+    del password
+
+    return password_str
