@@ -44,46 +44,17 @@ node("mc-agent"){
                               --exclude filename --exclude '*.crt' --exclude '*certs*' ./ "${MODULE_NAME}_TEMP"                    
                 """
         }    
-        if ("${nodename}" == "MC_NODE_UBUNTU18.04" ){
-		    stage("Compile Package $nodeName") {
-			    linuxCompile.call()
-		    }
-	    }
-	    if( "${nodename}" == "MC_NODE_UBUNTU20.04" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_UBUNTU22.04" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_DEBIAN11" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_CENTOS7.4" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_CENTOS7.6" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_DEBIAN10" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
-        if( "${nodename}" == "MC_NODE_RHEL8.2" ){
-		    stage("Compile Package $nodeName") {
-                linuxCompile.call()
-		    }		
-	    }
+        switch("${nodename}") {
+                case "MC_NODE_UBUNTU18.04":
+                case "MC_NODE_UBUNTU22.04":
+                case "MC_NODE_UBUNTU24.04":
+                    stage("Compile Package $nodeName") {
+                        linuxCompile.call()
+                    }
+                    break;
+                default: println "Error Message: Executes only on the Ubuntu OS version specified in the ESH MC module definition.\nPlease select it while creating the module. Currently supports only Ubuntu18.04, Ubuntu 22.04 and Ubuntu 24.04 versions"
+                    break;
+        }    
     }
     parallel agents
 }

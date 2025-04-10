@@ -12,6 +12,7 @@ from esb_common import locale
 import sys
 import tty
 import termios
+from click import progressbar
 
 MODULE = "Edge Microvisor Toolkit Standalone Node Script"
 CURRENT_DIR = os.getcwd()
@@ -182,59 +183,6 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
         print("-------+----+-- Installation Begins --+----+-------")
         self.log.info("Installation begins.")
 
-        # Search for sen-installation-files.tar.gz
-        sen_file_path = None
-        for dirpath, dirnames, filenames in os.walk(CURRENT_DIR):
-            for filename in filenames:
-                if filename == "sen-installation-files.tar.gz":
-                    sen_file_path = os.path.join(dirpath, filename)
-            if sen_file_path:
-                break
-
-        if not sen_file_path:
-            self.log.error("File sen-installation-files.tar.gz not found.")
-            print(colored(
-                "ERROR: File sen-installation-files.tar.gz not found.",
-                "red"))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "File sen-installation-files.tar.gz not found"
-            )
-
-        command = "tar -xvf {0}".format(sen_file_path)
-        status = run(
-            command.split(), stdout=PIPE, stderr=PIPE, shell=False)
-        if status.returncode:
-            self.log.error("Error during tar extraction.")
-            self.log.error(
-                f"Standard Output: {status.stdout.decode('utf-8')}"
-            )
-            self.log.error(
-                f"Standard Error: {status.stderr.decode('utf-8')}"
-            )
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                status.stdout + status.stderr,
-                "{0} to unzip".format(locale.FAILED),
-                command
-            )
-
-        files_to_check = [
-            'config-file',
-            'bootable-usb-prepare.sh',
-            'usb-bootable-files.tar.gz',
-            'edgenode-logs-collection.sh'
-            ]
-
-        # Get the list of files in the current directory
-        current_directory_files = os.listdir(CURRENT_DIR)
-
-        # Check for the presence of required file
-        for file_name in files_to_check:
-            if file_name in current_directory_files:
-                self.log.info(f"{file_name} is present in directory.")
-            else:
-                raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                    f"{file_name} is not present.")
-
         # Get user inputs for the proxies, ssh key, user name and password
         http_proxy = input(colored(
             'Enter the HTTP proxy (leave blank for none): ', "green"))
@@ -274,16 +222,6 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
             raise EdgeMicroVisorStandaloneNodeDeploymentException(
                 "User name or password cannot be empty.")
 
-        proxy_ssh_config_path = os.path.join(
-            CURRENT_DIR, "config-file"
-        )
-        self.update_proxy_file(
-            http_proxy, https_proxy, no_proxy, ssh_key,
-            user_name, password, proxy_ssh_config_path
-        )
-        print(colored(
-            'proxy_ssh_config File updated successfully!', "green"))
-
         lsblk_output = self.run_lsblk()
         if lsblk_output:
             print(colored("Disk Information:\n", "green"))
@@ -295,30 +233,112 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
             )
         print(colored(f"You selected the disk: {disk}", "green"))
 
-        print(colored("Starting bootable USB preparation...", "green"))
-        command = [
-            "sudo", "./bootable-usb-prepare.sh", disk,
-            "usb-bootable-files.tar.gz", "config-file"
-        ]
-        with open("usb_preparation.log", "w") as log_file:
-            result = run(command, stdout=log_file,
-                         stderr=log_file, shell=False, text=True)
-        if result.returncode == 0:
-            print(colored(
-                "Bootable USB preparation completed successfully!", "green"
-            ))
-            self.log.info(
-                "Bootable USB preparation completed successfully."
+        with progressbar(length=1, fill_char=".",
+                         empty_char=" ", width=50,
+                         label="Install dependencies".ljust(self.str_len, " "),
+                         show_eta=True, show_percent=True,
+                         bar_template="%(label)s [%(bar)s] %(info)s"
+                         ) as self.pbar:
+
+            # Search for sen-installation-files.tar.gz
+            sen_file_path = None
+            for dirpath, dirnames, filenames in os.walk(CURRENT_DIR):
+                for filename in filenames:
+                    if filename == "sen-installation-files.tar.gz":
+                        sen_file_path = os.path.join(dirpath, filename)
+                if sen_file_path:
+                    break
+
+            if not sen_file_path:
+                self.log.error("File sen-installation-files.tar.gz not found.")
+                print(colored(
+                    "ERROR: File sen-installation-files.tar.gz not found.",
+                    "red"))
+                raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                    "File sen-installation-files.tar.gz not found"
+                )
+
+            command = "tar -xvf {0}".format(sen_file_path)
+            status = run(
+                command.split(), stdout=PIPE, stderr=PIPE, shell=False)
+            if status.returncode:
+                self.log.error("Error during tar extraction.")
+                self.log.error(
+                    f"Standard Output: {status.stdout.decode('utf-8')}"
+                )
+                self.log.error(
+                    f"Standard Error: {status.stderr.decode('utf-8')}"
+                )
+                raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                    status.stdout + status.stderr,
+                    "{0} to unzip".format(locale.FAILED),
+                    command
+                )
+
+            files_to_check = [
+                'config-file',
+                'bootable-usb-prepare.sh',
+                'usb-bootable-files.tar.gz',
+                'edgenode-logs-collection.sh'
+                ]
+
+            # Get the list of files in the current directory
+            current_directory_files = os.listdir(CURRENT_DIR)
+
+            # Check for the presence of required file
+            for file_name in files_to_check:
+                if file_name in current_directory_files:
+                    self.log.info(f"{file_name} is present in directory.")
+                else:
+                    raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                        f"{file_name} is not present.")
+
+            proxy_ssh_config_path = os.path.join(
+                CURRENT_DIR, "config-file"
             )
-        else:
-            self.log.error("Error during bootable USB preparation")
-            print(colored(
-                "Error during bootable USB preparation. "
-                "See logs for details.", "red"
-            ))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "Bootable USB preparation failed."
+            self.update_proxy_file(
+                http_proxy, https_proxy, no_proxy, ssh_key,
+                user_name, password, proxy_ssh_config_path
             )
+            print("\n")
+            print(colored(
+                'proxy_ssh_config File updated successfully!', "green"))
+
+            self.pbar.update(1)
+
+        print(colored(
+            "Starting bootable USB preparation, This process will take "
+            "approximately 10 minutes...", "green"))
+        with progressbar(length=1, fill_char=".",
+                         empty_char=" ", width=50,
+                         label="Prepare Bootable USB".ljust(self.str_len, " "),
+                         show_eta=True, show_percent=True,
+                         bar_template="%(label)s [%(bar)s] %(info)s"
+                         ) as self.pbar:
+            command = [
+                "sudo", "./bootable-usb-prepare.sh", disk,
+                "usb-bootable-files.tar.gz", "config-file"
+            ]
+            with open("usb_preparation.log", "w") as log_file:
+                result = run(command, stdout=log_file,
+                             stderr=log_file, shell=False, text=True)
+            if result.returncode == 0:
+                print(colored(
+                    "Bootable USB preparation completed successfully!", "green"
+                ))
+                self.log.info(
+                    "Bootable USB preparation completed successfully."
+                )
+            else:
+                self.log.error("Error during bootable USB preparation")
+                print(colored(
+                    "Error during bootable USB preparation. "
+                    "See logs for details.", "red"
+                ))
+                raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                    "Bootable USB preparation failed."
+                )
+            self.pbar.update(1)
 
     def verify_installation(self):
         """
@@ -418,7 +438,7 @@ def masked_input(prompt):
             ch = sys.stdin.read(1)
             if ch == '\r' or ch == '\n':
                 break
-            elif ch == '\x7f':
+            elif ch in ('\x08', '\x7f'):
                 if password:
                     password.pop()
                     sys.stdout.write('\b \b')
