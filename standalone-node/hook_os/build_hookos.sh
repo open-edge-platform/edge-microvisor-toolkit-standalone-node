@@ -94,7 +94,7 @@ build_debian_img()
 {
 # Create the debian image for os installation
 pushd images/hook-debian/
-docker build  -t debian:latest .
+docker build  -t debian:12.10 .
 
 if [ $? -ne 0 ]; then
     echo "Debian image generation failed"

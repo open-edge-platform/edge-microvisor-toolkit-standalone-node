@@ -110,6 +110,7 @@ fi
 echo "Preparing the USB bootable device..."
 ISO="usb_files/hook-os.iso"
 OS_IMG_PARTITION_SIZE="3000"
+K8S_PARTITION_SIZE="8000"
 OS_PART=5
 K8_PART=6
 
@@ -159,7 +160,7 @@ fi
 echo "Creating OS Image,K8 Storage partitions,please wait !!!"
 echo ""
 create_partition "${LAST_END}" "$(echo "${LAST_END} + ${OS_IMG_PARTITION_SIZE}" | bc)MB" "OS image storage"
-create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "100%" "K8 storage"
+create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${K8S_PARTITION_SIZE}" "K8 storage"
 
 # Copy files to partitions
 copy_to_partition() {

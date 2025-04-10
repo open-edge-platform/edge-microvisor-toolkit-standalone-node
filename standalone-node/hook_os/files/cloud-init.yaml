@@ -1,4 +1,12 @@
 ---
+
+# NTP Time Sync Configuration
+ntp:
+  enabled: true
+  ntp_client: systemd-timesyncd
+  servers:
+    - time.google.com
+
 # Cloud-config file to start the rke2 cluster.
 runcmd:
   - |

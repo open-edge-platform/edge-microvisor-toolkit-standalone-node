@@ -3,7 +3,7 @@
 
 # Docker file to prepare the debain image with required pkgs 
 
-FROM debian:latest
+FROM debian:12.10
 
 RUN apt update && apt install -y \  
                       grub-common \
@@ -17,4 +17,6 @@ RUN apt update && apt install -y \
 		      lvm2 \
 		      fdisk \
 		      cryptsetup-bin \
+                      net-tools \
+                      iproute2 \
     		      && rm -rf /var/lib/apt/lists/*

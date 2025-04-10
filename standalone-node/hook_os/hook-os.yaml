@@ -154,7 +154,7 @@ services:
         - /var/lib/dhcpcd
 
   - name: os-installer
-    image: debian:latest
+    image: debian:12.10
     command: ["/bin/bash", "-c", "/etc/scripts/install-os.sh"]
     capabilities:
       - all
@@ -203,6 +203,14 @@ files:
   - path: dhcpcd.conf
     source: "files/dhcpcd.conf"
     mode: "0644"
+
+  - path: etc/motd
+    mode: "0644"
+    contents: ""
+
+  - path: etc/issue
+    mode: "0644"
+    contents: ""
 
   - path: etc/securetty
     contents: |

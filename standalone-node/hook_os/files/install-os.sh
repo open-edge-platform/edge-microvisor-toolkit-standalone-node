@@ -394,6 +394,23 @@ fi
 efibootmgr
 }
 
+# Update the MAC address under 99-dhcp.conf file
+update_mac_under_dhcp_systemd() {
+# Mount the OS disk
+check_mnt_mount_exist
+mount "$os_disk$os_rootfs_part" /mnt
+
+CONFIG_FILE="/mnt/etc/systemd/network/99-dhcp-en.network"
+
+pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+mac=$(cat /sys/class/net/$pub_inerface_name/address)
+
+# Update the mac
+sed -i "s/Name=.*/MACAddress=$mac/" $CONFIG_FILE
+umount /mnt
+
+}
+
 # Enable dm-verity on tiber os image
 enable_dm_verity() {
 echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC} [7/9]" | tee /dev/tty0
@@ -421,6 +438,8 @@ main() {
     create_user
 
     update_proxy_and_ssh_settings
+
+    update_mac_under_dhcp_systemd
 
     enable_dm_verity
 
