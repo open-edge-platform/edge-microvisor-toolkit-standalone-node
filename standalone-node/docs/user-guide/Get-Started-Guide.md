@@ -15,7 +15,7 @@ The installation of the Edge Microvisor  Toolkit should also include installatio
 
 Before starting the Edge Node deployment, perform the following steps:-
 
-- System bootable to a frESC Ubuntu 22.04.
+- System bootable to a fresh Ubuntu 22.04.
 - Internet connectivity is available on the Node
 - The target node(s) hostname must be in lowercase, numerals, and hyphen’ – ‘. 
   - For example: wrk-8 is acceptable; wrk_8, WRK8, and Wrk^8 are not accepted as hostnames.
@@ -32,6 +32,8 @@ Before starting the Edge Node deployment, perform the following steps:-
 The ESC Package will be downloaded on your Local System in a zip format, labeled as “Edge_Microvisor_Toolkit_Standalone_Node.zip”.
 
 1. Copy the ESC package from the Local System to a Edge Node running Ubuntu 22.04 <br>
+   mkdir Test <br>
+   chmod 750 Test <br>
    ![Copy Package](_images/copy_pkg.png) <br>
    *<center>Figure 6: Copy ESC Package to Target System</center>* <br><br>
 2. Proceed to extract the compressed file to obtain the ESC Installer.
@@ -54,4 +56,30 @@ The ESC Package will be downloaded on your Local System in a zip format, labeled
    ```bash
    $ sudo ./edgesoftware install
    ```
-   ![Folder Strcuter](_images/ESC-install-dir.png) <br>
+   ![Folder Structure](_images/ESC-install-dir.png) <br>
+
+### 4.1 User Inputs Required for installtion
+   <details>
+   <summary><code>User Inputs</code> <code><b>Edge Microvisor Toolkit Standalone Node Package</b></code></summary>
+
+   #### Parameters:-
+
+   | Prompt                | User Input                                          |
+   |-----------------------|-----------------------------------------------------|
+   | HTTP Proxy            | Enter the HTTP proxy (leave blank for none)         |
+   | HTTPS Proxy           | Enter the HTTPS proxy (leave blank for none)        |
+   | No Proxy              | Enter the NO proxy (leave blank for none)           |
+   | SSH Key               | Enter the SSH key                                   |
+   | User Name             | Enter the user name                                 |
+   | Password              | Enter the password                                  |
+   | Disk                  | Enter the disk                                      |
+
+   </details>
+
+## Step 5:  Uninstall Edge Microvisor Toolkit Standalone Node Package
+
+   - Navigate to the directory where ESC installer is extracted
+   - Execute execute ./edgesoftware with uninstall option
+   ```bash
+   $ ./edgesoftware uninstall
+   ```
