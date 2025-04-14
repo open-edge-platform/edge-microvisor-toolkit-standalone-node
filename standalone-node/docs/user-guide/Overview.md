@@ -12,7 +12,10 @@ patches.
 
 ![Overview](_images/overview.png)
 
-## Getting Started
+## How It Works
+The Edge Microvisor Toolkit is installed on the standalone edge node along with kubernetes cluster using a bootable USB drive created from this installer. The Edge Microvisor Toolkit standalone Node can be used to deploy user applications using helm charts onto the edge node for the evaluation.
+
+### Getting Started
 
 System requirements for the hardware and software requirements Edge Microvisor Toolkit Standalone is designed to support all Intel® platforms with the latest Intel® kernel to ensure all features are exposed and available for application and workloads. The microvisor has been validated on the following platforms.
 
@@ -29,8 +32,8 @@ The following outlines the recommended hardware configuration to run Edge Microv
 | Component    | Standalone Installation    |
 |--------------|----------------------------|
 | CPU          | Intel® Atom®, Intel® Core™, Intel® Core Ultra™ or Intel® Xeon®|
-| RAM          | 4GB minimum                |
-| Storage      | 32GB SSD/NVMe or eMMC      |
+| RAM          | 8GB minimum                |
+| Storage      | 128GB SSD/NVMe or eMMC      |
 | Networking   | 1GbE Ethernet or Wi-Fi     |
 
 ## Installation Instructions
