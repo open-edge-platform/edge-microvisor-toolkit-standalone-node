@@ -176,6 +176,21 @@ echo "$(date): The cluster installation is complete!"
 
 # Print banner
 IP=$(sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
+IPCHECK="/var/lib/rancher/ip.log"
+CHANGE_MSG=""
+
+if [ ! -f "$IPCHECK" ]; then
+    echo "$IP" | sudo tee "$IPCHECK"
+else
+    CLUSTER_IP=$(cat "$IPCHECK")
+    if ip addr | grep -qw "$CLUSTER_IP"; then
+        echo "IP address $CLUSTER_IP is present."
+	CHANGE_MSG="IP address remained same after reboot."
+    else
+        echo "IP changed"
+	CHANGE_MSG="Warning: The Edge Node IP has changed since RKE2 install!"
+    fi
+fi
 
 banner="
 ===================================================================
@@ -187,7 +202,10 @@ For RKE2 logs run:
 	sudo journalctl -fu rke2-server
 
 IP address of the Node:
-	$IP - Ensure IP address is persistent across the reboots
+	$IP - Ensure IP address is persistent across the reboot!
+        See: https://ranchermanager.docs.rancher.com/getting-started
+	/installation-and-upgrade/installation-requirements#node-ip-
+	addresses $CHANGE_MSG
 
 To access and view the cluster's pods run:
 	source /etc/environment

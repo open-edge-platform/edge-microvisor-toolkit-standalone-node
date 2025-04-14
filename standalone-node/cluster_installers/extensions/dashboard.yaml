@@ -273,6 +273,7 @@ spec:
         k8s-app: dashboard-metrics-scraper
     spec:
       securityContext:
+        runAsUser: 1001
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -296,6 +297,11 @@ spec:
             readOnlyRootFilesystem: true
             runAsUser: 1001
             runAsGroup: 2001
+          resources:
+            requests:
+              cpu: "100m"  # Request 100 millicores
+            limits:
+              cpu: "500m"  # Limit to 500 millicores
       serviceAccountName: kubernetes-dashboard
       nodeSelector:
         "kubernetes.io/os": linux

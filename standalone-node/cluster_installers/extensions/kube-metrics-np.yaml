@@ -13,7 +13,9 @@ spec:
       app.kubernetes.io/name: rke2-metrics-server
   policyTypes:
     - Egress
+    - Ingress
   egress:
     - ports:
         - protocol: TCP
           port: 10250
+  ingress: []

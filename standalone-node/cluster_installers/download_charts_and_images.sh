@@ -134,12 +134,12 @@ download_extension_images () {
 	done
 }
 # Download K8s dashboard
-download_other_manifests () {
-	
-	echo "Downloading K8s dashboard manifest"
-	mkdir -p ${EXT_DIR}
-	curl -Ls https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml -o ./extensions/dashboard.yaml
-}
+#download_other_manifests () {
+#	
+#	echo "Downloading K8s dashboard manifest"
+#	mkdir -p ${EXT_DIR}
+#	curl -Ls https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml -o ./extensions/dashboard.yaml
+#}
 
 #This function exists to ensure that if somebody accidentaly deletes additional manifests from extensions directory the manifests will be backed up from extensions-template dir
 copy_other_manifests_from_template_dir () {
@@ -162,5 +162,5 @@ install_pkgs
 download_rke2_artifacts
 download_extension_charts
 download_extension_images
-download_other_manifests
+#download_other_manifests
 copy_other_manifests_from_template_dir
