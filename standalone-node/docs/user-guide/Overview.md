@@ -1,30 +1,89 @@
-# Edge Microvisor Toolkit Standalone Node 
+# Edge Microvisor Toolkit Standalone Node
 
-Provide ESC installer to support Standalone USB based edge node installation of Edge Microvisor Toolkit.
+Setting Up an Edge Microvisor Toolkit on a Standalone Node with a Single-Node Cluster Using a USB Bootable Flash Drive
+
 
 ## Overview
+The following article provides information about the Edge Microvisor Toolkit for Standalone Node installation including system requirements.
 
-The Edge Microvisor (formerly called Tiber OS) needs to support a standalone installation without requiring the ITEP controller (backend). The installation of the Edge Microvisor Toolkit should also include installation of Kubernetes, all necessary Kubernetes extensions (device plugins, scheduler extensions, CNIs, CSIs, etc). Ultimately the standalone EN based on Edge Microvisor Toolkit should support customers to deploy their workloads in an independent standalone cluster. Once the customer completes the evaluation the customer should be able to onboard this EN to the backed as part of the product deployment and scaling as described [here](https://edge-node.app.intel.com/docs/specs/adr-itep-en-imaging/#onboarding-a-pre-provisioned-edge-node).
 
-The initial release needs to support a bare minimum set of features, where subsequent releases will include more value-added functionality such as local auth/authz, OIDC (Open-ID Connect) for federated identity and provisioning of enterprise rooted CAs (through certmgr) to secure the Kubernetes control plane.
+The Edge Microvisor Toolkit Standalone is a comprehensive package that includes the immutable Edge Microvisor Toolkit, along with the installation of Kubernetes and  all necessary extensions to establish a fully functional single-node cluster. Edge Microvisor Toolkit is a streamlined container operating system that showcases the Intel silicon optimizations. Built on Azure Linux, it features a Linux Kernel maintained by Intel, incorporating all the latest kernel and user
+patches. 
 
-## How It Works
+![Overview](_images/overview.png)
 
-The following outlines the key requirements for the initial release of a standalone edge stack based on Tiber Microvisor.
+## Getting Started
 
-|ID| Requirement | Description | Priority |
-|--------------|--------------|--------------|--------------|
-|1|ISO non-interactive installation| The Tiber Microvisor must support installation without EN requiring keyboard/mouse/monitor to install OS, container runtime, K8s and basic cluster components like CNI and Observability| 3.0 |
-|2|Immutable TiberOS|The Tiber Microvisor must be immutable and leverage the same production image used for ITEP so the EN can, at a later point in time with necessary onboarding utility, join an existing ITEP backend| 3.0 |
-|3|Single node cluster|The standalone EN shall support creating a single node cluster (combined control- and worker node)| 3.0 |
-|4|Setup utility (Optional)|A terminal based connection utility should be provided that the customer can run on their development system (on same subnet) that helps in (a) discovering the newly created EN w/ mDNS (b) installs `kubectl` and `helm` and (c) retrieves the `kubeconfig` over `scp` from the EN with default provisioned node credentials| 3.1 |
-|5|EN access|Customer should be able to use cloud-native development and debug tools like `kubectl`, `helm` and `kubernetes dashboard` to access application and K8s cluster on the EN.| 3.0 |
-|6|EN access|TiberOS install should create a user and enable `sshd` which will enable customer to remote login to the EN and copy the `kubeconfig`.| 3.0 |
+System requirements for the hardware and software requirements Edge Microvisor Toolkit Standalone is designed to support all Intel® platforms with the latest Intel® kernel to ensure all features are exposed and available for application and workloads. The microvisor has been validated on the following platforms.
 
-## Linux Development Setup flow: (Day 0)
+### System Requirements
 
-![Day0 Architecture](_images/day0_flow.png)
+|      Atom             |               Core            |      Xeon               |
+| ----------------------| ----------------------------- | ----------------------- |
+| Intel® Atom® X Series | 12th Gen Intel® Core™         | 4th Gen Intel® Xeon® SP |
+|                       | 13th Gen Intel® Core™         | 3rd Gen Intel® Xeon® SP |
+|                       | Intel® Core™ Ultra (Series 1) |                         |
 
-## Edge microvisor toolkit Standalone Node provisioning and Cluster Creation Flow (Day 1)
+The following outlines the recommended hardware configuration to run Edge Microvisor Toolkit.
 
-![Day1 Architecture](_images/day1_flow.png)
+| Component    | Standalone Installation    |
+|--------------|----------------------------|
+| CPU          | Intel® Atom®, Intel® Core™, Intel® Core Ultra™ or Intel® Xeon®|
+| RAM          | 4GB minimum                |
+| Storage      | 32GB SSD/NVMe or eMMC      |
+| Networking   | 1GbE Ethernet or Wi-Fi     |
+
+## Installation Instructions
+
+### Step 1: Prerequisites
+
+- Your development system should be running a Ubuntu 22.04 machine.
+- Internet connectivity is available on the system.
+- The target node(s) hostname must be in lowercase, numerals, and hyphen’ – ‘.
+- For example: wrk-8 is acceptable; wrk_8, WRK8, and Wrk^8 are not accepted as
+hostnames.
+- Required proxy settings must be added to the /etc/environment file (more below).
+- Get access to the [Edge Software Catalog](https://edgesoftwarecatalog.intel.com/) portal
+- Refer to Get Started Guide [Get Started Guide](https://docs.edgeplatform.intel.com/standalone-edge-node/user-guide/Get-Started-Guide.html) for comprehensive steps on configuring the Standalone Node.
+
+### Step 2: Download the ESC Package
+
+Select Configure & Download to download the Intel® Edge Microvisor Toolkit
+Standalone Node package [Configure & Download](https://edge-services-catalog-prod-qa.apps1-bg-int.icloud.intel.com/package/edge_microvisor_toolkit_standalone_node)
+
+### Step 3: Configure
+
+The ESC Package will be downloaded on your Local System in a zip format, labeled as `Edge_Microvisor_Toolkit_Standalone_Node.zip`
+
+1. Proceed to extract the compressed file to obtain the ESC Installer.
+
+   ```bash
+   unzip Edge_Microvisor_Toolkit_Standalone_Node.zip
+   ```
+
+1. Navigate to the extracted folder & modify the permissions of the
+‘edgesoftware’ file to make it executable.
+
+   ```bash
+   chmod +x edgesoftware
+   ```
+
+1. Execute the Edge Software Catalog Installer to begin the installation process by using the
+following command:
+
+   ```bash
+   sudo ./edgesoftware install
+   ```
+Adhere to the console guidelines to set up the USB bootable flash drive.
+
+## Step 4: Install Edge Microvisor Toolkit and Cluster setup
+
+1. Once the script has finished successfully, eject the USB device
+1. Ensure that USB boot is enabled in BIOS on the target device. Check that the USB boot option is highest in boot order priority to ensure that it will be booting from USB and not attempt network boot or boot from the system's NVMe/SSD.
+1. The Runtime OS will install the Edge Microvisor Toolkit and continues to create the kubernetes cluster
+1. User shall connect to the Standalone node using credential or ssh keys.
+1. Copy the required kubeconfig file Development system for Cluster management and application deployment.
+
+## Step 5: Application Deployment
+1. User can install the application using helm charts 
+1. Refer to Get started guide for more details to deploy the application

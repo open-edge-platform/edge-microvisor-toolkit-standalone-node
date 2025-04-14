@@ -2,7 +2,7 @@ name: Build
 
 on:
     pull_request:
-      branches: [ 'main' ]
+      branches: [ 'test-for-now' ]
       types:
       - opened
       - synchronize
