@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LicenseRef-Intel
 
 .DEFAULT_GOAL := help
-.PHONY: build test lint license help generate
+.PHONY: build test lint license help generate fuzz
 
 ##### Variables #####
 
@@ -94,6 +94,8 @@ clean:
 	cd host_os && rm -f *.gz *.sha256sum *.der && cd ..
 	cd hook_os && make clean && cd ..
 	cd installation_scripts && rm -rf out && cd ..
+	rm -rf ./out
+	rm -rf .hypothesis
 	@echo "---END MAKEFILE CLEAN---"
 
 list: 
@@ -108,4 +110,10 @@ help:
         | sort \
         | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' \
         | xargs -I _ sh -c 'printf "%-20s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
-	
+
+fuzz: $(VENV_NAME)
+	@# Help: Runs fuzz testing for 60 seconds
+	@echo "---MAKEFILE FUZZ TEST---"
+	mkdir -p ./out
+	@. $(VENV_NAME)/bin/activate; $(VENV_NAME)/bin/python ./esc/fuzz_Edge_microvisor.py 60 > ./out/fuzz_repor_4hr.logs 2>&1
+	@echo "---END MAKEFILE FUZZ TEST---"
