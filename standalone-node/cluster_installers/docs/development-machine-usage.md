@@ -18,9 +18,17 @@ PS C:\Users\user> cd .kube
 PS C:\Users\user> New-Item config -type file
 ```
 
-2. Copy Kubeconfig from Edge Node at `cat /etc/rancher/rke2/rke2.yaml` into the development machine filesystem and save the content under `C:\Users\user\.kube\config`
+2. Copy Kubeconfig from Edge Node at `/etc/rancher/rke2/rke2.yaml` into the development machine filesystem and save the content under `C:\Users\user\.kube\config`
+
+```shell
+ PS C:\Users\user> scp -o MACs=hmac-sha2-512-etm@openssh.com user@<EN IP>:/etc/rancher/rke2/rke2.yaml C:\Users\user\.kube\config
+```
 
 3. Edit the IP of the Edge Node in `C:\Users\user\.kube\config` from `localhost` to the actual IP of the Standalone Edge Node.
+
+```shell
+PS C:\Users\user> (Get-Content -Path "C:\Users\user\.kube\config") -replace "127\.0\.0\.1", "<EN IP>" | Set-Content -Path "C:\Users\user\.kube\config"
+```
 
 ```diff
 -    server: https://127.0.0.1:6443
@@ -328,10 +336,34 @@ PS C:\Users\user>  Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -B
 
 ## Accessing metrics from Standalone Edge Node
 
-First you'll need access to a grafana installation. 
-You can either install it on the cluster yourself or use an existing grafana setup like the pdd example above.
+### Accessing Grafana
+
+Grafana is installed and used to access metrics form the Edge Node to access Grafana
+
+1. Get the username and password
+
+```shell
+PS C:\Users\dkopyto\.kube> kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | % { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
+```
+
+```shell
+PS C:\Users\dkopyto\.kube> kubectl get secret grafana -n observability -o jsonpath="{.data.admin-password}" | % { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
+```
+
+2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
+
+```shell
+http://<EN IP>:32000
+```
+
+![Login page](./images/obs-grafana-login.png "Login Page")
+
+### Adding prometheus metrics to Grafana 
+
 Next you'll need the prometheus TLS credentials.
 **Note**: The following commands are in powershell but using ``base64 --decode`` on a linux setup works just as well.
+
+1. Get Prometheus credentials
 ```shell
 PS C:\Users\user> $key=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}"
 PS C:\Users\user> $cert=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}"
@@ -343,9 +375,29 @@ PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($c
 PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($ca)) 
 <ca>
 ```
-In grafana navigate to ``connections/Data sources`` and add a new prometheus data source.
 
-![Prometheus data source](./images/data-source.png "Prometheus data source")
+2. In grafana navigate to ``connections/Data sources`` 
 
-Configure the data source like so, filling in the ca, cert and key you gathered earlier. Be sure to set the url and server name as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``
-You should now be able to query the prometheus data source.
+![Prometheus data source](./images/obs-grafana-datasource.png "Prometheus data source")
+
+3. Add a new prometheus data source.
+
+![Prometheus new](./images/obs-grafana-add-prometheus.png "Prometheus new")
+
+4. Configure the data source, filling in the ca, cert and key gathered earlier. Set the url and server name as ``https://prometheus-prometheus.observability.svc.cluster.local:9090`` and save.
+
+![Prometheus save](./images/obs-grafana-set.png "Prometheus save")
+   
+### Querying metrics
+
+1. Create a dashboard using prometheus data source
+   
+   ![Prometheus dashboard](./images/obs-grafana-dashboard.png "Prometheus dashboard")
+
+2. Select the data source
+
+  ![Prometheus source](./images/obs-grafana-prometheus.png "Prometheus datasource")
+
+3. Select metrics to query, use metric explorer to view available metrics. User `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button.
+
+  ![Prometheus source](./images/obs-grafana-build-dashboard.png "Prometheus datasource")
