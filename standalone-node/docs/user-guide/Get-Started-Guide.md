@@ -1,201 +1,354 @@
 # Get Started Guide
 
-The installation flow for **Intel® Edge Microvisor Toolkit Standalone Node – Edge Software Hub** is primarily intended for public/external users.The primary objective of the Intel® Edge Microvisor Toolkit Standalone Node product is to enable customers to deploy and evaluate Intel Architecure based platfroms for Edge and Edge AI applications.The Edge Microvisor Toolkit Standalone Node Software is installed through **ESC QA (Edge Software Hub)**. Users log in to ESC, select the released package, and download the installer package. 
+## Step 1: Prepare the Developer's System
 
-The user extracts and copies the EdgeNode install package to the development systems and executes the installer to support standalone USB-based edge node installation of the Edge Microvisor Toolkit. The installation process includes setting up Kubernetes, all necessary Kubernetes extensions (device plugins, scheduler extensions, CNIs, CSIs, etc.). Ultimately, the standalone EdgeNode based on the Edge Microvisor Toolkit supports customers in deploying workloads in an independent standalone cluster. Once the evaluation is complete, customers can onboard this EdgeNode to the backend as part of the product deployment.
-
-> **Note:** Software updates to the Foundation Edge Nodes are done manually by downloading an updated version of the Intel Edge Microvisor Toolkit Standalone Node package. There is no automatic update process for Edge Nodes in this scenario.
+The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive on Linux-based operating systems. The installer has been tested on Ubuntu 22.04 LTS.
 
 ---
 
-## Installation Process for Intel® Edge Microvisor Toolkit Standalone Node
+## Step 2: Download
 
-![Installation flow](_images/installation_flow.png)  
-*<center>Figure 1: Flow for Intel® Edge Microvisor Toolkit Standalone Node</center>*
-
----
-
-## Step 1: Prerequisites & System Setup
-
-Before starting the Edge Node deployment, ensure the following:
-
-- System is bootable to a fresh **Ubuntu 22.04**.
-- Internet connectivity is available on the node.
-- The target node(s) hostname must be in lowercase, numerals, and hyphens (`-`).  
-  - **Example:** `wrk-8` is acceptable; `wrk_8`, `WRK8`, and `Wrk^8` are not.
-- Required proxy settings must be added to the `/etc/environment` file.
-- Access to the **Edge Software Hub portal** is available.
-
----
-
-## Step 2: Download the ESC Package
-
-1. Select **Configure & Download** to download the Intel® Edge Microvisor Toolkit Standalone Node package.  
-   <a href="https://edge-services-catalog-prod-qa.apps1-bg-int.icloud.intel.com/package/edge_microvisor_toolkit_standalone_node" style="display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #007bff; text-align: center; text-decoration: none; border-radius: 5px; border: none;">Configure & Download</a>
+Select **Configure & Download** to download the Intel® Edge Microvisor Toolkit Standalone Node installer.  
+[Configure & Download](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node)
 
 ---
 
 ## Step 3: Configure
 
-The ESC package will be downloaded to your local system in a zip format labeled as `Edge_Microvisor_Toolkit_Standalone_Node.zip`.
+The `Edge_Microvisor_Toolkit_Standalone_Node.zip` is downloaded to the Developer's System.
 
-1. Copy the ESC package to an Edge Node running **Ubuntu 22.04**:
+- Create a working folder
+
    ```bash
-   mkdir Test
-   chmod 750 Test
+   mkdir ~/installer
+   sudo chmod 750 ~/installer
    ```
-   ![Copy Package](_images/copy_pkg.png)  
-   *<center>Figure 6: Copy ESC Package to Target System</center>*
 
-2. Extract the compressed file to obtain the ESC Installer:
+- Extract
+
    ```bash
-   unzip Edge_Microvisor_Toolkit_Standalone_Node.zip
+   cd ~/installer
+   unzip <path>/Edge_Microvisor_Toolkit_Standalone_Node.zip
    ```
-   ![Unzip Package](_images/unzip.png)  
-   *<center>Figure 7: Unzip the ESC Package</center>*
 
-3. Navigate to the extracted folder and modify the permissions of the `edgesoftware` file to make it executable:
+- Make installer an executable
+
    ```bash
    chmod +x edgesoftware
    ```
-   ![Change Permission](_images/chmod.png)  
-   *<center>Figure 8: Change Installer Permission</center>*
+
+- Insert the USB drive into the Developer's System and identify the USB disk.
+
+   ```bash
+   lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
+   ```
+
+> **Note:** Please be advised that the installer will erase all contents on the target USB drive. It is crucial to ensure that the correct USB drive is selected to avoid any unintended data loss.
+
+- Unmount the USB drive if mounted.
+
+   ```bash
+   sudo umount <usb device>
+   ```
+
+- Start the installer to create the bootable USB
+
+   ```bash
+   sudo ./edgesoftware install
+   ```
+
+- Edge node configuration
+
+   ```bash
+   Enter the HTTP proxy (leave blank for none): <Enter HTTP Proxy eg. http://x.y.z:abc>
+   Enter the HTTPS proxy (leave blank for none): <Enter HTTP Proxy eg. http://x.y.z:abc>
+   Enter the NO_PROXY list (comma-separated): <Enter No Proxy eg. "localhost,127.0.0.1,a.b.c.d">
+   Enter your SSH public key: <Enter the ssh pub key created for connecting to edge node>
+   Enter user name: <username>
+   Enter password: <password>
+  
+   Enter the disk (e.g., /dev/sda, /dev/sdb): <Enter USB drive>
+   ```
+
+- Upon completion safely eject the USB drive from the developer's system.
 
 ---
 
-## Step 4: Deploy
+## Step 4: Install
 
-Execute the ESC Installer to begin the installation process:
-```bash
-sudo ./edgesoftware install
-```
-![Folder Structure](_images/ESC-install-dir.png)
+- Insert the USB drive into the target edge node and boot from it. The installer will automatically start.  
 
-### 4.1 User Inputs Required for Installation
+- The USB based installer will reboot once and continues the installation.
 
-<details>
-<summary><b>User Inputs</b> for <b>Edge Microvisor Toolkit Standalone Node Package</b></summary>
+- To monitor the progress and completion of installation.
 
-#### Parameters:
+   ```bash
+   tail -f /var/log/os-installer.log
+   tail -f /var/log/cluster-init.log 
+   ```
 
-| **Prompt**         | **User Input**                                   |
-|---------------------|-------------------------------------------------|
-| HTTP Proxy          | Enter the HTTP proxy (leave blank for none)     |
-| HTTPS Proxy         | Enter the HTTPS proxy (leave blank for none)    |
-| No Proxy            | Enter the NO proxy (leave blank for none)       |
-| SSH Key             | Enter the SSH key                               |
-| User Name           | Enter the user name                             |
-| Password            | Enter the password                              |
-| Disk                | Enter the disk                                  |
+- Console output on successful completion
 
-</details>
+   ```bash
+    ....
+    Edge Microvisor Toolkit - cluster installation complete
+    ....
+   ```
 
----
+- Once the installation is complete it is safe to remove the bootable USB drive.
 
-## Step 5: Gain Access to the Edge Node from a Development Machine
+## Step 5: Set up tools on Developer's System
 
-A development machine can be used to interact with the Edge Node. Ensure the development machine and Edge Node are on the same network with no communication obstacles.
+Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
-> **Note:** The same functionality can be achieved in a Linux environment by executing Linux-equivalent commands.
-
----
-
-## Step 6: Set Up Tools on Development Machine
-
-Install and configure `kubectl` and `helm` tools on the development machine.
-
-> **Note:** Replace the user and disk used in the development machine throughout the commands provided in this tutorial. Replace `<EN IP>` with the actual Edge Node IP address.
+> **Note:** The commands are executed from `Linux` environment, but the same can be achieved from any environment supporting `kubectl` and `helm` by using equivalent commands.
 
 1. Install `kubectl`:
-   ```powershell
-   PS C:\Users\user> winget install -e --id Kubernetes.kubectl
-   PS C:\Users\user> mkdir .kube
-   PS C:\Users\user> New-Item config -type file
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
+   curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+   sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+   echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+   sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+   sudo apt-get update
+   sudo apt-get install -y kubectl
    ```
 
 2. Copy the kubeconfig file from the Edge Node:
-   ```powershell
-   PS C:\Users\user> scp user@<EN IP>:/etc/rancher/rke2/rke2.yaml C:\Users\user\.kube\config
+
+   ```bash
+   export EN_IP=<EN_IP>
+   mkdir ~/.kube
+   scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
    ```
 
-3. Update the Edge Node IP in the kubeconfig file:
-   ```powershell
-   PS C:\Users\user> (Get-Content -Path "C:\Users\user\.kube\config") -replace "127\.0\.0\.1", "<EN IP>" | Set-Content -Path "C:\Users\user\.kube\config"
+3. Update the Edge Node IP in the kubeconfig file and export the path as KUBECONFIG:
+
+   ```shell
+   sed -i "s/127\.0\.0\.1/${EN_IP}/g" ~/.kube/config
+   export KUBECONFIG=~/.kube/config
    ```
 
 4. Test the connection:
-   ```powershell
-   PS C:\Users\user> kubectl get pods -A
+
+   ```bash
+   kubectl get pods -A
    ```
 
 5. Install `helm`:
-   ```powershell
-   PS C:\Users\user> winget install Helm.Helm
+
+   ```bash
+   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+   chmod 700 get_helm.sh
+   ./get_helm.sh
    ```
 
 ---
 
-## Step 7: Set Up Kubernetes Dashboard Access
+## Step 6: Set Up Kubernetes Dashboard Access
 
 1. View the Kubernetes dashboard pods:
-   ```powershell
-   PS C:\Users\user> kubectl get pods -n kubernetes-dashboard
+
+   ```bash
+   kubectl get pods -n kubernetes-dashboard
    ```
 
-2. Enable kube proxy:
-   ```powershell
-   PS C:\Users\user> kubectl proxy
+2. Start kube proxy:
+
+   ```bash
+   kubectl proxy &
    ```
 
 3. Generate an access token:
-   ```powershell
-   PS C:\Users\user> kubectl -n kubernetes-dashboard create token admin-user
+
+   ```bash
+   kubectl -n kubernetes-dashboard create token admin-user
    ```
 
-4. Access the dashboard in a browser:  
+4. Access the dashboard in a browser:
+
    `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+
+5. Login using the previously generated access token.
 
 ---
 
-## Step 8: Install Sample Application
+## Step 7: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
 1. Add the `bitnami` repository:
-   ```powershell
-   PS C:\Users\user> helm repo add bitnami https://charts.bitnami.com/bitnami
+
+   ```bash
+   helm repo add bitnami https://charts.bitnami.com/bitnami
    ```
 
-2. Create a values override file `values-wp.yaml` and install WordPress:
-   ```powershell
-   PS C:\Users\user> helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f .\values-wp.yaml --version 19.4.3
+2. Create a values override file `values-wp.yaml`, replace the `<pass>` with a password and install WordPress:
+
+   ```yaml
+   mariadb:
+     primary:
+       persistence:
+         enabled: false
+     auth:
+       password: <pass>
+       rootPassword: <pass>>
+   wordpressUsername: admin
+   wordpressPassword: <pass>
+   persistence:
+     enabled: false
+   resources:
+     requests:
+       cpu: 0m
+       memory: 0Mi
+   service:
+     type: ClusterIP
+     annotations:
+       service-proxy.app.orchestrator.io/ports: "80"
+       external-dns.alpha.kubernetes.io/hostname: "wordpress.example.org"
    ```
+
+   ```bash
+   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f .\values-wp.yaml --version 19.4.3
+   ```
+
+3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
+
+   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the allowed traffic per needs of an application in non-test app deployments. By default the ingress and egress traffic is set to be denied.
+
+   ```yaml
+   apiVersion: networking.k8s.io/v1
+   kind: NetworkPolicy
+   metadata:
+     name: wordpress-egress
+     namespace: wordpress
+   spec:
+     egress:
+     - {}
+     policyTypes:
+     - Egress
+   ---
+   apiVersion: networking.k8s.io/v1
+   kind: NetworkPolicy
+   metadata:
+     name: wordpress-ingress
+     namespace: wordpress
+   spec:
+     ingress:
+     - {}
+     podSelector: {}
+     policyTypes:
+     - Ingress
+   ```
+
+   ```bash
+   kubectl apply -f wp-net-policy.yaml
+   ```
+
+4. View the pods running
+
+   ```bash
+   kubectl get pods -n wordpress
+   NAME                           READY   STATUS    RESTARTS       AGE
+   my-wordpress-d57b44f9c-lw69m   1/1     Running   3 (3m4s ago)   10m
+   my-wordpress-mariadb-0         1/1     Running   0              10m
+   ```
+
+5. Forward port to be able to access WP
+
+   ```bash
+   kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
+   ```
+
+6. Access the WP blog from browser using `http://localhost:8080/admin` URL.
+
+7. Login using the `admin` (login) and `password` (`<pass>`) credentials
+
+> **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
 
 ---
 
-## Step 9: Accessing Grafana
+## Step 8: Accessing Grafana
 
 1. Retrieve Grafana credentials:
-   ```powershell
-   PS C:\Users\user> kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | % { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
+
+   ```shell
+   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | base64 --decode)
+   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-password}" | base64 --decode)
    ```
 
-2. Access Grafana in a browser:  
-   `http://<EN IP>:32000`
+2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
+
+   ```bash
+   http://<EN IP>:32000
+   ```
 
 ---
 
-## Step 12: Uninstall Edge Microvisor Toolkit Standalone Node Package
+## Step 9: Adding Prometheus metrics to Grafana
 
-To uninstall, navigate to the directory where the ESC installer is extracted and run:
-```bash
-./edgesoftware uninstall
-```
+1. Get Prometheus credentials:
+
+   ```shell
+   key=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}"| base64 --decode)
+   cert=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}"| base64 --decode)
+   ca=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}"| base64 --decode)
+   echo $key
+   echo $cert
+   echo $ca
+   ```
+
+2. In Grafana navigate to ``connections/Data sources`` :
+
+   ![Prometheus data source](./_images/obs-grafana-datasource.png "Prometheus data source")
+
+3. Add a new Prometheus data source:
+
+   ![Prometheus new](./_images/obs-grafana-add-prometheus.png "Prometheus new")
+
+4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
+
+   ![Prometheus save](./_images/obs-grafana-set.png "Prometheus save")
+
+## Step 10: Querying Metrics
+
+1. Create a dashboard using prometheus data source:
+
+   ![Prometheus dashboard](./_images/obs-grafana-dashboard.png "Prometheus dashboard")
+
+2. Select the data source:
+
+   ![Prometheus source](./_images/obs-grafana-prometheus.png "Prometheus datasource")
+
+3. Select metrics to query, use metric explorer to view available metrics. User `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
+
+   ![Prometheus source](./_images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ---
 
 ## Troubleshooting
 
-- Ensure the Edge Node retains the same IP address across reboots, as the Kubernetes cluster depends on the initially configured IP address. If the IP changes, the cluster may not function properly.
-- Verify network connectivity and proxy settings if issues arise.
+### Edge Node Logs from Developer's System
 
+Use the `edgenode-logs-collection.sh` script to collect logs from the edge node.
+
+```bash
+./edgenode-logs-collection.sh <edgenode-username> <edgenode-ip>
+```
+
+OS install logs are stored on the USB drive in the `os-installer.log` file.
+
+### Edge Node IP address
+
+The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster. It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
+
+### Uninstallation of installer on Developer's System
+
+In case of any errors during installation process on the Developer's System, user can uninstall and retry installing the Edge Microvisor Toolkit Standalone Node installer.
+
+   ```bash
+   cd ~/test/Edge_Microvisor_Toolkit_Standalone_Node/
+   sudo ./edgesoftware uninstall -a
+  ```
