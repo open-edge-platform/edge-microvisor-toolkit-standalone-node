@@ -40,7 +40,7 @@ node("mc-agent"){
                               --exclude docs --exclude .reuse --exclude compile.log --exclude requirements.txt \
                               --exclude installation_scripts --exclude LICENSES --exclude placeholder.txt \
                               --exclude VERSION --exclude .yamllint --exclude helm-v3.12.0-linux-amd64.tar.gz \
-                              --exclude helm-v3.12.0-linux-amd64.tar.gz.* --exclude linux-amd64 \
+                              --exclude helm-v3.12.0-linux-amd64.tar.gz.* --exclude linux-amd64 --exclude fuzz_Edge_microvisor.py \
                               --exclude filename --exclude '*.crt' --exclude '*certs*' ./ "${MODULE_NAME}_TEMP"                    
                 """
         }    
