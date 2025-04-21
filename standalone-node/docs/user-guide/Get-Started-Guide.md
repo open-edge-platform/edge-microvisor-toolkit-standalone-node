@@ -292,12 +292,12 @@ Install a WordPress application as a test application using `helm`.
 1. Get Prometheus credentials:
 
    ```shell
-   key=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}"| base64 --decode)
-   cert=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}"| base64 --decode)
-   ca=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}"| base64 --decode)
-   echo $key
-   echo $cert
-   echo $ca
+   key=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}" | base64 --decode)
+   cert=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}" | base64 --decode)
+   ca=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}" | base64 --decode)
+   printf "%s\n" "$key"
+   printf "%s\n" "$cert"
+   printf "%s\n" "$ca"
    ```
 
 2. In Grafana navigate to ``connections/Data sources`` :
@@ -322,7 +322,7 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus source](./_images/obs-grafana-prometheus.png "Prometheus datasource")
 
-3. Select metrics to query, use metric explorer to view available metrics. User `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
+3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
 
    ![Prometheus source](./_images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
