@@ -19,27 +19,27 @@ The `Edge_Microvisor_Toolkit_Standalone_Node.zip` is downloaded to the Developer
 
 - Create a working folder
 
-   ```bash
+   ```
    mkdir ~/installer
    sudo chmod 750 ~/installer
    ```
 
 - Extract
 
-   ```bash
+   ```
    cd ~/installer
    unzip <path>/Edge_Microvisor_Toolkit_Standalone_Node.zip
    ```
 
 - Make installer an executable
 
-   ```bash
+   ```
    chmod +x edgesoftware
    ```
 
 - Insert the USB drive into the Developer's System and identify the USB disk.
 
-   ```bash
+   ```
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
 
@@ -47,25 +47,25 @@ The `Edge_Microvisor_Toolkit_Standalone_Node.zip` is downloaded to the Developer
 
 - Unmount the USB drive if mounted.
 
-   ```bash
+   ```
    sudo umount <usb device>
    ```
 
 - Start the installer to create the bootable USB
 
-   ```bash
+   ```
    sudo ./edgesoftware install
    ```
 
 - Edge node configuration
 
-   ```bash
+   ```
    Enter the HTTP proxy (leave blank for none): <Enter HTTP Proxy eg. http://x.y.z:abc>
    Enter the HTTPS proxy (leave blank for none): <Enter HTTP Proxy eg. http://x.y.z:abc>
    Enter the NO_PROXY list (comma-separated): <Enter No Proxy eg. "localhost,127.0.0.1,a.b.c.d">
    Enter your SSH public key: <Enter the ssh pub key created for connecting to edge node>
-   Enter user name: <username>
-   Enter password: <password>
+   Enter user name: <linux username>
+   Enter password: <linux password>
   
    Enter the disk (e.g., /dev/sda, /dev/sdb): <Enter USB drive>
    ```
@@ -82,14 +82,14 @@ The `Edge_Microvisor_Toolkit_Standalone_Node.zip` is downloaded to the Developer
 
 - To monitor the progress and completion of installation.
 
-   ```bash
+   ```
    tail -f /var/log/os-installer.log
    tail -f /var/log/cluster-init.log 
    ```
 
 - Console output on successful completion
 
-   ```bash
+   ```
     ....
     Edge Microvisor Toolkit - cluster installation complete
     ....
@@ -105,7 +105,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 1. Install `kubectl`:
 
-   ```bash
+   ```
    sudo apt-get update
    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -118,7 +118,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 2. Copy the kubeconfig file from the Edge Node:
 
-   ```bash
+   ```
    export EN_IP=<EN_IP>
    mkdir ~/.kube
    scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
@@ -133,13 +133,13 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 4. Test the connection:
 
-   ```bash
+   ```
    kubectl get pods -A
    ```
 
 5. Install `helm`:
 
-   ```bash
+   ```
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
    chmod 700 get_helm.sh
    ./get_helm.sh
@@ -151,19 +151,19 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 1. View the Kubernetes dashboard pods:
 
-   ```bash
+   ```
    kubectl get pods -n kubernetes-dashboard
    ```
 
 2. Start kube proxy:
 
-   ```bash
+   ```
    kubectl proxy &
    ```
 
 3. Generate an access token:
 
-   ```bash
+   ```
    kubectl -n kubernetes-dashboard create token admin-user
    ```
 
@@ -181,7 +181,7 @@ Install a WordPress application as a test application using `helm`.
 
 1. Add the `bitnami` repository:
 
-   ```bash
+   ```
    helm repo add bitnami https://charts.bitnami.com/bitnami
    ```
 
@@ -210,7 +210,7 @@ Install a WordPress application as a test application using `helm`.
        external-dns.alpha.kubernetes.io/hostname: "wordpress.example.org"
    ```
 
-   ```bash
+   ```
    helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f .\values-wp.yaml --version 19.4.3
    ```
 
@@ -243,13 +243,13 @@ Install a WordPress application as a test application using `helm`.
      - Ingress
    ```
 
-   ```bash
+   ```
    kubectl apply -f wp-net-policy.yaml
    ```
 
 4. View the pods running
 
-   ```bash
+   ```
    kubectl get pods -n wordpress
    NAME                           READY   STATUS    RESTARTS       AGE
    my-wordpress-d57b44f9c-lw69m   1/1     Running   3 (3m4s ago)   10m
@@ -258,7 +258,7 @@ Install a WordPress application as a test application using `helm`.
 
 5. Forward port to be able to access WP
 
-   ```bash
+   ```
    kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
    ```
 
@@ -281,7 +281,7 @@ Install a WordPress application as a test application using `helm`.
 
 2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
 
-   ```bash
+   ```
    http://<EN IP>:32000
    ```
 
@@ -334,7 +334,7 @@ Install a WordPress application as a test application using `helm`.
 
 Use the `edgenode-logs-collection.sh` script to collect logs from the edge node.
 
-```bash
+```
 ./edgenode-logs-collection.sh <edgenode-username> <edgenode-ip>
 ```
 
@@ -348,7 +348,7 @@ The edge node operates both the Kubernetes control plane and node services, maki
 
 In case of any errors during installation process on the Developer's System, user can uninstall and retry installing the Edge Microvisor Toolkit Standalone Node installer.
 
-   ```bash
-   cd ~/test/Edge_Microvisor_Toolkit_Standalone_Node/
+   ```
+   cd ~/installer/Edge_Microvisor_Toolkit_Standalone_Node/
    sudo ./edgesoftware uninstall -a
   ```
