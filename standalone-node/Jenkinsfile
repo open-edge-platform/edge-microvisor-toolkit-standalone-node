@@ -142,7 +142,7 @@ pipeline {
                        SCANNERS  = 'bdba'
                     }
                     when {
-                        anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; changeRequest();}
+                        anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*';}
                     }
                     steps {
                         sh """
@@ -164,8 +164,8 @@ pipeline {
                 }
                 stage('Scan Binary SSCB') {
                     when {
-                        changeRequest()
-                    }
+	                anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; }
+	            }
                    steps {
                        scanBinarySSCB()
                     }
