@@ -143,6 +143,9 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
                 file.write(f'ssh_key="{ssh_key}"\n')
                 file.write(f'user_name="{user_name}"\n')
                 file.write(f'passwd="{password}"\n')
+            # Overwrite the password variable and delete it
+            password = None
+            del password
         except FileNotFoundError:
             self.log.error("Configuration file not found.")
 
@@ -183,56 +186,6 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
 
         print("-------+----+-- Installation Begins --+----+-------")
         self.log.info("Installation begins.")
-
-        # Get user inputs for the proxies, ssh key, user name and password
-        http_proxy = input(colored(
-            'Enter the HTTP proxy (leave blank for none): ', "green"))
-        if http_proxy and not self.validate_proxy(http_proxy):
-            self.log.error("Invalid HTTP proxy format. Exiting...")
-            print(colored('Invalid HTTP proxy format. Exiting...', "red"))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "Invalid HTTP proxy format.")
-
-        https_proxy = input(colored(
-            'Enter the HTTPS proxy (leave blank for none): ', "green"))
-        if https_proxy and not self.validate_proxy(https_proxy):
-            self.log.error("Invalid HTTPS proxy format. Exiting...")
-            print(colored('Invalid HTTPS proxy format. Exiting...', "red"))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "Invalid HTTPS proxy format.")
-
-        no_proxy = input(colored(
-            'Enter the NO_PROXY list (comma-separated): ',
-            "green"))
-        if not self.validate_no_proxy(no_proxy):
-            self.log.error("Invalid NO_PROXY format. Exiting...")
-            print(colored('Invalid NO_PROXY format. Exiting...', "red"))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "Invalid NO_PROXY format.")
-
-        ssh_key = input(colored('Enter your SSH public key: ', "green"))
-        if not self.validate_ssh_key(ssh_key):
-            self.log.error("Invalid SSH key format. Exiting...")
-            print(colored('Invalid SSH key format. Exiting...', "red"))
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "Invalid SSH key format.")
-
-        user_name = input(colored('Enter user name: ', "green"))
-        password = masked_input(colored('Enter password: ', "green"))
-        if not user_name or not password:
-            raise EdgeMicroVisorStandaloneNodeDeploymentException(
-                "User name or password cannot be empty.")
-
-        lsblk_output = self.run_lsblk()
-        if lsblk_output:
-            print(colored("Disk Information:\n", "green"))
-            print(lsblk_output)
-
-        disk = input(colored(
-            "Enter the disk (e.g., /dev/sda, /dev/sdb): ",
-            "green").strip()
-            )
-        print(colored(f"You selected the disk: {disk}", "green"))
 
         # Search for sen-installation-files.tar.gz
         sen_file_path = None
@@ -287,6 +240,45 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
                 raise EdgeMicroVisorStandaloneNodeDeploymentException(
                     f"{file_name} is not present.")
 
+        # Get user inputs for the proxies, ssh key, user name and password
+        http_proxy = input(colored(
+            'Enter the HTTP proxy (leave blank for none): ', "green"))
+        if http_proxy and not self.validate_proxy(http_proxy):
+            self.log.error("Invalid HTTP proxy format. Exiting...")
+            print(colored('Invalid HTTP proxy format. Exiting...', "red"))
+            raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                "Invalid HTTP proxy format.")
+
+        https_proxy = input(colored(
+            'Enter the HTTPS proxy (leave blank for none): ', "green"))
+        if https_proxy and not self.validate_proxy(https_proxy):
+            self.log.error("Invalid HTTPS proxy format. Exiting...")
+            print(colored('Invalid HTTPS proxy format. Exiting...', "red"))
+            raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                "Invalid HTTPS proxy format.")
+
+        no_proxy = input(colored(
+            'Enter the NO_PROXY list (comma-separated): ',
+            "green"))
+        if not self.validate_no_proxy(no_proxy):
+            self.log.error("Invalid NO_PROXY format. Exiting...")
+            print(colored('Invalid NO_PROXY format. Exiting...', "red"))
+            raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                "Invalid NO_PROXY format.")
+
+        ssh_key = input(colored('Enter your SSH public key: ', "green"))
+        if not self.validate_ssh_key(ssh_key):
+            self.log.error("Invalid SSH key format. Exiting...")
+            print(colored('Invalid SSH key format. Exiting...', "red"))
+            raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                "Invalid SSH key format.")
+
+        user_name = input(colored('Enter user name: ', "green"))
+        password = masked_input(colored('Enter password: ', "green"))
+        if not user_name or not password:
+            raise EdgeMicroVisorStandaloneNodeDeploymentException(
+                "User name or password cannot be empty.")
+
         proxy_ssh_config_path = os.path.join(
             CURRENT_DIR, "config-file"
         )
@@ -294,9 +286,19 @@ class EdgeMicroVisorToolKitStandaloneNodeDeployment(object):
             http_proxy, https_proxy, no_proxy, ssh_key,
             user_name, password, proxy_ssh_config_path
         )
-        print("\n")
         print(colored(
             'proxy_ssh_config File updated successfully!', "green"))
+
+        lsblk_output = self.run_lsblk()
+        if lsblk_output:
+            print(colored("Disk Information:\n", "green"))
+            print(lsblk_output)
+
+        disk = input(colored(
+            "Enter the disk (e.g., /dev/sda, /dev/sdb): ",
+            "green").strip()
+            )
+        print(colored(f"You selected the disk: {disk}", "green"))
 
         print(colored(
             "Starting bootable USB preparation, This process will take "

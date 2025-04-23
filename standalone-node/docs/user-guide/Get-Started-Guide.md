@@ -21,7 +21,7 @@ The `Edge_Microvisor_Toolkit_Standalone_Node.zip` is downloaded to the Developer
 
    ```
    mkdir ~/installer
-   sudo chmod 750 ~/installer
+   sudo chmod 700 ~/installer
    ```
 
 - Extract
