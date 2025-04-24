@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# SPDX-License-Identifier: LicenseRef-Intel
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: grafana
+  namespace: kube-system
+spec:
+  chartContent:
+  targetNamespace: observability
+  createNamespace: true
+  valuesContent: |-
+    service:
+      type: NodePort
+      nodePort: 32000

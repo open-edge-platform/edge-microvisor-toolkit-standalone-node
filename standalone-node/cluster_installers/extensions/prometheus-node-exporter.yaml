@@ -1,0 +1,200 @@
+# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# SPDX-License-Identifier: LicenseRef-Intel
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: prometheus-node-exporter
+  namespace: kube-system
+spec:
+  chartContent: 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
+  targetNamespace: observability
+  valuesContent: |-
+    minimalMetricSet:
+      # yamllint disable-line rule:line-length
+      nodeExporter: &nodeExporter "node_boot_time_seconds|node_context_switches_total|node_cpu_seconds_total|node_filefd_allocated|node_filefd_maximum|node_intr_total|node_load1|node_load15|node_load5|node_memory_Buffers_bytes|node_memory_Cached_bytes|node_memory_MemAvailable_bytes|node_memory_MemFree_bytes|node_memory_MemTotal_bytes|node_memory_SwapFree_bytes|node_memory_SwapTotal_bytes|node_netstat_Tcp_CurrEstab|node_network_receive_bytes_total|node_network_receive_drop_total|node_network_receive_errs_total|node_network_receive_packets_total|node_network_transmit_bytes_total|node_network_transmit_drop_total|node_network_transmit_errs_total|node_network_transmit_packets_total|node_nf_conntrack_entries|node_nf_conntrack_entries_limit|node_time_seconds|node_timex_estimated_error_seconds|node_timex_maxerror_seconds|scrape_samples_scraped|up"
+
+    resources:
+      limits:
+        cpu: 200m
+        memory: 50Mi
+      requests:
+        cpu: 100m
+        memory: 30Mi
+    image:
+      registry: quay.io
+      repository: prometheus/node-exporter
+      tag: v1.9.0
+    # Allow access to system time
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      capabilities:
+        add:
+          - SYS_TIME
+    ## If true, create & use Pod Security Policy resources
+    ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+    ## Intentionally disabled because PodSecurityPolicy was deprecated in Kubernetes v1.21, and
+    ## removed from Kubernetes in v1.25
+    rbac:
+      pspEnabled: false
+    # Work in host's network (it's required in order to get host's network data)
+    hostNetwork: false
+    # Work in host's PID space (required to access host's /proc info)
+    hostPID: false
+    # Get access to host's root space (to for example scrape disk data)
+    hostRootFsMount:
+      enabled: false
+
+    # Pod  should be running on every node
+    tolerations:
+      - effect: NoSchedule
+        operator: Exists
+
+    # Additional commands for node-exporter
+    extraArgs:
+      - --web.config.file=/opt/node-exporter/web-config.yml  # Path for TLS configuration
+      - --no-collector.filesystem
+
+    # TLS secret for NodeExporter
+    secrets:
+      - name: node-exporter-tls
+        mountPath: /opt/node-exporter/certs
+
+    # Additional configmaps for NodeExporter
+    configmaps:
+      # TLS config
+      - name: node-exporter-web-config
+        mountPath: /opt/node-exporter
+
+    service:
+      port: 9100
+      targetPort: 9100
+
+    livenessProbe:
+      httpGet:
+        scheme: https
+
+    readinessProbe:
+      httpGet:
+        scheme: https
+
+    prometheus:
+      monitor:
+        enabled: true
+        namespace: observability
+        scheme: https
+        metricRelabelings:
+          - action: keep
+            sourceLabels: [__name__]
+            regex: *nodeExporter
+        tlsConfig:
+          serverName: node-exporter
+          keySecret:
+            key: tls.key
+            name: prometheus-tls
+          cert:
+            secret:
+              key: tls.crt
+              name: prometheus-tls
+          ca:
+            secret:
+              key: ca.crt
+              name: prometheus-tls
+        relabelings:
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - sourceLabels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+            regex: '.*prometheus-node-exporter.*'
+            action: keep
+          - sourceLabels: [__address__]
+            regex: '.*:9100'
+            action: keep
+          - sourceLabels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            targetLabel: instance
+          - sourceLabels: [__meta_kubernetes_pod_name]
+            action: replace
+            targetLabel: kubernetes_pod_name
+
+    extraManifests:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: node-exporter-web-config
+          namespace: observability
+          annotations:
+            helm.sh/hook: pre-install
+            helm.sh/hook-weight: "2"
+        data:
+          web-config.yml: |
+            tls_server_config:
+              cert_file: "/opt/node-exporter/certs/tls.crt"
+              key_file: "/opt/node-exporter/certs/tls.key"
+              client_auth_type: "RequestClientCert"
+              client_ca_file: "/opt/node-exporter/certs/ca.crt"
+              cipher_suites:
+                - TLS_AES_256_GCM_SHA384
+                - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 # Required by http/2
+      - |
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: node-exporter-tls
+          namespace: observability
+          annotations:
+            helm.sh/hook: pre-install
+            helm.sh/hook-weight: "2"
+        spec:
+          secretName: node-exporter-tls
+          commonName: node-exporter
+          duration: 1440h
+          renewBefore: 168h
+          isCA: false
+          privateKey:
+            algorithm: RSA
+            encoding: PKCS1
+            size: 4096
+          usages:
+            - server auth
+            - client auth
+          dnsNames:
+            - node-exporter
+          issuerRef:
+            name: edge-node-cluster-issuer
+            kind: ClusterIssuer
+      - |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: observability-node-exporter-deny-ingress
+          namespace: observability
+        spec:
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus-node-exporter
+          policyTypes:
+            - Ingress
+      - |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: observability-node-exporter-allow-prometheus-ingress
+          namespace: observability
+        spec:
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus-node-exporter
+          policyTypes:
+            - Ingress
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: prometheus
+                      app.kubernetes.io/instance: prometheus-prometheus
+              ports:
+                - protocol: TCP
+                  port: 9100

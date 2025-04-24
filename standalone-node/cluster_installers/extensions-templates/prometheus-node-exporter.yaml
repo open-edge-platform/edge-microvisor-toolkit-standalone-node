@@ -1,0 +1,200 @@
+# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# SPDX-License-Identifier: LicenseRef-Intel
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: prometheus-node-exporter
+  namespace: kube-system
+spec:
+  chartContent:
+  targetNamespace: observability
+  valuesContent: |-
+    minimalMetricSet:
+      # yamllint disable-line rule:line-length
+      nodeExporter: &nodeExporter "node_boot_time_seconds|node_context_switches_total|node_cpu_seconds_total|node_filefd_allocated|node_filefd_maximum|node_intr_total|node_load1|node_load15|node_load5|node_memory_Buffers_bytes|node_memory_Cached_bytes|node_memory_MemAvailable_bytes|node_memory_MemFree_bytes|node_memory_MemTotal_bytes|node_memory_SwapFree_bytes|node_memory_SwapTotal_bytes|node_netstat_Tcp_CurrEstab|node_network_receive_bytes_total|node_network_receive_drop_total|node_network_receive_errs_total|node_network_receive_packets_total|node_network_transmit_bytes_total|node_network_transmit_drop_total|node_network_transmit_errs_total|node_network_transmit_packets_total|node_nf_conntrack_entries|node_nf_conntrack_entries_limit|node_time_seconds|node_timex_estimated_error_seconds|node_timex_maxerror_seconds|scrape_samples_scraped|up"
+
+    resources:
+      limits:
+        cpu: 200m
+        memory: 50Mi
+      requests:
+        cpu: 100m
+        memory: 30Mi
+    image:
+      registry: quay.io
+      repository: prometheus/node-exporter
+      tag: v1.9.0
+    # Allow access to system time
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      capabilities:
+        add:
+          - SYS_TIME
+    ## If true, create & use Pod Security Policy resources
+    ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+    ## Intentionally disabled because PodSecurityPolicy was deprecated in Kubernetes v1.21, and
+    ## removed from Kubernetes in v1.25
+    rbac:
+      pspEnabled: false
+    # Work in host's network (it's required in order to get host's network data)
+    hostNetwork: false
+    # Work in host's PID space (required to access host's /proc info)
+    hostPID: false
+    # Get access to host's root space (to for example scrape disk data)
+    hostRootFsMount:
+      enabled: false
+
+    # Pod  should be running on every node
+    tolerations:
+      - effect: NoSchedule
+        operator: Exists
+
+    # Additional commands for node-exporter
+    extraArgs:
+      - --web.config.file=/opt/node-exporter/web-config.yml  # Path for TLS configuration
+      - --no-collector.filesystem
+
+    # TLS secret for NodeExporter
+    secrets:
+      - name: node-exporter-tls
+        mountPath: /opt/node-exporter/certs
+
+    # Additional configmaps for NodeExporter
+    configmaps:
+      # TLS config
+      - name: node-exporter-web-config
+        mountPath: /opt/node-exporter
+
+    service:
+      port: 9100
+      targetPort: 9100
+
+    livenessProbe:
+      httpGet:
+        scheme: https
+
+    readinessProbe:
+      httpGet:
+        scheme: https
+
+    prometheus:
+      monitor:
+        enabled: true
+        namespace: observability
+        scheme: https
+        metricRelabelings:
+          - action: keep
+            sourceLabels: [__name__]
+            regex: *nodeExporter
+        tlsConfig:
+          serverName: node-exporter
+          keySecret:
+            key: tls.key
+            name: prometheus-tls
+          cert:
+            secret:
+              key: tls.crt
+              name: prometheus-tls
+          ca:
+            secret:
+              key: ca.crt
+              name: prometheus-tls
+        relabelings:
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - sourceLabels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+            regex: '.*prometheus-node-exporter.*'
+            action: keep
+          - sourceLabels: [__address__]
+            regex: '.*:9100'
+            action: keep
+          - sourceLabels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            targetLabel: instance
+          - sourceLabels: [__meta_kubernetes_pod_name]
+            action: replace
+            targetLabel: kubernetes_pod_name
+
+    extraManifests:
+      - |
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: node-exporter-web-config
+          namespace: observability
+          annotations:
+            helm.sh/hook: pre-install
+            helm.sh/hook-weight: "2"
+        data:
+          web-config.yml: |
+            tls_server_config:
+              cert_file: "/opt/node-exporter/certs/tls.crt"
+              key_file: "/opt/node-exporter/certs/tls.key"
+              client_auth_type: "RequestClientCert"
+              client_ca_file: "/opt/node-exporter/certs/ca.crt"
+              cipher_suites:
+                - TLS_AES_256_GCM_SHA384
+                - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 # Required by http/2
+      - |
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: node-exporter-tls
+          namespace: observability
+          annotations:
+            helm.sh/hook: pre-install
+            helm.sh/hook-weight: "2"
+        spec:
+          secretName: node-exporter-tls
+          commonName: node-exporter
+          duration: 1440h
+          renewBefore: 168h
+          isCA: false
+          privateKey:
+            algorithm: RSA
+            encoding: PKCS1
+            size: 4096
+          usages:
+            - server auth
+            - client auth
+          dnsNames:
+            - node-exporter
+          issuerRef:
+            name: edge-node-cluster-issuer
+            kind: ClusterIssuer
+      - |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: observability-node-exporter-deny-ingress
+          namespace: observability
+        spec:
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus-node-exporter
+          policyTypes:
+            - Ingress
+      - |
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        metadata:
+          name: observability-node-exporter-allow-prometheus-ingress
+          namespace: observability
+        spec:
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus-node-exporter
+          policyTypes:
+            - Ingress
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: prometheus
+                      app.kubernetes.io/instance: prometheus-prometheus
+              ports:
+                - protocol: TCP
+                  port: 9100

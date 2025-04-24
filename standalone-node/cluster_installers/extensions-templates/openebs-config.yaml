@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: (C) 2024 Intel Corporation
+# SPDX-License-Identifier: LicenseRef-Intel
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: openebs-config
+  namespace: kube-system
+spec:
+  chartContent:
+  targetNamespace: openebs
+  createNamespace: true

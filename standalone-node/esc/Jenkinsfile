@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+timeout(time: 30, unit: 'MINUTES'){
+node("mc-agent"){
+    stage('Build Modules'){
+        def agents = modulePipeline{
+        def linuxCompile={
+        
+                sh """#!/bin/bash
+                    echo "--------------------------------------------"
+                    echo " Compiling Files in ${nodename}"
+                    echo "--------------------------------------------"
+                    echo "-------------Install Dependencies--------------"
+                    sudo apt-get -y install podman
+                    wget https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
+                    tar -xvf  helm-v3.12.0-linux-amd64.tar.gz
+                    sudo mv linux-amd64/helm  /usr/local/bin
+                    export IS_JENKINS_BUILD=true
+                    echo "-------------Set Proxy Configuration--------------"
+                    echo "http_proxy=${http_proxy}" >> hook_os/config
+                    echo "https_proxy=${https_proxy}" >> hook_os/config
+                    echo "no_proxy=${no_proxy}" >> hook_os/config  
+                    echo "-------------Compile Package--------------"
+                    make build
+                    mv installation_scripts/out/sen-installation-files.tar.gz .
+                    mv esc/*.py ./
+                    python3 compile.py build_ext --inplace
+                    mv *.so esb_install.so
+                    rm -rf .git* build
+                    echo "-------------Copy dependencies--------------"
+                    rsync -av --exclude ${MODULE_FILE_NAME}.py --exclude ${MODULE_FILE_NAME}.c \
+                              --exclude compile.py --exclude '*.rst' --exclude '*.md' \
+                              --exclude install.log --exclude Jenkinsfile --exclude pep8_output.txt \
+                              --exclude bandit_report.txt --exclude __init__.py --exclude __pycache__ \
+                              --exclude tests --exclude IntelSHA2RootChain-Base64 --exclude __MACOSX \
+                              --exclude IntelSHA2RootChain-Base64.zip --exclude cluster_installers \
+                              --exclude docs --exclude esc --exclude host_os --exclude Jenkinsfile \
+                              --exclude hook_os --exclude Makefile --exclude README.md --exclude VERSION \
+                              --exclude docs --exclude .reuse --exclude compile.log --exclude requirements.txt \
+                              --exclude installation_scripts --exclude LICENSES --exclude placeholder.txt \
+                              --exclude VERSION --exclude .yamllint --exclude helm-v3.12.0-linux-amd64.tar.gz \
+                              --exclude helm-v3.12.0-linux-amd64.tar.gz.* --exclude linux-amd64 --exclude fuzz_Edge_microvisor.py \
+                              --exclude filename --exclude '*.crt' --exclude '*certs*' ./ "${MODULE_NAME}_TEMP"                    
+                """
+        }    
+        switch("${nodename}") {
+                case "MC_NODE_UBUNTU18.04":
+                case "MC_NODE_UBUNTU22.04":
+                case "MC_NODE_UBUNTU24.04":
+                    stage("Compile Package $nodeName") {
+                        linuxCompile.call()
+                    }
+                    break;
+                default: println "Error Message: Executes only on the Ubuntu OS version specified in the ESH MC module definition.\nPlease select it while creating the module. Currently supports only Ubuntu18.04, Ubuntu 22.04 and Ubuntu 24.04 versions"
+                    break;
+        }    
+    }
+    parallel agents
+}
+    
+stage('Update Md5Sum'){
+        updateMD5Sum()
+    }
+}
+}

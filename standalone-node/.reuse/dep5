@@ -1,0 +1,5 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: Jenkinsfile Makefile README.md placeholder.txt .github/* cluster_installers/* VERSION docs/* requirements.txt *.md hook_os/* host_os/* .sonar/* artifacts/* venv_stden/* Bandit/* CCG/* BDBA/* CCG.zip .yamllint SETUP_DONE.txt SSCB/* *Telemetry/* esc/__init__.py
+Copyright: 2023 Intel Corporation
+License: LicenseRef-Intel

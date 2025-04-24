@@ -1,0 +1,265 @@
+// SPDX-FileCopyrightText: (C) 2023 Intel Corporation
+// SPDX-License-Identifier: LicenseRef-Intel
+
+def getEnvFromBranch(branch) {
+    if (branch ==~ /main/) {
+        return 'protex'
+    }
+    else {
+        return 'virus,bandit,trivy,hadolint'
+    }
+}
+
+pipeline {
+    agent {
+        docker {
+            label 'oie_spot_executor'
+            image 'amr-registry.caas.intel.com/one-intel-edge/rrp-devops/oie_ci_testing:latest'
+            alwaysPull true
+        }
+    }
+    environment {
+        GIT_SHORT_URL=env.GIT_URL.split('/')[4].toString().replaceAll('.git','')
+        PROJECT_NAME = "${GIT_SHORT_URL}"
+        authorEmail = sh (script: 'git --no-pager show -s --format=\'%ae\'',returnStdout: true).trim()
+        SDLE_UPLOAD_PROJECT_ID = '23044' //add your SDL project
+        SDLE_UPLOAD = "true"
+        IS_JENKINS_BUILD =  true
+    }
+    stages {
+        stage('Scan Source') {
+            parallel {
+                stage('Scan Virus, Protex, Trivy'){
+                    environment {
+                        SCANNERS            = getEnvFromBranch(env.BRANCH_NAME)
+                        PROTEX_PROJECT_NAME = "${GIT_SHORT_URL}"
+                        BANDIT_EXCLUDE_PATH = '*/venv_stden/*'
+                    }
+                    when {
+                        anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; changeRequest();}
+                    }
+                    steps {
+                        script {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                rbheStaticCodeScan()
+                            }
+                        }
+                    }
+                }
+                stage('Shellcheck') {
+                    when {
+                        changeRequest()
+                    }
+                    steps {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            shellcheck('*.sh', 'SC1128,SC3044,SC2086,SC2164,SC2068,SC2181,SC1091,SC2034,SC2154,SC2034,SC2209,SC2207,SC2002,SC2317')
+                        }
+                    }
+                }
+            }
+        }
+        stage('Setup') {
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sys_oie_devops_github_api',usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+                {
+                    netrcPatch()
+                }
+            }
+        }
+        stage('Version Check') {
+            steps {
+                echo "Check if its a valid code version"
+                sh '''
+                /opt/ci/version-check.sh
+                '''
+            }        
+        }
+        stage('License Check') {
+            when {
+                changeRequest()
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                sh '''
+                echo "Checking the license"
+                make license
+                '''
+                }     
+            }
+        }
+        stage('Lint Code') {
+            when {
+                changeRequest()
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            sh '''
+                    echo "Linting the code"
+                    echo Y | make lint 
+                    '''
+
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                sh """
+                echo 'http_proxy=http://proxy-dmz.intel.com:911' >> hook_os/config
+                echo 'https_proxy=http://proxy-dmz.intel.com:912' >> hook_os/config
+                echo 'ftp_proxy=http://proxy-dmz.intel.com:911' >> hook_os/config
+                echo 'socks_proxy=socks://proxy-dmz.intel.com:1080' >> hook_os/config
+                echo 'no_proxy=localhost,*.intel.com,*intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock,.internal' >> hook_os/config
+                """
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pid_docker_hub_creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+                {
+		            sh '''
+                        docker login -u $USERNAME -p $PASSWORD https://index.docker.io/v1/
+                        make build
+		            '''
+                }
+                dir("${WORKSPACE}/hook_os/out") {
+                    stash name: "bdba_binary",includes: "hook*.gz" 
+                }
+            }
+        }
+        stage ('Scan Containers') {
+            when {
+                changeRequest()
+            }
+            environment {
+                SCANNERS = 'trivy'
+            }
+            steps {
+                script {
+                    scanContainers()
+                }
+            }
+        }
+        stage('Scan Binary') {
+            parallel {             
+                stage('BDBA'){
+                    environment {
+                       SCANNERS  = 'bdba'
+                    }
+                    when {
+                        anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*';}
+                    }
+                    steps {
+                        sh """
+                        mkdir -p binary
+                        """
+                        dir("${WORKSPACE}/binary") {
+                            unstash "bdba_binary"
+                        }
+                        sh """
+                        [ -d "BDBA" ] || mkdir BDBA
+                        tar -zcvf BDBA/${GIT_SHORT_URL}.tar.gz binary 
+                        """
+                        script {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                rbheStaticCodeScan()
+                            }
+                        }
+                    }
+                }
+                stage('Scan Binary SSCB') {
+                    when {
+	                anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; }
+	            }
+                   steps {
+                       scanBinarySSCB()
+                    }
+                }
+            }
+        }
+        // stage('Test') {
+        //     when {
+        //         changeRequest()
+        //     }
+        //     steps {
+        //         echo "Hi, I'm a pipeline, doing test step"
+        //         sh '''
+        //         make test
+        //         make coverage
+        //         '''
+        //     }
+        //     post {
+        //         success {
+        //             coverageReport('cobertura-coverage.xml')
+        //         }
+        //     }
+        // }
+        // stage('Push to OCI registry') {
+        //     when {
+        //         anyOf { branch 'main'; branch 'release*' }
+        //     }
+        //     steps {
+        //             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'intel-harbor-credentials',
+        //                         usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+        //                 {
+        //                 unstash 'alpine_image'
+        //                 unstash 'grub_source'
+        //             sh '''
+        //             /opt/ci/push-oci-package.sh -f 'alpine_image/hook_x86_64.tar.gz grub_source.tar.gz'
+        //             '''
+        //         }
+        //     }
+        // }
+        stage('Version Tag') {
+            when {
+                anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; }
+            }
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sys_oie_devops_github_api',usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+                    {
+                        netrcPatch()
+                        echo "Generate tag if SemVer"
+                        sh '''
+                        # Tag the version
+                        /opt/ci/version-tag.sh
+                        '''
+                }
+            }
+        }
+        stage('Version dev') {
+            when {
+                anyOf { branch 'main'; branch 'iaas-*-*'; branch 'release-*'; }
+            }
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sys_oie_devops_github_api',usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']])
+                {
+                    versionDev()
+                }
+            }
+        }
+        stage('Auto approve') {
+            when {
+                changeRequest()
+            }
+            steps {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sys_devops_approve_github_api', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    script {
+                        autoApproveAndMergePR()
+                    }
+                }
+            }
+        }
+        // stage('Artifact') {
+        //     steps {
+        //         artifactUpload()
+        //     }
+        // }
+    }
+    post {
+        always {
+            jcpSummaryReport()
+            intelLogstashSend failBuild: false, verbose: true
+            cleanWs()
+        }
+        failure {
+            script {
+                emailFailure()
+            }
+        }
+    }
+}

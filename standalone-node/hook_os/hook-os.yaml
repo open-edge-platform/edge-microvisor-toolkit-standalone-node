@@ -1,0 +1,250 @@
+---
+# Attention, this is a template that is run through envsubst
+# but with a specific list of variables to replace. Thus:
+# - HOOK_VERSION: ${HOOK_VERSION} (a simple 1.2.3 string, no 'v')
+# - HOOK_KERNEL_IMAGE: ${HOOK_KERNEL_IMAGE}
+# - HOOK_KERNEL_ID: ${HOOK_KERNEL_ID}
+# - HOOK_KERNEL_VERSION: ${HOOK_KERNEL_VERSION}
+# - HOOK_CONTAINER_BOOTKIT_IMAGE: ${HOOK_CONTAINER_BOOTKIT_IMAGE}
+# - HOOK_CONTAINER_DOCKER_IMAGE: ${HOOK_CONTAINER_DOCKER_IMAGE}
+# - HOOK_CONTAINER_MDEV_IMAGE: ${HOOK_CONTAINER_MDEV_IMAGE}
+# - HOOK_CONTAINER_CONTAINERD_IMAGE: ${HOOK_CONTAINER_CONTAINERD_IMAGE}
+# - HOOK_CONTAINER_RUNC_IMAGE: ${HOOK_CONTAINER_RUNC_IMAGE}
+# - HOOK_CONTAINER_EMBEDDED_IMAGE: ${HOOK_CONTAINER_EMBEDDED_IMAGE}
+# - Other variables are not replaced: for example this is a
+# - literal dollarsign-SOMETHING:$SOMETHING and with braces: ${SOMETHING}
+
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+kernel:
+  image: "${HOOK_KERNEL_IMAGE}"
+  cmdline: "console=tty0 console=ttyS0"
+
+init:
+  # this init container sha has support for volumes
+  - linuxkit/init:872d2e1be745f1acb948762562cf31c367303a3b
+  - "${HOOK_CONTAINER_RUNC_IMAGE}"
+  - "${HOOK_CONTAINER_CONTAINERD_IMAGE}"
+  - linuxkit/ca-certificates:v1.0.0
+  - linuxkit/firmware:24402a25359c7bc290f7fc3cd23b6b5f0feb32a5
+  - "${HOOK_CONTAINER_EMBEDDED_IMAGE}"
+
+onboot:
+  - name: rngd1
+    image: linuxkit/rngd:v1.0.0
+    command: ["/sbin/rngd", "-1"]
+
+  - name: sysctl
+    image: linuxkit/sysctl:v1.0.0
+
+  - name: sysfs
+    image: linuxkit/sysfs:v1.0.0
+
+  - name: modprobe
+    image: linuxkit/modprobe:v1.0.0
+    command: ["modprobe", "cdc_ncm"]
+
+services:
+  - name: rngd
+    image: linuxkit/rngd:v1.0.0
+
+  - name: mdev
+    image: "${HOOK_CONTAINER_MDEV_IMAGE}"
+    command: ["mdev", "-v", "-S", "-df"]
+    capabilities:
+      - all
+    binds:
+      - /dev/:/dev/
+      - /lib/modules:lib/modules
+    rootfsPropagation: shared
+    devices:
+      - path: all
+        type: b
+
+  - name: getty
+    image: linuxkit/getty:v1.0.0
+    capabilities:
+      - all
+    binds.add:
+      - /etc/securetty:/etc/securetty
+      - /:/host_root
+      - /dev:/dev
+      - /dev/console:/dev/console
+    env:
+      - INSECURE=true
+    devices:
+    - path: all
+      type: b
+    - path: all
+      type: c
+    - path: "/dev/console"
+      type: c
+      major: 5
+      minor: 1
+      mode: "0666"
+    - path: "/dev/tty0"
+      type: c
+      major: 4
+      minor: 0
+      mode: "0666"
+    - path: "/dev/tty1"
+      type: c
+      major: 4
+      minor: 1
+      mode: "0666"
+    - path: "/dev/ttyS0"
+      type: c
+      major: 4
+      minor: 64
+      mode: "0666"
+    - path: "/dev/ttyS1"
+      type: c
+      major: 4
+      minor: 65
+      mode: "0666"
+    - path: "/dev/ttyS2"
+      type: c
+      major: 4
+      minor: 66
+      mode: "0666"
+    - path: "/dev/ttyAMA0"
+      type: c
+      major: 204
+      minor: 64
+      mode: "0666"
+    - path: "/dev/ttyAMA1"
+      type: c
+      major: 204
+      minor: 65
+      mode: "0666"
+    - path: "/dev/ttyAML0"
+      type: c
+      major: 243
+      minor: 0
+      mode: "0666"
+    - path: "/dev/ttyAML1"
+      type: c
+      major: 243
+      minor: 1
+      mode: "0666"
+    - path: "/dev/ttyUSB0"
+      type: c
+      major: 188
+      minor: 0
+      mode: "0666"
+    - path: "/dev/ttyUSB1"
+      type: c
+      major: 188
+      minor: 1
+      mode: "0666"
+
+  - name: dhcpcd-daemon
+    image: linuxkit/dhcpcd:v1.0.0
+    command: ["/etc/ip/dhcp.sh", "false"]
+    capabilities:
+      - all
+    binds.add:
+      - /var/lib/dhcpcd:/var/lib/dhcpcd
+      - /run:/run
+      - /etc/ip/dhcp.sh:/etc/ip/dhcp.sh
+      - /dhcpcd.conf:/dhcpcd.conf
+    runtime:
+      mkdir:
+        - /var/lib/dhcpcd
+
+  - name: os-installer
+    image: debian:12.10
+    command: ["/bin/bash", "-c", "/etc/scripts/install-os.sh"]
+    capabilities:
+      - all
+    net: host
+    binds.add:
+      - /dev:/dev
+      - /run:/run
+      - /etc/scripts:/etc/scripts/
+      - /:/host
+      - /var/log/os-installer.log:/var/log/os-installer.log
+      - /etc/scripts/install-os.sh:/etc/scripts/install-os.sh
+    runtime:
+      mkdir:
+        - /var/lib/os-installd
+    devices:
+    - path: all
+      type: b
+    - path: all
+      type: c
+
+files:
+  - path: etc/scripts/install-os.sh
+    source: "files/install-os.sh"
+    mode: "0777"
+
+  - path: etc/scripts/cloud-init.yaml
+    source: "files/cloud-init.yaml"
+    mode: "0777"
+
+  - path: etc/scripts/enable-dmv.sh
+    source: "files/enable-dmv.sh"
+    mode: "0777"
+
+  - path: etc/scripts/collect-logs.sh
+    source: "files/collect-logs.sh"
+    mode: "0777"
+
+  - path: sbin/setup-dns
+    source: "files/setup-dns.sh"
+    mode: "0777"
+
+  - path: etc/ip/dhcp.sh
+    source: "files/dhcp.sh"
+    mode: "0777"
+
+  - path: dhcpcd.conf
+    source: "files/dhcpcd.conf"
+    mode: "0644"
+
+  - path: etc/motd
+    mode: "0644"
+    contents: ""
+
+  - path: etc/issue
+    mode: "0644"
+    contents: ""
+
+  - path: etc/securetty
+    contents: |
+      console
+      tty0
+      tty1
+      tty2
+      tty3
+      tty4
+      tty5
+      tty6
+      tty7
+      tty8
+      tty9
+      tty10
+      tty11
+      hvc0
+      ttyS0
+      ttyS1
+      ttyS2
+      ttyAMA0
+      ttyAMA1
+      ttyAML0
+      ttyAML1
+      ttyUSB0
+      ttyUSB1
+      ttyUSB2
+
+  - path: etc/hook/env_config
+    contents: ""
+    mode: "0644"
+
+
+trust:
+  org:
+    - linuxkit
+    - library
