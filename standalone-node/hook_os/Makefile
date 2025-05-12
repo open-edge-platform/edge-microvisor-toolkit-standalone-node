@@ -89,8 +89,7 @@ list:
 clean:
 	@# Help: displays make targets
 	sudo rm -rf  out
-	rm -rf alpine_*
-	rm -rf hook.hook-default-amd64.yaml
+	rm -rf cache kernel/patches-5.10.y
 
 help:
 	@printf "%-20s %s\n" "Target" "Description"

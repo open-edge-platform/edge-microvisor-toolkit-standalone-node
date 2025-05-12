@@ -67,9 +67,11 @@ common-clean:
 clean:
 	@# Clean: Remove build files
 	@echo "---MAKEFILE CLEAN---"
-	cd standalone-node/host_os && rm -f *.gz *.sha256sum *.der
+	cd standalone-node/host_os && rm -f *.gz *.sha256sum *.der cd standalone-node/host_os && rm -f *.gz *.sha256sum *.der edge_microvisor_toolkit.raw.gz.sha256sum
 	cd standalone-node/hook_os && make clean
-	cd standalone-node/installation_scripts && rm -rf out
+	cd standalone-node/cluster_installers && rm -rf charts images install.sh *.tar.zst *.txt *.tar.gz
+	cd standalone-node/cluster_installers/extensions && rm -rf *.yaml
+	cd standalone-node/installation_scripts && rm -rf out extensions/*.yaml
 	@echo "---END MAKEFILE CLEAN---"
 
 clean-venv:
