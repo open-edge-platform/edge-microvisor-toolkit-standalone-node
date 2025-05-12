@@ -65,7 +65,8 @@ common-clean:
 	rm -rf ${OUT_DIR} vendor
 
 clean:
-    @echo "---MAKEFILE CLEAN---"
+	@# Clean: Remove build files
+	@echo "---MAKEFILE CLEAN---"
 	cd standalone-node/host_os && rm -f *.gz *.sha256sum *.der
 	cd standalone-node/hook_os && make clean
 	cd standalone-node/installation_scripts && rm -rf out
