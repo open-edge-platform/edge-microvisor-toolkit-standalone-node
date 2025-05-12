@@ -1,0 +1,36 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Post-Merge Standalone-node
+
+on:
+  push:
+    branches:
+      - main
+      - release-*
+    paths:
+      - "standalone-node/**"
+
+permissions: {}
+
+jobs:
+  post-merge-pipeline:
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@0.1.5
+    with:
+      run_version_check: true
+      run_dep_version_check: true
+      run_build: true
+      run_lint: true
+      run_docker_build: false
+      run_docker_push: false
+      run_version_tag: true
+      run_artifact: false
+      prefix_tag_separator: "/"
+      project_folder: "standalone-node"
+    secrets:  # zizmor: ignore[secrets-inherit]
+      inherit
