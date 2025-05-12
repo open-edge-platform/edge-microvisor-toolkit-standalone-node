@@ -78,15 +78,6 @@ test:
 	@echo "---MAKEFILE TEST---"
 	echo $@
 	@echo "---END MAKEFILE TEST---"
-clean:
-	@# Clean: Remove build files
-	@echo "---MAKEFILE CLEAN---"
-	cd host_os && rm -f *.gz *.sha256sum *.der && cd ..
-	cd hook_os && make clean && cd ..
-	cd installation_scripts && rm -rf out && cd ..
-	rm -rf ./out
-	rm -rf .hypothesis
-	@echo "---END MAKEFILE CLEAN---"
 
 list: 
 	@# Help: displays make targets

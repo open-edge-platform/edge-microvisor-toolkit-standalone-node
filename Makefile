@@ -46,6 +46,7 @@ mdlint:
 clean:
 	@# Help: Runs clean stage in all subprojects
 	@echo "---MAKEFILE CLEAN---"
+	@# Clean: Remove build files
 	for dir in $(SUBPROJECTS); do $(MAKE) -C $$dir clean; done
 	@echo "---END MAKEFILE CLEAN---"
 

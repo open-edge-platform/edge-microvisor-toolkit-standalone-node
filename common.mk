@@ -64,6 +64,13 @@ mdlint: ## link MD files
 common-clean:
 	rm -rf ${OUT_DIR} vendor
 
+clean:
+    @echo "---MAKEFILE CLEAN---"
+	cd standalone-node/host_os && rm -f *.gz *.sha256sum *.der
+	cd standalone-node/hook_os && make clean
+	cd standalone-node/installation_scripts && rm -rf out
+	@echo "---END MAKEFILE CLEAN---"
+
 clean-venv:
 	rm -rf "$(VENV_NAME)"
 
