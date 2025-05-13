@@ -31,7 +31,7 @@ jobs:
       run_version_tag: true
       run_upload_assets: true
       run_artifact: false
-      extraction_dir: "installation_scripts/final_release"
+      assets_dir: "installation_scripts/final_release"
       prefix_tag_separator: "/"
       project_folder: "standalone-node"
     secrets:  # zizmor: ignore[secrets-inherit]
