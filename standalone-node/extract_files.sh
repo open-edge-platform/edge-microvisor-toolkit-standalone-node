@@ -30,9 +30,9 @@ else
 fi
 
 # Check for usb-bootable-files.tar.gz
-if [ -f "installation_scripts/out/usb-bootable-files.tar.gz" ]; then
+if [ -f "installation_scripts/temp_extraction/usb-bootable-files.tar.gz" ]; then
     echo "usb-bootable-files.tar.gz found, extracting..."
-    tar -xzf installation_scripts/out/usb-bootable-files.tar.gz -C "$final_dir"
+    tar -xzf installation_scripts/temp_extraction/usb-bootable-files.tar.gz -C "$final_dir"
 else
     echo "usb-bootable-files.tar.gz not found, skipping extraction."
 fi
