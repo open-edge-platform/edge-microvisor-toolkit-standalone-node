@@ -80,11 +80,11 @@ test:
 	@echo "---END MAKEFILE TEST---"
 
 extraction:
-    @# Help: Runs extraction process
-	@echo "---MAKEFILE extraction---"
+	@# Help: Runs extraction stage
+	@echo "---MAKEFILE BUILD---"
 	echo $@
 	./extract_files.sh
-	@echo "---END MAKEFILE extraction---"
+	@echo "---END MAKEFILE Build---"
 
 list: 
 	@# Help: displays make targets
