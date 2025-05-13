@@ -79,6 +79,13 @@ test:
 	echo $@
 	@echo "---END MAKEFILE TEST---"
 
+extraction:
+    @# Help: Runs extraction process
+	@echo "---MAKEFILE extraction---"
+	echo $@
+	./extract_files.sh
+	@echo "---END MAKEFILE extraction---"
+
 list: 
 	@# Help: displays make targets
 	help
