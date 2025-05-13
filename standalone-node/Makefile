@@ -65,12 +65,6 @@ image:
 	cd host_os && ./download_tmv.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 
-docker-build: 
-	@# Help: Runs docker-build stage
-	@echo "---MAKEFILE BUILD---"
-	echo $@
-	@echo "---END MAKEFILE Build---"
-
 dependency-check:
 	@# Help: Runs dependency-check stage
 	@echo "---MAKEFILE TEST---"
