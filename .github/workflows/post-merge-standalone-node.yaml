@@ -29,10 +29,9 @@ jobs:
       run_docker_build: false
       run_docker_push: false
       run_version_tag: true
-      run_extraction: true
       run_upload_assets: true
       run_artifact: false
-      extraction_dir: "installation_scripts/temp_extraction"
+      extraction_dir: "installation_scripts/final_release"
       prefix_tag_separator: "/"
       project_folder: "standalone-node"
     secrets:  # zizmor: ignore[secrets-inherit]

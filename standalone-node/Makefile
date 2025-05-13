@@ -53,6 +53,10 @@ build: configure
 	echo $@
 	cd installation_scripts && ./build-hook-os-iso.sh && cd ..
 	@echo "---END MAKEFILE Build---"
+	@echo "---MAKEFILE Extraction---"
+	echo $@
+	./extract_files.sh
+	@echo "---END MAKEFILE Extraction---"
 	
 image:
 	@# Help: Runs build stage
@@ -78,13 +82,6 @@ test:
 	@echo "---MAKEFILE TEST---"
 	echo $@
 	@echo "---END MAKEFILE TEST---"
-
-extraction:
-	@# Help: Runs extraction stage
-	@echo "---MAKEFILE BUILD---"
-	echo $@
-	./extract_files.sh
-	@echo "---END MAKEFILE Build---"
 
 list: 
 	@# Help: displays make targets
