@@ -55,7 +55,7 @@ build: configure
 	@echo "---END MAKEFILE Build---"
 	@echo "---MAKEFILE Extraction---"
 	echo $@
-	./extract_files.sh
+	chmod +x extract_files.sh && ./extract_files.sh
 	@echo "---END MAKEFILE Extraction---"
 	
 image:
