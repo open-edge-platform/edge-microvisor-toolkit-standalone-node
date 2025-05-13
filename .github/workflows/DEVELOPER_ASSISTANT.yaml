@@ -7,6 +7,10 @@ jobs:
   pr_agent_job:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ai-review') && ((contains(github.event.comment.body, '/review') || contains(github.event.comment.body, '/describe') || contains(github.event.comment.body, '/add_docs') || contains(github.event.comment.body, '/update_changelog')) && github.event.comment.user.login != 'nex-maximus' || (github.event_name == 'pull_request' && github.event.pull_request.user.login != 'nex-maximus')) }}
     runs-on: ['innersource.prod.amr.dind']
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     container: 
       image: gar-registry.caas.intel.com/maximus/smartdevops:genai-stable
       options: --pull always

@@ -16,5 +16,9 @@ on:
 jobs:
   Auto-Update-PR:
     runs-on: generic
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     steps:
-      - uses: intel-innersource/frameworks.actions.thirdparty.auto-update@v2.2.1
+      - uses: intel-innersource/frameworks.actions.thirdparty.auto-update@4081c5bdc34560b58288a010318054e63e6f4a51  # v2.2.1
