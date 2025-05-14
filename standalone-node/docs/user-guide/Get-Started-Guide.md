@@ -1,6 +1,6 @@
 # Get Started Guide
 
-## Step 1: Prepare the Developer System
+## Step 1: Prepare the Developer's System
 
 The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive on Linux-based operating systems. The installer has been tested on Ubuntu 22.04 LTS.
 
@@ -15,6 +15,7 @@ edge_microvisor_toolkit.raw.gz
 sen-rke2-package.tar.gz
 checksums.md5
 config-file
+bootable-usb-prepare.sh
 
 > **Note:** GitHub does not permit uploading files larger than 2GB. Therefore, users must manually create the usb-bootable-files.tar.gz archive using the downloaded files.
 ---
@@ -41,7 +42,7 @@ Download the files listed above from the GitHub release assets
 
    ```
    cd ~/installer
-   tar -czvf usb-bootable-files.tar.gz hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz
+   tar -czvf usb-bootable-files.tar.gz hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz checksums.md5
    ```
 
 -  Modify the config file
