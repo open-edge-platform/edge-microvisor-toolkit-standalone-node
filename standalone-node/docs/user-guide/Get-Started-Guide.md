@@ -6,44 +6,13 @@ The current release of the Intel® Edge Microvisor Toolkit Standalone Node suppo
 
 ---
 
-## Step 2: Download
+## Step 2: Build from Source
 
-The necessary files for creating a bootable USB drive are available as assets in the GitHub release. Due to GitHub's file size limitations, individual files are provided instead of a single archive.
-Files to Download from GitHub Release:
-hook-os.iso
-edge_microvisor_toolkit.raw.gz
-sen-rke2-package.tar.gz
-checksums.md5
-config-file
-bootable-usb-prepare.sh
+Create the Standalone Installation Tar File
 
-> **Note:** GitHub does not permit uploading files larger than 2GB. Therefore, users must manually create the usb-bootable-files.tar.gz archive using the downloaded files.
----
+- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
-## Step 3: Create usb-bootable-files.tar.gz
-
-Download the files listed above from the GitHub release assets
-
-- Create a working folder
-
-   ```
-   mkdir ~/installer
-   sudo chmod 700 ~/installer
-   ```
-
-- Move downloaded files into the working folder
-
-   ```
-   cd ~/installer
-   mv <path_to_downloaded_files>/* ~/installer/
-   ```
-
-- Create the usb-bootable-files.tar.gz archive:
-
-   ```
-   cd ~/installer
-   tar -czvf usb-bootable-files.tar.gz hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz checksums.md5
-   ```
+> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the hook_os/config file
 
 -  Modify the config file
 
@@ -61,7 +30,10 @@ Download the files listed above from the GitHub release assets
    ssh_key=""
    ```
 
-## Step 4:  Prepare the USB Drive
+   ```
+   make build
+   ```
+## Step 3:  Prepare the USB Drive
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
@@ -70,7 +42,22 @@ Download the files listed above from the GitHub release assets
    ```
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Transfer usb-bootable-files.tar.gz and config files to Standalone Node
+- Copy files to prepare the Bootable USB
+
+  Extract the contents of sen-installation-files.tar.gz
+
+  ```
+   tar -xzf sen-installation-files.tar.gz
+  ```
+
+- Extracted files will include
+
+  ```
+  usb-bootable-files.tar.gz
+  config-file
+  bootable-usb-prepare.sh
+  edgenode-logs-collection.sh
+  ```
 
 - Run the preparation script to create the bootable USB
 
@@ -82,6 +69,15 @@ Download the files listed above from the GitHub release assets
    Example usage:
    ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config
    ```
+   - Required Inputs for the Script:
+
+     usb: A valid USB device name (e.g., /dev/sdc).
+     usb-bootable-files.tar.gz: The tar file containing bootable files.
+     config-file: Configuration file for proxy settings (if the edge node is behind a firewall).
+     Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node.
+     User credentials: Set the username and password for the edge node.
+
+     > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
 
 ## Step 5: Deploy on Standalone Node
 

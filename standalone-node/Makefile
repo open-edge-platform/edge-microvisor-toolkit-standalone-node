@@ -53,10 +53,6 @@ build: configure
 	echo $@
 	cd installation_scripts && ./build-hook-os-iso.sh && cd ..
 	@echo "---END MAKEFILE Build---"
-	@echo "---MAKEFILE Extraction---"
-	echo $@
-	chmod +x extract_files.sh && ./extract_files.sh
-	@echo "---END MAKEFILE Extraction---"
 	
 image:
 	@# Help: Runs build stage
