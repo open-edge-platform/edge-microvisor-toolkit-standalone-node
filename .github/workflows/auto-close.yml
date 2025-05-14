@@ -15,10 +15,6 @@ on:
 jobs:
   stale-auto-close:
     runs-on: generic
-    permissions:
-      contents: read
-      issues: read
-      pull-requests: read
     steps:
       - uses: actions/stale@v5.1.1
         with:

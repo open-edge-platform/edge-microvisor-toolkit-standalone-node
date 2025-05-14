@@ -10,10 +10,4 @@
    jobs:
       build:
         uses: intel-innersource/applications.services.esh.intel-edge-services-document/.github/workflows/publishtoaws.yml@release-1.0
-        permissions:
-         contents: read
-         issues: read
-         pull-requests: read
-        secrets:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        secrets: inherit
