@@ -38,12 +38,15 @@ singlehdd_lvm_partition=9
 
 #####################################################################################
 # Partitions in %
+# shellcheck disable=SC2034
 swap_space_start=91
 
 # Size in MBs
 tep_size=14336
 reserved_size=5120
+# shellcheck disable=SC2034
 boot_size=5120600
+# shellcheck disable=SC2034
 bare_min_rootfs_size=25
 rootfs_size=3584
 rootfs_hashmap_size=100
@@ -53,14 +56,13 @@ rootfs_roothash_size=50
 #####################################################################################
 #Global var which is updated
 single_hdd=-1
+# shellcheck disable=SC2034
 check_all_disks=1
 #####################################################################################
 #####################################################################################
 fix_partition_suffix() {
     part_variable=''
-    ret=$(grep -i "nvme" <<< "$DEST_DISK")
-    if [ $? == 0 ]
-    then
+    if grep -i "nvme" <<< "$DEST_DISK"; then
 	part_variable="p"
     fi
 
@@ -70,9 +72,7 @@ fix_partition_suffix() {
 #####################################################################################
 get_partition_suffix() {
     part_variable=''
-    ret=$(grep -i "nvme" <<< "$1")
-    if [ $? == 0 ]
-    then
+    if grep -i "nvme" <<< "$1"; then
 	part_variable="p"
     fi
 
@@ -81,7 +81,7 @@ get_partition_suffix() {
 
 #####################################################################################
 check_return_value() {
-    if [ $1 -ne 0 ]
+    if [ "$1" -ne 0 ]
     then
 	echo "$2"
 	exit 1
@@ -92,17 +92,15 @@ check_return_value() {
 get_dest_disk()
 {
     disk_device=""
-
+    # shellcheck disable=SC2207
     list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
-    for block_dev in ${list_block_devices[@]};
+    for block_dev in "${list_block_devices[@]}";
     do
 	#if there were any problems when the ubuntu was streamed.
 	printf 'OK\n'  | parted ---pretend-input-tty -m  "/dev/$block_dev" p
 	printf 'Fix\n' | parted ---pretend-input-tty -m  "/dev/$block_dev" p
 
-	parted "/dev/$block_dev" p | grep -i boot
-	if [ $? -ne 0 ];
-	then
+	if ! parted "/dev/$block_dev" p | grep -i boot; then
 	   continue
 	fi
 
@@ -122,21 +120,23 @@ get_dest_disk()
 #####################################################################################
 # set the single_hdd var to 0 if this is a single HDD else it will keep it unchanged at -1
 is_single_hdd() {
+    # shellcheck disable=SC2034
     ret=-1
     # list_block_devices=($(lsblk -o NAME,TYPE | grep -i disk  | awk  '$1 ~ /sd*|nvme*/ {print $1}'))
     ## $3 represents the block device size. if 0 omit
     ## $4 is set to 1 if the device is removable
+    # shellcheck disable=SC2207
     list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
 
     count=${#list_block_devices[@]}
 
-    if [ $count -eq 0 ];
+    if [ "$count" -eq 0 ];
     then
 	echo "No valid block devices found."
 	exit 1
     fi
 
-    if [ $count -eq 1 ];
+    if [ "$count" -eq 1 ];
     then
 	# send a 0 if there is only one HDD
 	single_hdd=0
@@ -184,7 +184,7 @@ make_partition() {
 
     swap_size=$(( swap_size * 1024 ))
 
-    total_size_disk=$(fdisk -l ${DEST_DISK} | grep -i ${DEST_DISK} | head -1 |  awk '/GiB/{ print int($3)*1024} /TiB/{ print int($3)*1024*1024}')
+    total_size_disk=$(fdisk -l "${DEST_DISK}" | grep -i "${DEST_DISK}" | head -1 |  awk '/GiB/{ print int($3)*1024} /TiB/{ print int($3)*1024*1024}')
 
     # For single HDD reduce the size to 100 and fit everything inside it
     if [ $single_hdd -eq 0 ];
@@ -216,11 +216,12 @@ make_partition() {
 
     #save this size of emt persistent before partition
     suffix=$(fix_partition_suffix)
-    emt_persistent_dd_count=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${emt_persistent_partition}" | awk '{print int( ($4/2048/4) + 0.999999) }')
+    emt_persistent_dd_count=$(fdisk -l "${DEST_DISK}" | grep "${DEST_DISK}${suffix}${emt_persistent_partition}" | awk '{print int( ($4/2048/4) + 0.999999) }')
     export emt_persistent_dd_count
     #####
     # logging needed to understand the block splits
     echo "DEST_DISK ${DEST_DISK}"
+    # shellcheck disable=SC2154
     echo "rootfs_partition     $rootfs_partition         rootfs_end           ${rootfs_end}MB"
     echo "root_hashmap_a_start ${root_hashmap_a_start}MB root_hashmap_b_start ${root_hashmap_b_start}MB"
     echo "root_hashmap_b_start ${root_hashmap_b_start}MB rootfs_b_start       ${rootfs_b_start}MB"
@@ -230,24 +231,24 @@ make_partition() {
     #####
 
     echo "sizes in sectors"
-    echo "rootfs_partition     $rootfs_partition         rootfs_end             $(convert_mb_to_sectors ${rootfs_end} 1)"
-    echo "root_hashmap_a_start $(convert_mb_to_sectors ${root_hashmap_a_start} 0) root_hashmap_b_start $(convert_mb_to_sectors ${root_hashmap_b_start} 1)"
-    echo "root_hashmap_b_start $(convert_mb_to_sectors ${root_hashmap_b_start} 0) rootfs_b_start       $(convert_mb_to_sectors ${rootfs_b_start} 1)"
-    echo "rootfs_b_start       $(convert_mb_to_sectors ${rootfs_b_start} 0)       roothash_start       $(convert_mb_to_sectors ${roothash_start} 1)"
-    echo "roothash_start       $(convert_mb_to_sectors ${roothash_start} 0)       swap_start           $(convert_mb_to_sectors ${swap_start} 1)"
-    echo "swap_start          $(convert_mb_to_sectors ${swap_start} 0)            tep_start            $(convert_mb_to_sectors ${total_size_disk} 1)"
+    echo "rootfs_partition     $rootfs_partition         rootfs_end             $(convert_mb_to_sectors "${rootfs_end}" 1)"
+    echo "root_hashmap_a_start $(convert_mb_to_sectors "${root_hashmap_a_start}" 0) root_hashmap_b_start $(convert_mb_to_sectors "${root_hashmap_b_start}" 1)"
+    echo "root_hashmap_b_start $(convert_mb_to_sectors "${root_hashmap_b_start}" 0) rootfs_b_start       $(convert_mb_to_sectors "${rootfs_b_start}" 1)"
+    echo "rootfs_b_start       $(convert_mb_to_sectors "${rootfs_b_start}" 0)       roothash_start       $(convert_mb_to_sectors "${roothash_start}" 1)"
+    echo "roothash_start       $(convert_mb_to_sectors "${roothash_start}" 0)       swap_start           $(convert_mb_to_sectors "${swap_start}" 1)"
+    echo "swap_start          $(convert_mb_to_sectors "${swap_start}" 0)            tep_start            $(convert_mb_to_sectors "${total_size_disk}" 1)"
     #####
 
     if $COMPLETE_DMVERITY;
     then
 	#this cmd only resizes parition. if there is an error this should handle it.
-	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
+	printf 'Fix\n' | parted ---pretend-input-tty "${DEST_DISK}" \
 	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
 	check_return_value $? "Failed to resize emt persistent paritions"
 
 	#this cmd only creates new partitions.
-	parted -s ${DEST_DISK} \
+	parted -s "${DEST_DISK}" \
 	       mkpart hashmap_a ext4  "$(convert_mb_to_sectors "${root_hashmap_a_start}" 0)"s "$(convert_mb_to_sectors "${root_hashmap_b_start}" 1)"s \
 	       mkpart hashmap_b ext4  "$(convert_mb_to_sectors "${root_hashmap_b_start}" 0)"s "$(convert_mb_to_sectors "${rootfs_b_start}" 1)"s \
 	       mkpart rootfs_b ext4   "$(convert_mb_to_sectors "${rootfs_b_start}" 0)"s       "$(convert_mb_to_sectors "${roothash_start}" 1)"s \
@@ -257,7 +258,7 @@ make_partition() {
 
 	check_return_value $? "Failed to create paritions"
     else
-	parted -s ${DEST_DISK} \
+	parted -s "${DEST_DISK}" \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
 	       mkpart rootfs_b ext4 "${rootfs_b_start}MB" "${swap_start}MB" \
 	       mkpart swap linux-swap "${swap_start}MB" "${tep_start}MB" \
@@ -270,7 +271,7 @@ make_partition() {
 
     if [ $single_hdd -eq 0 ];
     then
-	parted -s ${DEST_DISK} \
+	parted -s "${DEST_DISK}" \
 	       mkpart lvm ext4 "$(convert_mb_to_sectors "${total_size_disk}" 0)"s 100%
 
 	check_return_value $? "Failed to create lvm parition"
@@ -314,7 +315,7 @@ create_single_hdd_lvmg() {
 # the output of this function is to update the global var update_sector if needed
 block_disk_phy_block_disk() {
     # list_block_devices=($(lsblk -o NAME,TYPE | grep -i disk  | awk  '$1 ~ /sd*|nvme*/ {print $1}'))
-
+    # shellcheck disable=SC2207
     list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
     list_of_lvmg_part=''
     block_size_4k=0
@@ -322,26 +323,20 @@ block_disk_phy_block_disk() {
     size_4k=0
     size_512=0
 
-    for block_dev in ${list_block_devices[@]};
+    for block_dev in "${list_block_devices[@]}";
     do
-	grep -i "${DEST_DISK}" <<< "/dev/${block_dev}"
-	if [ $? -eq 0 ]
-	then
+	if grep -i "${DEST_DISK}" <<< "/dev/${block_dev}"; then
 	    continue
 	fi
 
 	# get info if there is a 4kB physical block present
-	parted -s "/dev/${block_dev}" print | grep -i sector | grep -q 4098.$
-	if [ $? -eq 0 ];
-	then
+	if parted -s "/dev/${block_dev}" print | grep -i sector | grep -q 4098.$; then
 	    block_size_4k=$(( 1 + block_size_4k ))
 	    disk_4k="$disk_4k /dev/${block_dev}"
 	    export disk_4k
 	fi
 
-	parted -s "/dev/${block_dev}" print | grep -i sector | grep -q 512.$
-	if [ $? -eq 0 ];
-	then
+	if parted -s "/dev/${block_dev}" print | grep -i sector | grep -q 512.$; then
 	    block_size_512=$(( 1 + block_size_512 ))
 	    disk_512="$disk_512 /dev/${block_dev}"
 	    export disk_512
@@ -372,9 +367,7 @@ update_lvmvg() {
     for disk in $list_of_lvmg_part;
     do
 	size=$(lsblk -b --output SIZE -n -d "${disk}")
-	parted -s "${disk}" print | grep -i sector | grep -q 512.$
-	if [ $? -eq 0 ];
-	then
+	if parted -s "${disk}" print | grep -i sector | grep -q 512.$; then
 	    size_512=$(( size_512 + size ))
 	    list_of_lvmg_part_512+=" ${disk} "
 	else
@@ -388,25 +381,25 @@ update_lvmvg() {
 	echo "Selected 4k block sized disks because of higher total size"
 	if [[ $list_of_lvmg_part_4k != '' ]];
 	then
-	    vgcreate lvmvg $list_of_lvmg_part_4k
+	    vgcreate lvmvg "$list_of_lvmg_part_4k"
 	    check_return_value $? "Failed to create LVMVG with 4k blocks"
 	fi
 
 	if [[ $list_of_lvmg_part_512 != '' ]];
 	then
-	    vgcreate lvmvg2 $list_of_lvmg_part_512
+	    vgcreate lvmvg2 "$list_of_lvmg_part_512"
 	    check_return_value $? "Failed to create LVMVG with 512 blocks"
 	fi
     else
 	if [[ $list_of_lvmg_part_512 != '' ]];
 	then
-	    vgcreate lvmvg $list_of_lvmg_part_512
+	    vgcreate lvmvg "$list_of_lvmg_part_512"
 	    check_return_value $? "Failed to create LVMVG-2 with 512 blocks"
 	fi
 
 	if [[ $list_of_lvmg_part_4k != '' ]];
 	then
-	    vgcreate lvmvg2 $list_of_lvmg_part_4k
+	    vgcreate lvmvg2 "$list_of_lvmg_part_4k"
 	    check_return_value $? "Failed to create LVMVG-2 with 4k blocks"
 	fi
     fi
@@ -421,22 +414,23 @@ partition_other_devices() {
 
     ## $3 represents the block device size. if 0 omit
     ## $4 is set to 1 if the device is removable
+    # shellcheck disable=SC2207
     list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
     list_of_lvmg_part=''
-    for block_dev in ${list_block_devices[@]};
+    for block_dev in "${list_block_devices[@]}";
     do
-	grep -i "${DEST_DISK}" <<< "/dev/${block_dev}"
-	if [ $? -eq 0 ]
-	then
+	if grep -i "${DEST_DISK}" <<< "/dev/${block_dev}"; then
 	   continue
 	fi
 
 	#Delete all partitions on that disk to make it ready for luks with 1 partition only
+    # shellcheck disable=SC2034
 	line_num=$(parted -s "/dev/${block_dev}" print | awk '$1 == "Number" { print NR }')
 	partition_num=$(parted -s "/dev/${block_dev}" print | awk 'NR > $line_num { print $1}')
 	for part in $partition_num;
 	do
 	    echo "partition in $disk $part will be deleted"
+        # shellcheck disable=SC2034
 	    rm_part=$(parted -s "/dev/${block_dev}" rm "$part")
 	done
 
@@ -459,9 +453,7 @@ partition_other_devices() {
 
     if [[ $list_of_lvmg_part != '' ]];
     then
-	vgcreate lvmvg $list_of_lvmg_part
-	if [ $? -ne 0 ]
-	then
+	if ! vgcreate lvmvg "$list_of_lvmg_part"; then
 	    export list_of_lvmg_part=$list_of_lvmg_part
 	    echo "Failed to create a lvmvg group"
 	    echo "Trying with separated sectors"
@@ -599,10 +591,11 @@ EOT
 
 
     #cleanup of mounts
+    # shellcheck disable=SC2207
     mount_points=($(grep -i "/mnt"  /proc/mounts | awk '{print $2}' | sort -nr))
-    for mounted_dir in ${mount_points[@]};
+    for mounted_dir in "${mount_points[@]}";
     do
-	umount $mounted_dir
+	umount "$mounted_dir"
     done
     echo "Completed all umounts"
 
@@ -612,8 +605,8 @@ EOT
     if $TEST_ENABLE_DM_ON_ROOTFSB;
     then
 	#backup using dd
-	rootfs_dd_count=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print int( ($4/2048/4) + 0.999999) }')
-	dd if="${DEST_DISK}${suffix}${rootfs_partition}" of="${DEST_DISK}${suffix}${rootfs_b_partition}" bs=4M count=$rootfs_dd_count status=progress
+	rootfs_dd_count=$(fdisk -l "${DEST_DISK}" | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print int( ($4/2048/4) + 0.999999) }')
+	dd if="${DEST_DISK}${suffix}${rootfs_partition}" of="${DEST_DISK}${suffix}${rootfs_b_partition}" bs=4M count="$rootfs_dd_count" status=progress
 	e2fsck -fy  "${DEST_DISK}${suffix}${rootfs_partition}"
 	sync
 	###############

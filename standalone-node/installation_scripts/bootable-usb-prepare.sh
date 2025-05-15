@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 #set -x
+# shellcheck source=installation_scripts/config-file
 source config-file
 
 working_dir=$(pwd)
@@ -77,14 +78,17 @@ echo "Extracting USB bootable files..."
 rm -rf usb_files && mkdir -p usb_files
 cp "$USB_FILES" usb_files
 cd usb_files || exit 1
-tar -xzvf "$USB_FILES" || { echo "Error: Failed to extract USB bootable files!"; exit 1; }
+tar -xzvf "$USB_FILES" || {
+    echo "Error: Failed to extract USB bootable files!"
+    exit 1
+}
 cd "$working_dir" || exit 1
 
 # Verify MD5 checksum of required files
 echo "Verifying MD5 checksum of required files..."
 checksum_file="usb_files/checksums.md5"
 if [ -f "$checksum_file" ]; then
-    pushd usb_files > /dev/null || exit
+    pushd usb_files >/dev/null || exit
     for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
         if [ -f "$file" ]; then
             calculated_md5=$(md5sum "$file" | awk '{print $1}')
@@ -100,7 +104,7 @@ if [ -f "$checksum_file" ]; then
             exit 1
         fi
     done
-    popd > /dev/null || exit
+    popd >/dev/null || exit
 else
     echo "Error: Checksum file $checksum_file not found!"
     exit 1
@@ -120,16 +124,16 @@ sudo wipefs --all "$USB_DEVICE"
 echo "Write the ISO to USB"
 
 sudo dd if="$ISO" of="$USB_DEVICE" bs=4M status=progress && sudo sync
-sudo sgdisk -e "$USB_DEVICE" > /dev/null 2>&1
-blockdev --rereadpt  "${USB_DEVICE}"
-printf "fix\nq\n" | sudo parted "$USB_DEVICE" print > /dev/null 2>&1
+sudo sgdisk -e "$USB_DEVICE" >/dev/null 2>&1
+blockdev --rereadpt "${USB_DEVICE}"
+printf "fix\nq\n" | sudo parted "$USB_DEVICE" print >/dev/null 2>&1
 
 # Wait for the newly created partition for next operation from userspace
 wait_for_partition() {
-device=$1
-while [ ! -b "$device" ]; do
-    sleep 2
-done
+    device=$1
+    while [ ! -b "$device" ]; do
+        sleep 2
+    done
 }
 
 # Create partitions
@@ -137,7 +141,7 @@ create_partition() {
     local start=$1
     local end=$2
     local label=$3
-    sudo parted "$USB_DEVICE" --script mkpart primary ext4 "${start}" "${end}" > /dev/null 2>&1
+    sudo parted "$USB_DEVICE" --script mkpart primary ext4 "${start}" "${end}" >/dev/null 2>&1
     blockdev --rereadpt "$USB_DEVICE"
     sudo partprobe "$USB_DEVICE"
     local part_num
@@ -146,7 +150,10 @@ create_partition() {
     wait_for_partition "${USB_DEVICE}${part_num}"
     sleep 2
 
-    echo y | mkfs.ext4 "${USB_DEVICE}${part_num}" > /dev/null || { echo "Error: mkfs failed on ${USB_DEVICE}${part_num}!"; exit 1; }
+    echo y | mkfs.ext4 "${USB_DEVICE}${part_num}" >/dev/null || {
+        echo "Error: mkfs failed on ${USB_DEVICE}${part_num}!"
+        exit 1
+    }
     echo "${label} partition created successfully."
 }
 
@@ -171,37 +178,32 @@ copy_to_partition() {
     local attempt=0
 
     while [ $attempt -lt $retries ]; do
-        sudo mount "${USB_DEVICE}${part}" /mnt 
-        sudo cp "$src" "$dest"
-        if [ $? -eq 0 ]; then
-            sudo umount /mnt
-	    if [ $? -eq 0 ]; then
+        if sudo mount "${USB_DEVICE}${part}" /mnt && sudo cp "$src" "$dest"; then
+            if sudo umount /mnt; then
                 echo "Successfully copied $src to $dest on partition ${USB_DEVICE}${part}."
-		break
-	    fi
+                break
+            fi
         else
             echo "Error: Failed to copy $src to $dest on attempt $((attempt + 1))/$retries. Retrying..."
             sudo umount /mnt || true
             sleep 2
         fi
         attempt=$((attempt + 1))
-	if [ "$attempt" -eq 2 ]; then
-    	    echo "Error: Failed to copy $src to $dest after $retries attempts!"
+        if [ "$attempt" -eq 2 ]; then
+            echo "Error: Failed to copy $src to $dest after $retries attempts!"
             exit 1
-	fi
-   done
+        fi
+    done
 }
 echo "Copying files to USB device..."
 echo ""
 echo "OS image copying!!!"
 os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
-copy_to_partition "$OS_PART" "$os_filename" "/mnt" 
+copy_to_partition "$OS_PART" "$os_filename" "/mnt"
 echo ""
 echo "K8-Cluster scripts copying!!!"
-copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" 
-copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"
 
-if [ $? -eq 0 ]; then
+if copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
     echo "USB bootable device is ready!"
 else
     echo "USB Installation failed,please re-run the script again!!!"

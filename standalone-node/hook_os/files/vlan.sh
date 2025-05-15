@@ -68,7 +68,7 @@ add_vlan_interface() {
 	if [ -n "$vlan_id" ]; then
 		if [ -n "$hw_addr" ]; then
 			echo "VLAN handling - vlan_id: '${vlan_id}', hw_addr: '${hw_addr}', searching for interface..." >&2
-			ifname="$(get_interface_name ${hw_addr})"
+			ifname="$(get_interface_name "${hw_addr}")"
 			echo "VLAN handling - vlan_id: '${vlan_id}', hw_addr: '${hw_addr}', found interface: '${ifname}'" >&2
 		else
 			echo "VLAN handling - vlan_id: '${vlan_id}', hw_addr: '${hw_addr}', no hw_addr found in kernel commandline; default ifname to eth0." >&2

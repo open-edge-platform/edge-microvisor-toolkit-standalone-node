@@ -23,12 +23,12 @@ lvm_disks="$*"
 #if one disk found and it has rootfs
 if [ "$blk_device_count" -eq "1" ];then
     echo "starting the LVM creation for the disk volume ${lvm_disks}"
-    lvm_part=$(parted -ms ${lvm_disks}  print | tail -n 1 | awk -F: '{print $1}')
+    lvm_part=$(parted -ms "${lvm_disks}"  print | tail -n 1 | awk -F: '{print $1}')
     disks="${lvm_disks}${part_number}${lvm_part}"
 
 #more than one disk found
 else
-    set -- $lvm_disks
+    set -- "$lvm_disks"
     disks=""
     while [ "$1" ]; do
         disk="/dev/$1"
@@ -54,7 +54,7 @@ fi
 #wipse the crypt luck offset if its created during FDE enabled case
 #otherwise LVM creation will fail
 partprobe "$disk"
-set -- $disks
+set -- "$disks"
 while [ "$1" ];do
     wipefs -o 0 "$1"
     shift
@@ -79,7 +79,7 @@ if [ -n "$pvs" ]; then
     done
 fi
 #pv create
-set -- $disks
+set -- "$disks"
 while [ "$1" ];do
         if echo "y" | pvcreate "$1"; then
             echo "Successfuly done pvcreate"
@@ -144,12 +144,13 @@ else
         echo "Faild to mount the root file system for for swap entry update $disk"
         exit 1
     fi
-    mount $rootfs_partition_disk /mnt
+    mount "$rootfs_partition_disk" /mnt
     mount --bind /dev /mnt/dev
     mount --bind /dev/pts /mnt/dev/pts
     mount --bind /proc /mnt/proc
     mount --bind /sys /mnt/sys
     echo "UUID=$uuid swap swap default 0 2" >> /mnt/etc/fstab
+    #shellcheck disable=SC2002
     status=$(cat "/mnt/etc/fstab" | grep -c "swap")
     if [ "$status" -ge 1 ]; then
         echo "Successfuly created the swap partition for the disk $disk"
@@ -172,7 +173,7 @@ disk="/dev/$os_disk"
 
 #get the number of devices attached to system ignoreing USB/Virtual/Removabale disks
 blk_devices=$(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}')
-set -- $blk_devices
+set -- "$blk_devices"
 blk_disk_count=$#
 final_disk_list=""
 for disk_name in ${blk_devices}
@@ -210,6 +211,7 @@ secondary_rootfs_disk_num=$((data_part_number+1))
 if echo "$disk" | grep -q "nvme"; then
     secondary_rootfs_disk="p${secondary_rootfs_disk_num}"
 else
+    # shellcheck disable=SC2034
     secondary_rootfs_disk="${secondary_rootfs_disk_num}"
 fi
 
@@ -221,10 +223,7 @@ if [ "$blk_disk_count" -eq 1 ]; then
     #secondary rootfs partitions for A/B day2 upgrades
     secondary_rootfs_disk_end=$((new_disk_partition_size+secondary_rootfs_disk_size))
 
-    parted ---pretend-input-tty "${disk}" \
-        resizepart "$data_part_number" "${new_disk_partition_size}GB" \
-        mkpart primary ext4 "${new_disk_partition_size}GB" "${secondary_rootfs_disk_end}GB"
-    if [ $? -ne 0 ]; then
+    if ! parted ---pretend-input-tty "${disk}" resizepart "$data_part_number" "${new_disk_partition_size}GB" mkpart primary ext4 "${new_disk_partition_size}GB" "${secondary_rootfs_disk_end}GB"; then
         echo "Partition creation failed for the disk ${disk} failed"
         exit 1
     else
@@ -235,7 +234,7 @@ else
     #more than one disk detected expand the tiber_persistent partition to max-swap  partition
 
     #get the last partition end point
-    data_part_end=$(parted -m $disk unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')
+    data_part_end=$(parted -m "$disk" unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')
     if echo "$data_part_end" | grep -qE '^[0-9]+\.[0-9]+$'; then
         data_part_end=$(printf "%.0f" "$data_part_end")
     fi
@@ -245,10 +244,7 @@ else
     data_part_end_size=$(echo "$disk_size - $total_size_inuse" | bc)
     #secondary rootfs partitions for A/B day2 upgrades
     secondary_rootfs_disk_end=$((data_part_end_size+secondary_rootfs_disk_size))
-    parted ---pretend-input-tty "${disk}" \
-        resizepart "$data_part_number" "${data_part_end_size}GB" \
-       	mkpart primary ext4 "${data_part_end_size}GB" "${secondary_rootfs_disk_end}GB"
-    if [ $? -ne 0 ]; then
+    if ! parted ---pretend-input-tty "${disk}" resizepart "$data_part_number" "${data_part_end_size}GB" mkpart primary ext4 "${data_part_end_size}GB" "${secondary_rootfs_disk_end}GB"; then
         echo "Partition resize for the disk ${disk} failed"
         exit 1
     else
@@ -259,7 +255,7 @@ else
 fi
 
 #get the end size of the last partition from the  disk
-last_partition_end=$(parted -ms $disk  print | tail -n 1 | awk -F: '{print $3}' | sed 's/GB$//')
+last_partition_end=$(parted -ms "$disk"  print | tail -n 1 | awk -F: '{print $3}' | sed 's/GB$//')
 if echo "$last_partition_end" | grep -qE '^[0-9]+\.[0-9]+$'; then
         last_partition_end=$(printf "%.0f" "$last_partition_end")
 fi
@@ -276,7 +272,7 @@ if [ "$blk_disk_count" -eq 1 ]; then
     #create LVM partition
     blk_disk_count=1
     lvm_partition_size="100%"
-    swap_partition_size_end=$(parted -ms $disk  print | tail -n 1 | awk -F: '{print $3}' | sed 's/[^0-9]*//g')
+    swap_partition_size_end=$(parted -ms "$disk"  print | tail -n 1 | awk -F: '{print $3}' | sed 's/[^0-9]*//g')
     parted "${disk}" --script mkpart primary ext4 "${swap_partition_size_end}GB" $lvm_partition_size
     partprobe "${disk}"
 
@@ -289,9 +285,7 @@ else
 fi
 
 #finally expand the data partition using resize2fs
-e2fsck -f -y "$data_partition_disk"
-resize2fs "$data_partition_disk"
-if [ $? -ne 0 ]; then
+if ! e2fsck -f -y "$data_partition_disk" || ! resize2fs "$data_partition_disk"; then
     echo "Partition resize for the disk ${data_partition_disk} failed"
     exit 1
 else

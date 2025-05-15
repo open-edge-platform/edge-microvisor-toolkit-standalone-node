@@ -45,7 +45,7 @@ configure:
 	echo 'socks_proxy=$(socks_proxy)' >> hook_os/config
 	echo 'no_proxy=$(no_proxy)' >> hook_os/config
 
-lint: license yamllint mdlint
+lint: license yamllint mdlint shellcheck
 
 build: configure
 	@# Help: Runs build stage

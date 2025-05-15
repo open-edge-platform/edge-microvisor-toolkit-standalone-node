@@ -1,7 +1,7 @@
+#!/bin/bash
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-#!/bin/bash
 
 IMG_DIR=./images
 CHRT_DIR=./charts
@@ -84,28 +84,28 @@ download_extension_charts () {
 		url=$(echo "${chart}" | awk -F':' '{print $3":"$4}')
 		version=$(echo "${chart}" | awk -F':' '{print $5}')
 	
-		if [ ${repo} == "intel-rs" ]; then
-			echo Fetching ${name} chart
-			helm fetch -d ${CHRT_DIR} ${url}/${name} --version ${version}
-			base64 -w 0 ${CHRT_DIR}/${name}-$version.tgz > ${CHRT_DIR}/$name.base64
+		if [ "${repo}" == "intel-rs" ]; then
+			echo Fetching "${name}" chart
+			helm fetch -d ${CHRT_DIR} "${url}"/"${name}" --version "${version}"
+			base64 -w 0 ${CHRT_DIR}/"${name}"-"$version".tgz > ${CHRT_DIR}/"$name".base64
 	
 		else
-			echo Fetching ${name} chart
-			helm repo add ${repo} ${url}
-			helm fetch -d ${CHRT_DIR} ${repo}/${name} --version ${version}
-			if [ ${name} == "cert-manager" ]; then version="v${version}"; fi
-			if [ ${name} == "node-feature-discovery" ]; then version="chart-${version}"; fi
-			base64 -w 0 ${CHRT_DIR}/${name}-${version}.tgz > ${CHRT_DIR}/${name}.base64
+			echo Fetching "${name}" chart
+			helm repo add "${repo}" "${url}"
+			helm fetch -d ${CHRT_DIR} "${repo}"/"${name}" --version "${version}"
+			if [ "${name}" == "cert-manager" ]; then version="v${version}"; fi
+			if [ "${name}" == "node-feature-discovery" ]; then version="chart-${version}"; fi
+			base64 -w 0 ${CHRT_DIR}/"${name}"-"${version}".tgz > ${CHRT_DIR}/"${name}".base64
 		fi
 		# Remove unnecessary files from kube-prometheus-stack, reason:  then base encoded file becomes to big and cannot be consumed when installing via add-on on RKE2
-		if [ ${name} == "kube-prometheus-stack" ]; then
-			tar -xzf ${CHRT_DIR}/${name}-${version}.tgz -C ${CHRT_DIR}
-			rm -rf ${CHRT_DIR}/${name}-${version}.tgz
-			rm ${CHRT_DIR}/${name}/README.md
-			rm ${CHRT_DIR}/${name}/templates/grafana/dashboards-1.14/*windows*
-			rm -rf ${CHRT_DIR}/${name}/templates/thanos-ruler
-			tar -cf ${CHRT_DIR}/${name}-${version}.tgz --use-compress-program="gzip -9" -C ${CHRT_DIR} ${name}
-			base64 -w 0 ${CHRT_DIR}/${name}-${version}.tgz > ${CHRT_DIR}/${name}.base64
+		if [ "${name}" == "kube-prometheus-stack" ]; then
+			tar -xzf ${CHRT_DIR}/"${name}"-"${version}".tgz -C ${CHRT_DIR}
+			rm -rf ${CHRT_DIR}/"${name}"-"${version}".tgz
+			rm ${CHRT_DIR}/"${name}"/README.md
+			rm ${CHRT_DIR}/"${name}"/templates/grafana/dashboards-1.14/*windows*
+			rm -rf ${CHRT_DIR}/"${name}"/templates/thanos-ruler
+			tar -cf ${CHRT_DIR}/"${name}"-"${version}".tgz --use-compress-program="gzip -9" -C ${CHRT_DIR} "${name}"
+			base64 -w 0 ${CHRT_DIR}/"${name}"-"${version}".tgz > ${CHRT_DIR}/"${name}".base64
 		fi
 		# Template HelmChart addon manifets using the base64 chart
 		awk "/chartContent:/ {printf \"  chartContent: \"; while ((getline line < \"${CHRT_DIR}/${name}.base64\") > 0) printf \"%s\", line; close(\"${CHRT_DIR}/${name}.base64\"); print \"\"; next} 1" "${TPL_DIR}/${name}.yaml" > "${EXT_DIR}/${name}.yaml"
@@ -122,15 +122,15 @@ download_extension_images () {
 	echo "Downloading container images"
 	mkdir -p ${IMG_DIR}
 	for image in "${images[@]}" ; do
-		podman pull ${image}
-		img_name=$(echo ${image##*/} | tr ':' '-')
+		podman pull "${image}"
+		img_name=$(echo "${image##*/}" | tr ':' '-')
 		DEST=${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}
-		podman image save --output ${DEST}.tmp ${image}
-		bsdtar -c -f ${DEST} --include=manifest.json --include=repositories @${DEST}.tmp
-		bsdtar -r -f ${DEST} --exclude=manifest.json --exclude=repositories @${DEST}.tmp
-		rm -f ${DEST}.tmp
-		zstd -T0 -16 -f --long=25 --no-progress ${DEST} -o ${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}.zst
-		rm -f ${DEST}
+		podman image save --output "${DEST}".tmp "${image}"
+		bsdtar -c -f "${DEST}" --include=manifest.json --include=repositories @"${DEST}".tmp
+		bsdtar -r -f "${DEST}" --exclude=manifest.json --exclude=repositories @"${DEST}".tmp
+		rm -f "${DEST}".tmp
+		zstd -T0 -16 -f --long=25 --no-progress "${DEST}" -o ${IMG_DIR}/${TAR_PRX}-"${img_name}".${TAR_SFX}.zst
+		rm -f "${DEST}"
 	done
 }
 # Download K8s dashboard

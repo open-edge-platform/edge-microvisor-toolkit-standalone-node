@@ -32,10 +32,10 @@ kubectl describe pods -A | sudo tee $LOG_DIR/describe-pods-log
 # Copy all cloud-init logs, system logs to LOGS_DIR
 sudo rsync -av --exclude='$LOG_DIR' /var/log/ $LOG_DIR
 
-pushd $LOG_DIR
+pushd $LOG_DIR || exit 1
 
 sudo tar -czf edge_node_logs.tar.gz ./*
 
 sudo chmod 755 edge_node_logs.tar.gz
 
-popd
+popd || exit 1

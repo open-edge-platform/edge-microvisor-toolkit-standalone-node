@@ -31,11 +31,13 @@ function obtain_linuxkit_binary_cached() {
 function linuxkit_build() {
 	# Ensure OUTPUT_ID is set
 	if [[ "${OUTPUT_ID}" == "" ]]; then
+		# shellcheck disable=SC2154
 		log error "\${OUTPUT_ID} is not set after ${kernel_info[VERSION_FUNC]}"
 		exit 1
 	fi
 
 	# If the image is in the local docker cache, skip building
+	# shellcheck disable=SC2154
 	if [[ -n "$(docker images -q "${kernel_oci_image}")" ]]; then
 		log info "Kernel image ${kernel_oci_image} already in local cache; trying a pull to update, but tolerate failures..."
 		docker pull "${kernel_oci_image}" || log warn "Pull failed, fallback to local image ${kernel_oci_image} - results might be inconsistent."
@@ -46,6 +48,7 @@ function linuxkit_build() {
 			log info "Successfully pulled kernel ${kernel_oci_image} from registry."
 		else
 			log error "Failed to pull kernel ${kernel_oci_image} from registry."
+			# shellcheck disable=SC2154
 			log error "You might want to build the kernel locally, by running './build.sh kernel ${inventory_id}'"
 			exit 7
 		fi
@@ -64,6 +67,7 @@ function linuxkit_build() {
 	# HOOK_VERSION is read-only & already exported so is not listed in the env vars here, but is included in the dollar-sign list for envsubst to process
 	# shellcheck disable=SC2002 # Again, no, I love my cat, leave me alone
 	# shellcheck disable=SC2016 # I'm using single quotes to avoid shell expansion, envsubst wants the dollar signs.
+	# shellcheck disable=SC2154
 	cat "hook-os.yaml" |
 		HOOK_KERNEL_IMAGE="${kernel_oci_image}" HOOK_KERNEL_ID="${inventory_id}" HOOK_KERNEL_VERSION="${kernel_oci_version}" \
 			HOOK_CONTAINER_BOOTKIT_IMAGE="${HOOK_CONTAINER_BOOTKIT_IMAGE}" \
