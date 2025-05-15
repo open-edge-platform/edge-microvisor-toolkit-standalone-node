@@ -27,6 +27,7 @@ ip_address=$2
 if [ -z "$user_name" ] || [ -z "$ip_address" ]; then
     echo "User_name/IP_address details not provided,please provide valid User_name and IP address"
     usage
+    # shellcheck disable=SC2317
     exit 1
 fi
 

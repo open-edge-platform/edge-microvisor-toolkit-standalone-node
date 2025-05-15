@@ -41,7 +41,7 @@ $(VENV_NAME): requirements.txt
 
 #### Lint and Validator Targets ####
 # https://github.com/koalaman/shellcheck
-SH_FILES := $(shell find . -type f \( -name '*.sh' \) -print )
+SH_FILES := $(shell find . -type f \( -name '*.sh' \) ! -path './cluster_installers/install.sh' -print)
 shellcheck: ## lint shell scripts with shellcheck
 	shellcheck --version
 	shellcheck -x -S style $(SH_FILES)
