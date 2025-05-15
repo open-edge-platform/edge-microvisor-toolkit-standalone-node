@@ -324,29 +324,29 @@ Install a WordPress application as a test application using `helm`.
 
 2. In Grafana navigate to ``connections/Data sources`` :
 
-   ![Prometheus data source](./_images/obs-grafana-datasource.png "Prometheus data source")
+   ![Prometheus data source](../../images//obs-grafana-datasource.png "Prometheus data source")
 
 3. Add a new Prometheus data source:
 
-   ![Prometheus new](./_images/obs-grafana-add-prometheus.png "Prometheus new")
+   ![Prometheus new](../../images/obs-grafana-add-prometheus.png "Prometheus new")
 
 4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
 
-   ![Prometheus save](./_images/obs-grafana-set.png "Prometheus save")
+   ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
 ## Step 8: Querying Metrics
 
 1. Create a dashboard using prometheus data source:
 
-   ![Prometheus dashboard](./_images/obs-grafana-dashboard.png "Prometheus dashboard")
+   ![Prometheus dashboard](../../images/obs-grafana-dashboard.png "Prometheus dashboard")
 
 2. Select the data source:
 
-   ![Prometheus source](./_images/obs-grafana-prometheus.png "Prometheus datasource")
+   ![Prometheus source](../../images/obs-grafana-prometheus.png "Prometheus datasource")
 
 3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
 
-   ![Prometheus source](./_images/obs-grafana-build-dashboard.png "Prometheus datasource")
+   ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
 

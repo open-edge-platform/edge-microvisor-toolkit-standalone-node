@@ -2,5 +2,4 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. toctree::
-   Overview
    Get-Started-Guide
