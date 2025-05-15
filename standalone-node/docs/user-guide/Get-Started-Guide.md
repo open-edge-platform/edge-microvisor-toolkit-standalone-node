@@ -3,7 +3,7 @@
 ## Get Started
 
 The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive 
-on Linux-based operating systems. This section provides step-by-step instructions to set up the environment required 
+on Linux based operating systems. This section provides step-by-step instructions to set up the environment required 
 for USB-based provisioning for the standalone node.
 
 ### Step 1: Prerequisites
@@ -34,7 +34,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 -  Update the config file
   
-   ```
+   ```bash
    vi config
 
    # Proxy configuration
@@ -47,15 +47,15 @@ cd edge-microvisor-toolkit-standalone-node
 
    # SSH configuration (get the key using "cat ~/.ssh/id_rsa.pub")
    ssh_key=""
-
    ```
 
 #### 1.4: Create the Standalone Installation Tar File
 
 - To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
-   ```
+   ```bash
    make build
+
    ```
 > **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
@@ -64,7 +64,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
-   ```
+   ```bash
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
@@ -73,7 +73,7 @@ cd edge-microvisor-toolkit-standalone-node
 
   Extract the contents of sen-installation-files.tar.gz
 
-  ```
+  ```bash
    tar -xzf sen-installation-files.tar.gz
   ```
 
@@ -89,17 +89,17 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Run the preparation script to create the bootable USB
 
-   ```
+   ```bash
    sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
    ```
 
-   ```
+   ```bash
    Example usage:
    ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
    ```
    - Required Inputs for the Script:
 
-     ```
+     ```bash
      - usb: A valid USB device name (e.g., /dev/sdc)
      - usb-bootable-files.tar.gz: The tar file containing bootable files
      - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
@@ -126,6 +126,17 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
+#### 2.1  Login to the Edge Node After Successful Installation
+
+Use the credentials provided as input while preparing the bootable USB drive.
+
+- Check Kubernetes Pods Status
+  Run the following commands to check the status of Kubernetes pods:
+
+  ```bash
+  source /etc/environment && export KUBECONFIG
+  kubectl get pods -A
+  ```
 
 ## Step 3: Set up tools on Developer's System
 
@@ -135,7 +146,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 1. Install `kubectl`:
 
-   ```
+   ```bash
    sudo apt-get update
    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -148,7 +159,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 2. Copy the kubeconfig file from the Edge Node:
 
-   ```
+   ```bash
    mkdir ~/.kube
    export EN_IP=<EN_IP>
    scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
@@ -156,20 +167,20 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 3. Update the Edge Node IP in the kubeconfig file and export the path as KUBECONFIG:
 
-   ```shell
+   ```bash
    sed -i "s/127\.0\.0\.1/${EN_IP}/g" ~/.kube/config
    export KUBECONFIG=~/.kube/config
    ```
 
 4. Test the connection:
 
-   ```
+   ```bash
    kubectl get pods -A
    ```
 
 5. Install `helm`:
 
-   ```
+   ```bash
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
    chmod 700 get_helm.sh
    ./get_helm.sh
@@ -179,25 +190,28 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 1. View the Kubernetes dashboard pods:
 
-   ```
+   ```bash
    kubectl get pods -n kubernetes-dashboard
    ```
 
 2. Start kube proxy:
 
-   ```
+   ```bash
    kubectl proxy &
    ```
 
 3. Generate an access token:
 
-   ```
+   ```bash
    kubectl -n kubernetes-dashboard create token admin-user
    ```
 
 4. Access the dashboard in a browser:
+   - Open a web browser on your Ubuntu desktop and navigate to the following URL
 
-   `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+     `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+
+     > **Note:**  This URL accesses the Kubernetes Dashboard through the proxy you started earlier.
 
 5. Login using the previously generated access token.
 
@@ -207,7 +221,7 @@ Install a WordPress application as a test application using `helm`.
 
 1. Add the `bitnami` repository:
 
-   ```
+   ```bash
    helm repo add bitnami https://charts.bitnami.com/bitnami
    ```
 
@@ -236,8 +250,8 @@ Install a WordPress application as a test application using `helm`.
        external-dns.alpha.kubernetes.io/hostname: "wordpress.example.org"
    ```
 
-   ```
-   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f .\values-wp.yaml --version 19.4.3
+   ```bash
+   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f values-wp.yaml --version 19.4.3
    ```
 
 3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
@@ -269,13 +283,13 @@ Install a WordPress application as a test application using `helm`.
      - Ingress
    ```
 
-   ```
+   ```bash
    kubectl apply -f wp-net-policy.yaml
    ```
 
 4. View the pods running
 
-   ```
+   ```bash
    kubectl get pods -n wordpress
    NAME                           READY   STATUS    RESTARTS       AGE
    my-wordpress-d57b44f9c-lw69m   1/1     Running   3 (3m4s ago)   10m
@@ -284,7 +298,7 @@ Install a WordPress application as a test application using `helm`.
 
 5. Forward port to be able to access WP
 
-   ```
+   ```bash
    kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
    ```
 
@@ -305,7 +319,7 @@ Install a WordPress application as a test application using `helm`.
 
 2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
 
-   ```
+   ```bash
    http://<EN IP>:32000
    ```
 

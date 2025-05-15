@@ -76,7 +76,7 @@ else
         set gfxmode=text
 
         menuentry "Alpine Linux" {
-	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quite loglevel=3 usbcore.delay_ms=1000 modloop=none text
+	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quite loglevel=7 usbcore.delay_ms=2000 usbcore.autosuspend=-1 modloop=none text
         initrd /boot/initrd
 }
 EOF
