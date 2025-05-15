@@ -1,39 +1,66 @@
-# Get Started Guide
+# Standalone Node USB base provisioing
 
-## Step 1: Prepare the Developer's System
+## Get Started
 
-The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive on Linux-based operating systems. The installer has been tested on Ubuntu 22.04 LTS.
+The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive 
+on Linux-based operating systems. This section provides step-by-step instructions to set up the environment required 
+for USB-based provisioning for the standalone node.
 
----
+### Step 1: Prerequisites
 
-## Step 2: Build from Source
+#### 1.1: Docker and docker proxy Setup
 
-Create the Standalone Installation Tar File
+Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
+Refer to the links below for Docker installation and proxy setup:
 
-- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
+- [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
+- [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
 
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the hook_os/config file
+> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
 
--  Modify the config file
+#### 1.2: Repository Setup
 
+Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
+is crucial for accessing the tools required for standalone node
+
+```bash
+git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
+cd edge-microvisor-toolkit-standalone-node
+```
+
+#### 1.3: Proxy settings
+
+> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
+
+-  Update the config file
+  
    ```
    vi config
+
    # Proxy configuration
-   http_proxy="http://proxy-dmz.intel.com:912"
-   https_proxy="http://proxy-dmz.intel.com:912"
-   no_proxy="localhost,127.0.0.1,intel.com,*.intel.com,10.0.0.0/8"
-   HTTP_PROXY="http://proxy-dmz.intel.com:912"
-   HTTPS_PROXY="http://proxy-dmz.intel.com:912"
-   NO_PROXY="localhost,127.0.0.1,intel.com,*.intel.com,10.0.0.0/8"
+   # Uncomment and set the following variables if you need to use a proxy
+   # Replace <proxy_url> with your actual proxy URL and port
+   # http_proxy="<proxy_url>"
+   # https_proxy="<proxy_url>"
+   # ftp_proxy="<proxy_url>"
+   # no_proxy="127.0.0.1,localhost,10.0.0.0/8"
 
    # SSH configuration (get the key using "cat ~/.ssh/id_rsa.pub")
    ssh_key=""
+
    ```
+
+#### 1.4: Create the Standalone Installation Tar File
+
+- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
    ```
    make build
    ```
-## Step 3:  Prepare the USB Drive
+> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
+  The file will be located in the `$(pwd)/installation-scripts/out` directory.
+
+#### 1.5:  Prepare the USB Drive
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
@@ -42,7 +69,7 @@ Create the Standalone Installation Tar File
    ```
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Copy files to prepare the Bootable USB
+- Copy standalone installation tar file to developer system to prepare the Bootable USB
 
   Extract the contents of sen-installation-files.tar.gz
 
@@ -57,29 +84,34 @@ Create the Standalone Installation Tar File
   config-file
   bootable-usb-prepare.sh
   edgenode-logs-collection.sh
+
   ```
 
 - Run the preparation script to create the bootable USB
 
    ```
-   sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config
+   sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
    ```
 
    ```
    Example usage:
-   ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config
+   ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
    ```
    - Required Inputs for the Script:
 
-     usb: A valid USB device name (e.g., /dev/sdc).
-     usb-bootable-files.tar.gz: The tar file containing bootable files.
-     config-file: Configuration file for proxy settings (if the edge node is behind a firewall).
-     Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node.
-     User credentials: Set the username and password for the edge node.
+     ```
+     - usb: A valid USB device name (e.g., /dev/sdc)
+     - usb-bootable-files.tar.gz: The tar file containing bootable files
+     - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
+     - Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node
+     - User credentials: Set the username and password for the edge node
+     ```
 
      > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
 
-## Step 5: Deploy on Standalone Node
+## Step 2: Deploy on Standalone Node
+
+- Unplug the attached bootable USB from developer system 
 
 - Plug the created bootable USB pen drive into the standalone node
 
@@ -95,7 +127,7 @@ Create the Standalone Installation Tar File
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
 
-## Step 5: Set up tools on Developer's System
+## Step 3: Set up tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
@@ -117,8 +149,8 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 2. Copy the kubeconfig file from the Edge Node:
 
    ```
-   export EN_IP=<EN_IP>
    mkdir ~/.kube
+   export EN_IP=<EN_IP>
    scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
    ```
 
@@ -143,9 +175,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
----
-
-## Step 6: Set Up Kubernetes Dashboard Access
+## Step 4: Set Up Kubernetes Dashboard Access
 
 1. View the Kubernetes dashboard pods:
 
@@ -171,9 +201,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 5. Login using the previously generated access token.
 
----
-
-## Step 7: Install Sample Application
+## Step 5: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
@@ -266,9 +294,7 @@ Install a WordPress application as a test application using `helm`.
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
 
----
-
-## Step 8: Accessing Grafana
+## Step 6: Accessing Grafana
 
 1. Retrieve Grafana credentials:
 
@@ -283,9 +309,7 @@ Install a WordPress application as a test application using `helm`.
    http://<EN IP>:32000
    ```
 
----
-
-## Step 9: Adding Prometheus metrics to Grafana
+## Step 7: Adding Prometheus metrics to Grafana
 
 1. Get Prometheus credentials:
 
@@ -310,7 +334,7 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus save](./_images/obs-grafana-set.png "Prometheus save")
 
-## Step 10: Querying Metrics
+## Step 8: Querying Metrics
 
 1. Create a dashboard using prometheus data source:
 
@@ -323,8 +347,6 @@ Install a WordPress application as a test application using `helm`.
 3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
 
    ![Prometheus source](./_images/obs-grafana-build-dashboard.png "Prometheus datasource")
-
----
 
 ## Troubleshooting
 

@@ -12,14 +12,14 @@ on:
     paths:
       - "standalone-node/**"
 
-permissions: {}
+#permissions: {}
 
 jobs:
   post-merge-pipeline:
-    permissions:
-      contents: read
-      security-events: read
-      id-token: read
+    #permissions:
+      #contents: read
+      #security-events: read
+      #id-token: read
     uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@0.1.5
     with:
       run_version_check: true
