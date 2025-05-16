@@ -45,8 +45,6 @@ cd edge-microvisor-toolkit-standalone-node
    # ftp_proxy="<proxy_url>"
    # no_proxy="127.0.0.1,localhost,10.0.0.0/8"
 
-   # SSH configuration (get the key using "cat ~/.ssh/id_rsa.pub")
-   ssh_key=""
    ```
 
 #### 1.4: Create the Standalone Installation Tar File
