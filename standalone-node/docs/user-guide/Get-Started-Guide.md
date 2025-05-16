@@ -1,4 +1,4 @@
-# Standalone Node USB base provisioing
+# Standalone Node USB based provisioning 
 
 ## Get Started
 
