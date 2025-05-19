@@ -1,0 +1,16 @@
+---
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Same as '--ignorefile'
+# Default is '.trivyignore'
+ignorefile: hook-os/.trivyignore
+
+scan:
+  # Same as '--skip-dirs'
+  # Default is empty.
+  # The code in the following directories is unchanged from the open-source version.
+  skip-dirs:
+    - hook_os/images/hook-containerd
+    - hook_os/images/hook-runc
+    - hook_os/kernel

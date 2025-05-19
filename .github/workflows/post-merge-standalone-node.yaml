@@ -12,21 +12,22 @@ on:
     paths:
       - "standalone-node/**"
 
-permissions: {}
+#permissions: {}
 
 jobs:
   post-merge-pipeline:
-    permissions:
-      contents: read
-      security-events: read
-      id-token: read
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@0.1.5
+    #permissions:
+      #contents: read
+      #security-events: read
+      #id-token: read
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@main
     with:
       run_version_check: true
       run_dep_version_check: true
+      run_freeup_ubuntu_space: true
       run_build: true
       run_lint: true
-      run_docker_build: false
+      run_docker_build: true
       run_docker_push: false
       run_version_tag: true
       run_artifact: false

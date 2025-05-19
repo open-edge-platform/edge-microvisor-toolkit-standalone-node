@@ -67,6 +67,12 @@ dependency-check:
 	echo $@
 	@echo "---END MAKEFILE TEST---"
 
+docker-build: 
+	@# Help: Runs docker-build stage
+	@echo "---MAKEFILE BUILD---"
+	echo $@
+	@echo "---END MAKEFILE Build---"
+
 test:
 	@# Help: Runs test stage
 	@echo "---MAKEFILE TEST---"

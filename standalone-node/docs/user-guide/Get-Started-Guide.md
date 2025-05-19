@@ -1,55 +1,77 @@
-# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+# Standalone Node USB based provisioning 
 
-# Get Started Guide
+## Get Started
 
-## Step 1: Prepare the Developer's System
+The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive 
+on Linux based operating systems. This section provides step-by-step instructions to set up the environment required 
+for USB-based provisioning for the standalone node.
 
-The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive on Linux-based operating systems. The installer has been tested on Ubuntu 22.04 LTS.
+### Step 1: Prerequisites
 
----
+#### 1.1: Docker and docker proxy Setup
 
-## Step 2: Build from Source
+Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
+Refer to the links below for Docker installation and proxy setup:
 
-Create the Standalone Installation Tar File
+- [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
+- [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
+
+> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
+
+#### 1.2: Repository Setup
+
+Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
+is crucial for accessing the tools required for standalone node
+
+```bash
+git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
+cd edge-microvisor-toolkit-standalone-node
+```
+
+#### 1.3: Proxy settings
+
+> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
+
+-  Update the config file
+  
+   ```bash
+   vi config
+
+   # Proxy configuration
+   # Uncomment and set the following variables if you need to use a proxy
+   # Replace <proxy_url> with your actual proxy URL and port
+   # http_proxy="<proxy_url>"
+   # https_proxy="<proxy_url>"
+   # ftp_proxy="<proxy_url>"
+   # no_proxy="127.0.0.1,localhost,10.0.0.0/8"
+
+   ```
+
+#### 1.4: Create the Standalone Installation Tar File
 
 - To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the hook_os/config file
-
--  Modify the config file
-
-   ```
-   vi config
-   # Proxy configuration
-   http_proxy="http://proxy-dmz.intel.com:912"
-   https_proxy="http://proxy-dmz.intel.com:912"
-   no_proxy="localhost,127.0.0.1,intel.com,*.intel.com,10.0.0.0/8"
-   HTTP_PROXY="http://proxy-dmz.intel.com:912"
-   HTTPS_PROXY="http://proxy-dmz.intel.com:912"
-   NO_PROXY="localhost,127.0.0.1,intel.com,*.intel.com,10.0.0.0/8"
-
-   # SSH configuration (get the key using "cat ~/.ssh/id_rsa.pub")
-   ssh_key=""
-   ```
-
-   ```
+   ```bash
    make build
+
    ```
-## Step 3:  Prepare the USB Drive
+> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
+  The file will be located in the `$(pwd)/installation-scripts/out` directory.
+
+#### 1.5:  Prepare the USB Drive
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
-   ```
+   ```bash
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Copy files to prepare the Bootable USB
+- Copy standalone installation tar file to developer system to prepare the Bootable USB
 
   Extract the contents of sen-installation-files.tar.gz
 
-  ```
+  ```bash
    tar -xzf sen-installation-files.tar.gz
   ```
 
@@ -60,29 +82,34 @@ Create the Standalone Installation Tar File
   config-file
   bootable-usb-prepare.sh
   edgenode-logs-collection.sh
+
   ```
 
 - Run the preparation script to create the bootable USB
 
-   ```
-   sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config
+   ```bash
+   sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
    ```
 
-   ```
+   ```bash
    Example usage:
-   ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config
+   ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
    ```
    - Required Inputs for the Script:
 
-     usb: A valid USB device name (e.g., /dev/sdc).
-     usb-bootable-files.tar.gz: The tar file containing bootable files.
-     config-file: Configuration file for proxy settings (if the edge node is behind a firewall).
-     Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node.
-     User credentials: Set the username and password for the edge node.
+     ```bash
+     - usb: A valid USB device name (e.g., /dev/sdc)
+     - usb-bootable-files.tar.gz: The tar file containing bootable files
+     - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
+     - Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node
+     - User credentials: Set the username and password for the edge node
+     ```
 
      > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
 
-## Step 5: Deploy on Standalone Node
+## Step 2: Deploy on Standalone Node
+
+- Unplug the attached bootable USB from developer system 
 
 - Plug the created bootable USB pen drive into the standalone node
 
@@ -97,8 +124,19 @@ Create the Standalone Installation Tar File
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
+#### 2.1  Login to the Edge Node After Successful Installation
 
-## Step 5: Set up tools on Developer's System
+Use the credentials provided as input while preparing the bootable USB drive.
+
+- Check Kubernetes Pods Status
+  Run the following commands to check the status of Kubernetes pods:
+
+  ```bash
+  source /etc/environment && export KUBECONFIG
+  kubectl get pods -A
+  ```
+
+## Step 3: Set up tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
@@ -106,7 +144,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 1. Install `kubectl`:
 
-   ```
+   ```bash
    sudo apt-get update
    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -119,70 +157,69 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 2. Copy the kubeconfig file from the Edge Node:
 
-   ```
-   export EN_IP=<EN_IP>
+   ```bash
    mkdir ~/.kube
+   export EN_IP=<EN_IP>
    scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
    ```
 
 3. Update the Edge Node IP in the kubeconfig file and export the path as KUBECONFIG:
 
-   ```shell
+   ```bash
    sed -i "s/127\.0\.0\.1/${EN_IP}/g" ~/.kube/config
    export KUBECONFIG=~/.kube/config
    ```
 
 4. Test the connection:
 
-   ```
+   ```bash
    kubectl get pods -A
    ```
 
 5. Install `helm`:
 
-   ```
+   ```bash
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
    chmod 700 get_helm.sh
    ./get_helm.sh
    ```
 
----
-
-## Step 6: Set Up Kubernetes Dashboard Access
+## Step 4: Set Up Kubernetes Dashboard Access
 
 1. View the Kubernetes dashboard pods:
 
-   ```
+   ```bash
    kubectl get pods -n kubernetes-dashboard
    ```
 
 2. Start kube proxy:
 
-   ```
+   ```bash
    kubectl proxy &
    ```
 
 3. Generate an access token:
 
-   ```
+   ```bash
    kubectl -n kubernetes-dashboard create token admin-user
    ```
 
 4. Access the dashboard in a browser:
+   - Open a web browser on your Ubuntu desktop and navigate to the following URL
 
-   `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+     `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+
+     > **Note:**  This URL accesses the Kubernetes Dashboard through the proxy you started earlier.
 
 5. Login using the previously generated access token.
 
----
-
-## Step 7: Install Sample Application
+## Step 5: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
 1. Add the `bitnami` repository:
 
-   ```
+   ```bash
    helm repo add bitnami https://charts.bitnami.com/bitnami
    ```
 
@@ -211,8 +248,8 @@ Install a WordPress application as a test application using `helm`.
        external-dns.alpha.kubernetes.io/hostname: "wordpress.example.org"
    ```
 
-   ```
-   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f .\values-wp.yaml --version 19.4.3
+   ```bash
+   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f values-wp.yaml --version 19.4.3
    ```
 
 3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
@@ -244,13 +281,13 @@ Install a WordPress application as a test application using `helm`.
      - Ingress
    ```
 
-   ```
+   ```bash
    kubectl apply -f wp-net-policy.yaml
    ```
 
 4. View the pods running
 
-   ```
+   ```bash
    kubectl get pods -n wordpress
    NAME                           READY   STATUS    RESTARTS       AGE
    my-wordpress-d57b44f9c-lw69m   1/1     Running   3 (3m4s ago)   10m
@@ -259,7 +296,7 @@ Install a WordPress application as a test application using `helm`.
 
 5. Forward port to be able to access WP
 
-   ```
+   ```bash
    kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
    ```
 
@@ -269,9 +306,7 @@ Install a WordPress application as a test application using `helm`.
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
 
----
-
-## Step 8: Accessing Grafana
+## Step 6: Accessing Grafana
 
 1. Retrieve Grafana credentials:
 
@@ -282,13 +317,11 @@ Install a WordPress application as a test application using `helm`.
 
 2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
 
-   ```
+   ```bash
    http://<EN IP>:32000
    ```
 
----
-
-## Step 9: Adding Prometheus metrics to Grafana
+## Step 7: Adding Prometheus metrics to Grafana
 
 1. Get Prometheus credentials:
 
@@ -303,31 +336,29 @@ Install a WordPress application as a test application using `helm`.
 
 2. In Grafana navigate to ``connections/Data sources`` :
 
-   ![Prometheus data source](./_images/obs-grafana-datasource.png "Prometheus data source")
+   ![Prometheus data source](../../images//obs-grafana-datasource.png "Prometheus data source")
 
 3. Add a new Prometheus data source:
 
-   ![Prometheus new](./_images/obs-grafana-add-prometheus.png "Prometheus new")
+   ![Prometheus new](../../images/obs-grafana-add-prometheus.png "Prometheus new")
 
 4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
 
-   ![Prometheus save](./_images/obs-grafana-set.png "Prometheus save")
+   ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
-## Step 10: Querying Metrics
+## Step 8: Querying Metrics
 
 1. Create a dashboard using prometheus data source:
 
-   ![Prometheus dashboard](./_images/obs-grafana-dashboard.png "Prometheus dashboard")
+   ![Prometheus dashboard](../../images/obs-grafana-dashboard.png "Prometheus dashboard")
 
 2. Select the data source:
 
-   ![Prometheus source](./_images/obs-grafana-prometheus.png "Prometheus datasource")
+   ![Prometheus source](../../images/obs-grafana-prometheus.png "Prometheus datasource")
 
 3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
 
-   ![Prometheus source](./_images/obs-grafana-build-dashboard.png "Prometheus datasource")
-
----
+   ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
 

@@ -1,99 +1,52 @@
-# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+# Edge Microvisor Toolkit Standalone Node
 
-### Pre-conditions for Build Environment
+Designed to enable Edge AI applications evaluation on Intel platforms.
 
-Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
-Refer to the links below for Docker installation and proxy setup:
+## Overview
 
-- [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
-- [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
+The Edge Microvisor Toolkit Standalone Node solution, designed to enable Edge AI applications evaluation on Intel platforms is designed to empower enterprise customers and developers by providing a rapid and efficient means to familiarize, evaluate, and trial Edge AI applications on Intel Architecture-based platforms. This comprehensive solution stack includes the edge-optimized immutable Edge Microvisor Toolkit, integrated with Kubernetes and foundational extensions, enabling the deployment of both cloud-native and legacy VM-based applications.
 
-> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
+Key Features:
 
----
+- **Edge Optimized Immutable Toolkit**: The Edge Microvisor Toolkit is specifically optimized for edge environments, ensuring robust performance on Intel Architecture-based platforms and security.
+- **Kubernetes Integration**: Seamlessly deploy and manage applications using Kubernetes and cloud-native tools.
+- **Foundational Extensions**: These extensions support the deployment of diverse application types, including both modern cloud-native and traditional VM-based applications.
 
-### Create the Standalone Installation Tar File
+Upon completion of the evaluation using the Edge Microvisor Toolkit Standalone Node solution, designed to enable Edge AI applications evaluation on Intel platforms customers will gain critical insights into the capabilities of edge platforms and Edge AI applications. This knowledge is essential for deploying use-case-specific applications and will significantly aid in scaling out deployments.
 
-To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command:
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the `hook_os/config` file.
+## How It Works
 
-```bash
-make build
-```
+To begin the evaluation process, the customer downloads the Edge Microvisor Toolkit Standalone Node installer to their laptop or development system. This system will be used to create a bootable USB installer for the edge node designated for evaluation. During this stage, the customer can configure settings such as proxy and user credentials.
 
-This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
-The file will be located in the `$(pwd)/installation-scripts/out` directory.
+Next, the customer runs the automated installer, which generates a bootable USB stick. This USB stick is self-contained and includes all the necessary software components to install the Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
 
----
+With the bootable USB stick prepared, the customer can proceed to install it on the edge node.
 
-### Copy Files to Prepare the Bootable USB
+Once the edge node is up and running, the customer evaluates various Edge AI applications, pipelines, and microservices available from the Intel Edge services catalog and open-source repositories using standard tools like `helm`.
 
-Extract the contents of `sen-installation-files.tar.gz`:
+System requirements for the hardware and software requirements Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the latest Intel® kernel to ensure all features are exposed and available for application and workloads. The microvisor has been validated on the following platforms.
 
-```bash
-tar -xzf sen-installation-files.tar.gz
-```
+![How it works](images/howitworks.png)  
 
-The extracted files will include:
+### System Requirements
 
-- `usb-bootable-files.tar.gz`
-- `config-file`
-- `bootable-usb-prepare.sh`
-- `edgenode-logs-collection.sh`
+The Edge Microvisor Toolkit Standalone Node solution is engineered to support a diverse range of Intel® platforms, ensuring compatibility and optimal performance. Below is a detailed summary of the supported processor families and system requirements:
 
----
+#### Supported Processor Families
 
-### Prepare the Bootable USB Device
+| Processor Family            | Supported Models                                                                |
+|-----------------------------|---------------------------------------------------------------------------------|
+| **Intel Atom® Processors**  | Intel® Atom® X Series                                                           |
+| **Intel® Core™ Processors** | 12th Gen Intel® Core™, 13th Gen Intel® Core™, Intel® Core™ Ultra (Series 1)     |
+| **Intel® Xeon® Processors** | 4th Gen Intel® Xeon® SP, 3rd Gen Intel® Xeon® SP                                |
 
-Use the `bootable-usb-prepare.sh` script to:
+#### Memory, Storage and Networking Requirements
 
-1. Generate a bootable USB device for booting the hook OS into RAM.
-2. Install the OS on the edge node.
+| Component      | Minimum Requirements           |
+|----------------|--------------------------------|
+| **RAM**        | 8GB                            |
+| **Storage**    | 128GB SSD/HDD or NVMe          |
+| **Networking** | Wired Ethernet                 |
+| **GPU**        | Integrated GPU (i915)          |
 
-### Required Inputs for the Script:
-
-- **`usb`**: A valid USB device name (e.g., `/dev/sda`).
-- **`usb-bootable-files.tar.gz`**: The tar file containing bootable files.
-- **`config-file`**: Configuration file for proxy settings (if the edge node is behind a firewall).  
-    - Includes `ssh_key`, which is your Linux device's `id_rsa.pub` key for passwordless SSH access to the edge node.
-    - User credentials: Set the username and password for the edge node.
-
-> **Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
-
-### Example Command:
-
-```bash
-sudo ./bootable-usb-prepare.sh /dev/sda usb-bootable-files.tar.gz config-file
-```
-
-Once the script completes, the bootable USB device will be ready for installation.
-
----
-
-### Login to the Edge Node After Successful Installation
-
-Use the credentials provided as input while preparing the bootable USB drive.
-
----
-
-### Check Kubernetes Pods Status
-
-Run the following commands to check the status of Kubernetes pods:
-
-```bash
-source /etc/environment && export KUBECONFIG
-kubectl get pods -A
-```
-
----
-
-### Collect Edge Node Logs from Development System
-
-Use the `edgenode-logs-collection.sh` script to collect logs from the edge node. Ensure the system has the SSH key provided for passwordless access.
-
-### Example Command:
-
-```bash
-./edgenode-logs-collection.sh <edgenode-username> <edgenode-ip>
-```
+For detailed steps and running sample applications refer to the [Get Started Guide](docs/user-guide/Get-Started-Guide.md).
