@@ -36,8 +36,6 @@ kube-apiserver-arg:
 service-cidr: "10.43.0.0/16"
 kubelet-arg:
   - "topology-manager-policy=best-effort"
-  - "cpu-manager-policy=static"
-  - "reserved-cpus=1"
   - "max-pods=250"
   - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
 protect-kernel-defaults: true
