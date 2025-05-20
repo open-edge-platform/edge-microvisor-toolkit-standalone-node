@@ -38,6 +38,7 @@ function calculate_kernel_version_armbian() {
 	fi
 
 	# output ID is just the inventory_id
+	# shellcheck disable=SC2034
 	declare -g OUTPUT_ID="${inventory_id}"
 
 	declare -g ARMBIAN_KERNEL_FULL_ORAS_REF_DEB_TAR="${ARMBIAN_KERNEL_BASE_ORAS_REF}:${ARMBIAN_KERNEL_VERSION}"

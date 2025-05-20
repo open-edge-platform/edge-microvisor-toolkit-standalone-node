@@ -68,6 +68,7 @@ function prepare_json_matrix() {
 
 	declare -a json_items=()
 	declare kernel
+	# shellcheck disable=SC2154
 	for kernel in "${inventory_ids[@]}"; do
 		declare -A kernel_info
 		get_kernel_info_dict "${kernel}"

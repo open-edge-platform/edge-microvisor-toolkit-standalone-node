@@ -1,7 +1,7 @@
+#!/bin/bash
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-#!/bin/bash
 
 RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
 # for basic testing on a coder setup
@@ -96,7 +96,7 @@ EOF'
 
 # Install RKE2
 echo "$(date): Installing RKE2 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_RKE2_ARTIFACT_PATH=${RKE_INSTALLER_PATH} sh install.sh
+sudo INSTALL_RKE2_ARTIFACT_PATH="${RKE_INSTALLER_PATH}" sh install.sh
 
 # Copy the cni tarballs
 echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
@@ -126,7 +126,7 @@ until sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/k
 echo "$(date): RKE2 started 6/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Label node as a worker
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
-sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node $hostname node-role.kubernetes.io/worker=true
+sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node "$hostname" node-role.kubernetes.io/worker=true
 
 # Wait for the deployment to complete
 

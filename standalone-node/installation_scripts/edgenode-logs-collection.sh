@@ -27,22 +27,22 @@ ip_address=$2
 if [ -z "$user_name" ] || [ -z "$ip_address" ]; then
     echo "User_name/IP_address details not provided,please provide valid User_name and IP address"
     usage
+    # shellcheck disable=SC2317
     exit 1
 fi
 
 # Create the directory to store the edge node logs
-if [ ! -d $LOCAL_OUTPUT_DIR ]; then
-    mkdir -p $LOCAL_OUTPUT_DIR
+if [ ! -d "$LOCAL_OUTPUT_DIR" ]; then
+    mkdir -p "$LOCAL_OUTPUT_DIR"
 fi
 
 # Connect to the remote system and run the collect-logs.sh
 
 echo "Collecting the logs from Edge Node,Please Wait!!"
-ssh -T -o ConnectTimeout=10 "$user_name"@"$ip_address" "bash -c '$REMOTE_CMDS'"  > /dev/null 2>&1
 
-if [ "$?" -eq 0 ]; then
+if ssh -T -o ConnectTimeout=10 "$user_name"@"$ip_address" "bash -c '$REMOTE_CMDS'" >/dev/null 2>&1; then
     echo "All required logs generated!,Now Copying to Local Server,Please wait!!"
-    scp "$user_name@$ip_address:$REMOTE_FILE_PATH" "$LOCAL_OUTPUT_DIR/" > /dev/null 2>&1
+    scp "$user_name@$ip_address:$REMOTE_FILE_PATH" "$LOCAL_OUTPUT_DIR/" >/dev/null 2>&1
 
     if [ -e "${LOCAL_OUTPUT_DIR}/edge_node_logs.tar.gz" ]; then
         echo "Successfully Collected the Edge node logs and save under $LOCAL_OUTPUT_DIR"

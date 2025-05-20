@@ -82,7 +82,8 @@ jobs:
       run_test: false
       run_validate_clean_folder: false
       run_docker_build: true
-      run_artifact: false
+      run_artifact: true
+      artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
       trivy_image_skip:  "postgres:16.4"

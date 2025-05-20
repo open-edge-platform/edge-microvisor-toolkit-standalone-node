@@ -1,7 +1,7 @@
+#!/bin/bash
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-#!/bin/bash
 
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then

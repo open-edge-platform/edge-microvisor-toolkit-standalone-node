@@ -5,17 +5,27 @@
 # bash error control
 set -o pipefail
 set -e
-
+# shellcheck source=/hook_os/bash/inventory.sh
 source bash/inventory.sh
+# shellcheck source=/hook_os/bash/common.sh
 source bash/common.sh
+# shellcheck source=/hook_os/bash/cli.sh
 source bash/cli.sh
+# shellcheck source=/hook_os/bash/docker.sh
 source bash/docker.sh
+# shellcheck source=/hook_os/bash/linuxkit.sh
 source bash/linuxkit.sh
+# shellcheck source=/hook_os/bash/hook-lk-containers.sh
 source bash/hook-lk-containers.sh
+# shellcheck source=/hook_os/bash/shellcheck.sh
 source bash/shellcheck.sh
+# shellcheck source=/hook_os/bash/json-matrix.sh
 source bash/json-matrix.sh
+# shellcheck source=/hook_os/bash/kernel.sh
 source bash/kernel.sh
+# shellcheck source=/hook_os/bash/kernel/kernel_default.sh
 source bash/kernel/kernel_default.sh
+# shellcheck source=/hook_os/bash/kernel/kernel_armbian.sh
 source bash/kernel/kernel_armbian.sh
 
 ### Initialize the command-line handling. This should behave similar to `make`; PARAM=value pairs are accepted in any order mixed with non-param arguments.

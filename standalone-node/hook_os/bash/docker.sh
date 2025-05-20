@@ -21,6 +21,7 @@ function check_docker_daemon_for_sanity() {
 	fi
 
 	# Once we know docker is sane, hook up a function that helps us trace invocations.
+	# shellcheck disable=SC2317
 	function docker() {
 		log debug "--> docker $*"
 		command docker "$@"

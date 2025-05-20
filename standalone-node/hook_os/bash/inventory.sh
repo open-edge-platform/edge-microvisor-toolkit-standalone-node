@@ -56,6 +56,7 @@ function produce_kernels_flavours_inventory() {
 	define_id "armbian-uefi-x86-edge" METHOD='armbian' ARCH='x86_64' TAG='standard armbian-uefi' ARMBIAN_KERNEL_ARTIFACT='kernel-x86-edge'
 
 	#### END; extract keys & make readonly
+	# shellcheck disable=SC2034
 	declare -g -a -r inventory_ids=("${!inventory_dict[@]}") # extract the _keys_ from the inventory_ids dict
 	declare -g -A -r inventory_dict                          # make kernels_data dict readonly
 

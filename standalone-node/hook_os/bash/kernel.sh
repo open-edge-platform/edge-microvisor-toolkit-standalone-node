@@ -4,6 +4,7 @@
 
 function obtain_kernel_data_from_id() {
 	declare -g -A kernel_info=()
+	# shellcheck disable=SC2034
 	declare -g kernel_oci_version="" kernel_oci_image=""
 
 	log debug "Obtaining kernel data for kernel ID: '${1}'"
@@ -62,8 +63,8 @@ function resolve_latest_kernel_version_lts() { # Produces KERNEL_POINT_RELEASE
 	# HookOS using an existing kernel container image from the registry. This only works with
 	# unauthenticated registries.
 	if [[ -n "${USE_LATEST_BUILT_KERNEL}" ]]; then
-		reg="$(echo ${HOOK_KERNEL_OCI_BASE} | cut -d'/' -f1)"
-		repo="$(echo ${HOOK_KERNEL_OCI_BASE} | cut -d'/' -f2-)"
+		reg="$(echo "${HOOK_KERNEL_OCI_BASE}" | cut -d'/' -f1)"
+		repo="$(echo "${HOOK_KERNEL_OCI_BASE}" | cut -d'/' -f2-)"
 		# expected format is: 6.6.32-14b8be17 (major.minor.point-hash)
 		latest_point_release="$(curl -sL "https://${reg}/v2/${repo}/tags/list" | jq -r ".tags[]" | grep -e "^${KERNEL_MAJOR}.${KERNEL_MINOR}" | sort -V | tail -n1 | cut -d"-" -f1 | cut -d"." -f3)"
 		log info "Using latest point release from registry ${HOOK_KERNEL_OCI_BASE} for kernel ${KERNEL_MAJOR}.${KERNEL_MINOR}: ${latest_point_release}"
@@ -98,7 +99,10 @@ function resolve_latest_kernel_version_lts() { # Produces KERNEL_POINT_RELEASE
 
 function get_kernel_info_dict() {
 	declare kernel="${1}"
+	# shellcheck disable=SC2034
+	# shellcheck disable=SC2154
 	declare kernel_data_str="${inventory_dict[${kernel}]}"
+	# shellcheck disable=SC2154
 	if [[ -z "${kernel_data_str}" ]]; then
 		log error "No kernel data found for '${kernel}'; valid ones are: ${inventory_ids[*]} "
 		exit 1
@@ -139,6 +143,8 @@ function set_kernel_vars_from_info_dict() {
 function get_host_docker_arch() {
 	declare -g host_docker_arch="unknown"
 	# convert ARCH (x86_64, aarch64) to docker-ARCH (amd64, arm64)
+	# shellcheck disable=SC2154
+	# shellcheck disable=SC2034
 	case "$(uname -m)" in
 		"x86_64") host_docker_arch="amd64" ;;
 		"aarch64") host_docker_arch="arm64" ;;

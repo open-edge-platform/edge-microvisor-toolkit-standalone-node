@@ -24,8 +24,8 @@ shift $((OPTIND - 1))
 conf="${ROOT}resolv.conf"
 
 if [ -f "$conf" ] ; then
-        domain=$(awk '/^domain/ {print $2}' $conf)
-        dns=$(awk '/^nameserver/ {printf "%s ",$2}' $conf)
+        domain=$(awk '/^domain/ {print $2}' "$conf")
+        dns=$(awk '/^nameserver/ {printf "%s ",$2}' "$conf")
 elif fqdn="$(get_fqdn)" && [ -n "$fqdn" ]; then
         domain="$fqdn"
 fi
@@ -40,13 +40,13 @@ fi
 
 if [ -n "$domain" ]; then
         mkdir -p "${conf%/*}"
-        echo "search $domain" > $conf
+        echo "search $domain" > "$conf"
 fi
 
 if [ -n "$dns" ] || [ $# -gt 0 ] && [ -f "$conf" ]; then
-        sed -i -e '/^nameserver/d' $conf
+        sed -i -e '/^nameserver/d' "$conf"
 fi
-for i in $dns $@; do
+for i in "$dns" "$@"; do
         mkdir -p "${conf%/*}"
-        echo "nameserver $i" >> $conf
+        echo "nameserver $i" >> "$conf"
 done

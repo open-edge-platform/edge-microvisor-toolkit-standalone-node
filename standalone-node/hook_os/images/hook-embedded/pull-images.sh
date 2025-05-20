@@ -103,7 +103,7 @@ function main() {
     # Load the images
     for image_file in "${output_dir}"/*; do
         echo -e "Loading image: ${image_file}"
-        docker exec "${dind_container}" docker load -i "/images_tar/$(basename ${image_file})"
+        docker exec "${dind_container}" docker load -i "/images_tar/$(basename "${image_file}")"
     done
 
     # clean up tar files

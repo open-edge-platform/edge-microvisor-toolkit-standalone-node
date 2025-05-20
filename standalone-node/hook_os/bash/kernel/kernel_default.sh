@@ -26,6 +26,7 @@ function calculate_kernel_version_default() {
 	elif [[ "${KCONFIG}" != "generic" ]]; then
 		OUTPUT_ID="${KCONFIG}-${KERNEL_MAJOR}.${KERNEL_MINOR}.y-${ARCH}"
 	elif [[ -n "${USE_KERNEL_ID}" ]]; then
+		# shellcheck disable=SC2034
 		OUTPUT_ID="${inventory_id}"
 	fi
 
@@ -63,6 +64,7 @@ function calculate_kernel_version_default() {
 	kernel_id_to_use="${inventory_id}"
 	if [[ -n "${USE_KERNEL_ID}" ]]; then
 		log warn "USE_KERNEL_ID is set to '${USE_KERNEL_ID}'; using it instead of the default inventory_id '${inventory_id}'."
+		# shellcheck disable=SC2034
 		kernel_id_to_use="${USE_KERNEL_ID}"
 	fi
 
