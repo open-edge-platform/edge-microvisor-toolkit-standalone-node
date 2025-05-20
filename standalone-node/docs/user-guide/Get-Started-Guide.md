@@ -1,10 +1,12 @@
-# Standalone Node USB based provisioning 
+# Standalone Node USB based provisioning
 
 ## Get Started
 
-The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive 
-on Linux based operating systems. This section provides step-by-step instructions to set up the environment required 
+The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
+on Linux based operating systems. This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
+
+Source code for the Intel® Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 ### Step 1: Prerequisites
 
@@ -32,7 +34,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 > **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
 
--  Update the config file
+- Update the config file
   
    ```bash
    vi config
@@ -55,6 +57,7 @@ cd edge-microvisor-toolkit-standalone-node
    make build
 
    ```
+
 > **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
@@ -65,6 +68,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
+
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
@@ -95,7 +99,8 @@ cd edge-microvisor-toolkit-standalone-node
    Example usage:
    ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
    ```
-   - Required Inputs for the Script:
+
+  - Required Inputs for the Script:
 
      ```bash
      - usb: A valid USB device name (e.g., /dev/sdc)
@@ -109,7 +114,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 ## Step 2: Deploy on Standalone Node
 
-- Unplug the attached bootable USB from developer system 
+- Unplug the attached bootable USB from developer system
 
 - Plug the created bootable USB pen drive into the standalone node
 
@@ -367,4 +372,3 @@ Install a WordPress application as a test application using `helm`.
 ### Edge Node IP address
 
 The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster. It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
-
