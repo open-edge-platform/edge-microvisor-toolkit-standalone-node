@@ -118,6 +118,42 @@ else
 fi
 
 # Start RKE2
+# Check RKE2 start first time or after reboot
+IPCHECK="/var/lib/rancher/ip.log"
+if [ -f "$IPCHECK" ]; then
+   # Check if the IP address changes, if changes print the banner
+   host_prev_ip=$(cat "$IPCHECK")
+
+   # Get the system ip 
+   pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+   host_ip=$(ifconfig "${pub_inerface_name}" | grep 'inet ' | awk '{print $2}')
+
+   if [[ "$host_ip" != "$host_prev_ip" ]]; then
+       echo "IP changed"
+       CHANGE_MSG="Warning: The Edge Node IP("$host_ip") has changed since RKE2 install!"
+       banner="
+================================================================================
+Edge Microvisor Toolkit - cluster bring up problem 
+
+****Looks the IP address of the system chnaged since RKE2 install*****
+
+OLD RKE2 cluster IP "$host_prev_ip"
+NEW RKE2 cluster IP "$host_ip"
+
+IP address of the Node:
+        "$host_prev_ip" - Ensure IP address is persistent across the reboot!
+        See: https://ranchermanager.docs.rancher.com/getting-started
+        /installation-and-upgrade/installation-requirements#node-ip-
+        addresses $CHANGE_MSG
+        
+=================================================================================
+"
+       # Print the banner
+       echo "$banner" | sudo tee /dev/tty0
+    else
+       CHANGE_MSG="IP address remained same after reboot."
+    fi
+fi
 echo "$(date): Starting RKE2 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo systemctl enable --now rke2-server.service
 
@@ -203,23 +239,13 @@ export KUBECONFIG
 echo "$(date): The cluster installation is complete 13/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "$(date): The cluster installation is complete!"
 
-# Print banner
 IP=$(sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
 IPCHECK="/var/lib/rancher/ip.log"
-CHANGE_MSG=""
 
 if [ ! -f "$IPCHECK" ]; then
     echo "$IP" | sudo tee "$IPCHECK"
-else
-    CLUSTER_IP=$(cat "$IPCHECK")
-    if ip addr | grep -qw "$CLUSTER_IP"; then
-        echo "IP address $CLUSTER_IP is present."
-	CHANGE_MSG="IP address remained same after reboot."
-    else
-        echo "IP changed"
-	CHANGE_MSG="Warning: The Edge Node IP has changed since RKE2 install!"
-    fi
 fi
+# Print banner
 
 banner="
 ===================================================================
