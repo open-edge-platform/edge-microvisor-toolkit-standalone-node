@@ -4,6 +4,7 @@
 # shellcheck disable=all
 
 RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
+K3S_BIN_PATH=/"${2:-/var/lib/rancher/k3s/bin}"
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then
 	export IS_UBUNTU=true
@@ -16,16 +17,10 @@ sudo rm -rf /var/log/cluster-init.log
 
 #Configure RKE2
 echo "$(date): Configuring RKE2 1/13" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo mkdir -p /etc/rancher/rke2
-sudo bash -c 'cat << EOF >  /etc/rancher/rke2/config.yaml
+sudo mkdir -p /etc/rancher/k3s
+sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
 cluster-cidr: "10.42.0.0/16"
-cni:
-  - multus
-  - calico
-disable:
-  - rke2-canal
-  - rke2-ingress-nginx
 disable-kube-proxy: false
 etcd-arg:
   - --cipher-suites=[TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256,TLS_CHACHA20_POLY1305_SHA256]
@@ -43,12 +38,13 @@ EOF'
 
 
 # Set up coredns
-sudo mkdir -p /var/lib/rancher/rke2/server/manifests/
-sudo bash -c 'cat << EOF >  /var/lib/rancher/rke2/server/manifests/rke2-coredns-config.yaml
+sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
+sudo mkdir -p /var/lib/rancher/k3s/bin
+sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/k3s-coredns-config.yaml
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
-  name: rke2-coredns
+  name: k3s-coredns
   namespace: kube-system
 spec:
   valuesContent: |-
@@ -56,7 +52,7 @@ spec:
       clusterCIDR: 10.42.0.0/16
       clusterCIDRv4: 10.42.0.0/16
       clusterDNS: 10.43.0.10
-      rke2DataDir: /var/lib/rancher/rke2
+      k3sDataDir: /var/lib/rancher/k3s
       serviceCIDR: 10.43.0.0/16
     resources:
       limits:
@@ -66,7 +62,7 @@ spec:
 EOF'
 
 # Set up mirrors
-sudo bash -c 'cat << EOF >  /etc/rancher/rke2/registries.yaml
+sudo bash -c 'cat << EOF >  /etc/rancher/k3s/registries.yaml
 mirrors: 
  docker.io: 
    endpoint: ["https://localhost.internal:9443"]
@@ -75,12 +71,12 @@ mirrors:
    endpoint: ["https://localhost.internal:9443"]
 EOF'
 
-mkdir -p /var/lib/rancher/rke2/server/manifests/
-sudo bash -c 'cat << EOF >  /var/lib/rancher/rke2/server/manifests/rke2-calico-config.yaml
+mkdir -p /var/lib/rancher/k3s/server/manifests/
+sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/k3s-calico-config.yaml
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
-  name: rke2-calico
+  name: k3s-calico
   namespace: kube-system
 spec:
   valuesContent: |-
@@ -94,12 +90,12 @@ EOF'
 
 # Install RKE2
 echo "$(date): Installing RKE2 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_RKE2_ARTIFACT_PATH="${RKE_INSTALLER_PATH}" sh install.sh
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_EXEC="--flannel-backend=none" sh install.sh
 
 # Copy the cni tarballs
 echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo cp rke2-images-multus.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
-sudo cp rke2-images-calico.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
+# sudo cp rke2-images-multus.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
+# sudo cp rke2-images-calico.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
 
 # Copy extension images - if the images are part of the package - otherwise get pullled from internet
 if [ -d ./images ]; then
@@ -107,24 +103,24 @@ if [ -d ./images ]; then
 fi
 
 # Copy extensions (HelmChart definitions - charts encoded in yaml)
-sudo cp ./extensions/* /var/lib/rancher/rke2/server/manifests
+sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
 
 if [ "$IS_UBUNTU" = true ]; then
-  sudo sed -i '14i EnvironmentFile=-/etc/environment' /usr/local/lib/systemd/system/rke2-server.service
+  sudo sed -i '14i EnvironmentFile=-/etc/environment' /usr/local/lib/systemd/system/k3s-server.service
 else
-  sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/rke2-server.service
+  sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s-server.service
 fi
 
 # Start RKE2
 echo "$(date): Starting RKE2 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo systemctl enable --now rke2-server.service
+# sudo systemctl enable --now rke2-server.service
 
 echo "$(date): Waiting for RKE2 to start 5/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-until sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
+until sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
 echo "$(date): RKE2 started 6/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Label node as a worker
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
-sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl label node "$hostname" node-role.kubernetes.io/worker=true
+sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label node $hostname node-role.kubernetes.io/worker=true
 
 # Wait for the deployment to complete
 
@@ -144,7 +140,7 @@ echo "$(date): Waiting for namespaces to be created 7/13" | sudo tee -a /var/log
 while true; do
   all_exist=true
   for ns in "${namespaces[@]}"; do
-    sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get namespace "$ns" &> /dev/null || all_exist=false
+    sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get namespace "$ns" &> /dev/null || all_exist=false
   done
   $all_exist && break
   echo "Waiting for namespaces to be created..."
@@ -155,7 +151,7 @@ echo "$(date): Namespaces created 8/13" | sudo tee -a /var/log/cluster-init.log 
 
 ## Wait for NetworkPolicies to get created
 
-sudo bash -c 'KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl apply -f - <<EOF
+sudo bash -c "KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl apply -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -179,13 +175,13 @@ spec:
   podSelector: {}
   policyTypes:
   - Ingress
-EOF'
+EOF"
 echo "$(date): Permissive network policies created 9/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
 ## Wait for all pods to deploy
 echo "$(date): Waiting for all extensions to deploy 10/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "Waiting for all extensions to complete the deployment..."
-while sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
+while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
   echo "Some pods are still not ready. Checking again in 5 seconds..."
   sleep 5
 done
@@ -201,7 +197,8 @@ export KUBECONFIG
 echo "$(date): The cluster installation is complete 13/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "$(date): The cluster installation is complete!"
 
-IP=$(sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
+# Print banner
+IP=$(sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
 IPCHECK="/var/lib/rancher/ip.log"
 
 if [ ! -f "$IPCHECK" ]; then

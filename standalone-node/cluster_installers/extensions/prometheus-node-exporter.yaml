@@ -1,7 +1,6 @@
----
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:

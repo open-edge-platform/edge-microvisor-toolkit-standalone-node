@@ -41,6 +41,14 @@ images=(
 	docker.io/kubernetesui/metrics-scraper:v1.0.8
 	docker.io/grafana/grafana:11.6.0
 	docker.io/bats/bats:v1.4.1
+	docker.io/kubernetesui/dashboard-web:1.6.0
+	docker.io/kubernetesui/dashboard-metrics-scraper:1.2.1
+	docker.io/kubernetesui/dashboard-auth:1.2.2
+	docker.io/kubernetesui/dashboard-api:1.10.1
+	docker.io/library/kong:3.6
+	docker.io/calico/cni:v3.30.0
+	docker.io/calico/node:v3.30.0
+	docker.io/calico/kube-controllers:v3.30.0
 )
 
 charts=(
@@ -67,7 +75,7 @@ download_rke2_artifacts () {
 	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images-calico.linux-amd64.tar.zst
 	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images-multus.linux-amd64.tar.zst
 	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/sha256sum-amd64.txt
-	curl -sfL https://get.rke2.io --output install.sh
+	curl -sfL https://get.k3s.io --output install.sh
 }
 
 # Download charts and convert to base64 - the charts do not end up in installation package but the encoded base64 will be part of helmchart addon definition elswhere in extensions directory.
