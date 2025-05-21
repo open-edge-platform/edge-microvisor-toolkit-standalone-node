@@ -129,17 +129,11 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
-#### 2.1  Login to the Edge Node After Successful Installation
+#### 2.1  Login to the Edge Node After Installation complete
 
-Use the credentials provided as input while preparing the bootable USB drive.
+Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
-- Check Kubernetes Pods Status
-  Run the following commands to check the status of Kubernetes pods:
-
-  ```bash
-  source /etc/environment && export KUBECONFIG
-  kubectl get pods -A
-  ```
+Use the Linux login credentials which was provided while preparing the bootable USB drive.
 
 ## Step 3: Set up tools on Developer's System
 
