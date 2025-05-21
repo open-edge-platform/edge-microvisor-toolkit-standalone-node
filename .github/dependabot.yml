@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"  # this enables searching only in /.github/workflows directory
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "[gha] "
