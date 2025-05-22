@@ -366,6 +366,7 @@ Install a WordPress application as a test application using `helm`.
    ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
+
 1. Creation of USB pendrive failed
 The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
 

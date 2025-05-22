@@ -36,7 +36,7 @@ To learn how to contribute to the project, see the Contributor's Guide.[Contribu
 
 To learn more about the project, its community, and governance, visit the Edge Orchestrator Community.
 
-For support, start with Troubleshooting
+For support, start with Troubleshooting [Troubleshooting section](standalone-node/docs/user-guide/Get-Started-Guide.md#troubleshooting)
 
 ## License
 
