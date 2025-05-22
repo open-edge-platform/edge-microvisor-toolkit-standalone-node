@@ -40,5 +40,8 @@ For support, start with Troubleshooting
 
 ## License
 
-Each component of the Edge Infrastructure onboarding is licensed under Apache 2.0.
-Last Updated Date: May 22, 2025
+Each component of the Edge Microvisor Toolkit Standalone Node is licensed under [Apache 2.0][apache-license].
+
+Last Updated Date: April 7, 2025
+
+[apache-license]: https://www.apache.org/licenses/LICENSE-2.0
