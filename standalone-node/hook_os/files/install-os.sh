@@ -238,6 +238,7 @@ EOT
 
     # Copy Edge node logs collection script
     cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
+    cp /etc/scripts/rke2-setup-post-reboot.sh /mnt/etc/cloud/
 
     umount /mnt
 }

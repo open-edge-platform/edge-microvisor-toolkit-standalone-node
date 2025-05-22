@@ -44,7 +44,7 @@ $(VENV_NAME): requirements.txt
 SH_FILES := $(shell find . -type f \( -name '*.sh' \) ! -path './cluster_installers/install.sh' -print)
 shellcheck: ## lint shell scripts with shellcheck
 	shellcheck --version
-	shellcheck -x -S style $(SH_FILES) >> shellcheck_report.txt
+	shellcheck -x -S style $(SH_FILES)
 
 # https://pypi.org/project/reuse/
 license: $(VENV_NAME) ## Check licensing with the reuse tool

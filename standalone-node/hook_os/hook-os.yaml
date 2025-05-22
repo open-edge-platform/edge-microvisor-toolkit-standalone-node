@@ -195,6 +195,10 @@ files:
     source: "files/collect-logs.sh"
     mode: "0777"
 
+  - path: etc/scripts/rke2-setup-post-reboot.sh
+    source: "files/rke2-setup-post-reboot.sh"
+    mode: "0777"
+
   - path: sbin/setup-dns
     source: "files/setup-dns.sh"
     mode: "0777"

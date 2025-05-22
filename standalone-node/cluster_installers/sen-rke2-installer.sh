@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+# shellcheck disable=all
 
 RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
 # for basic testing on a coder setup
@@ -116,42 +116,6 @@ else
 fi
 
 # Start RKE2
-# Check RKE2 start first time or after reboot
-IPCHECK="/var/lib/rancher/ip.log"
-if [ -f "$IPCHECK" ]; then
-   # Check if the IP address changes, if changes print the banner
-   host_prev_ip=$(cat "$IPCHECK")
-
-   # Get the system ip 
-   pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
-   host_ip=$(ifconfig "${pub_inerface_name}" | grep 'inet ' | awk '{print $2}')
-
-   if [[ "$host_ip" != "$host_prev_ip" ]]; then
-       echo "IP changed"
-       CHANGE_MSG="Warning: The Edge Node IP("$host_ip") has changed since RKE2 install!"
-       banner="
-================================================================================
-Edge Microvisor Toolkit - cluster bring up problem 
-
-****Looks the IP address of the system chnaged since RKE2 install*****
-
-OLD RKE2 cluster IP "$host_prev_ip"
-NEW RKE2 cluster IP "$host_ip"
-
-IP address of the Node:
-        "$host_prev_ip" - Ensure IP address is persistent across the reboot!
-        See: https://ranchermanager.docs.rancher.com/getting-started
-        /installation-and-upgrade/installation-requirements#node-ip-
-        addresses $CHANGE_MSG
-        
-=================================================================================
-"
-       # Print the banner
-       echo "$banner" | sudo tee /dev/tty0
-    else
-       CHANGE_MSG="IP address remained same after reboot."
-    fi
-fi
 echo "$(date): Starting RKE2 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo systemctl enable --now rke2-server.service
 
@@ -243,6 +207,15 @@ IPCHECK="/var/lib/rancher/ip.log"
 if [ ! -f "$IPCHECK" ]; then
     echo "$IP" | sudo tee "$IPCHECK"
 fi
+
+# Add rke2 installation flag, so that on next reboot it will not start again from begining.
+
+RKE2_STATUS="/var/lib/rancher/rke2_status"
+
+if [ ! -f "$RKE2_STATUS" ]; then
+    echo "success" | sudo tee "$RKE2_STATUS"
+fi
+
 # Print banner
 
 banner="
@@ -258,7 +231,7 @@ IP address of the Node:
 	$IP - Ensure IP address is persistent across the reboot!
         See: https://ranchermanager.docs.rancher.com/getting-started
 	/installation-and-upgrade/installation-requirements#node-ip-
-	addresses $CHANGE_MSG
+	addresses 
 
 To access and view the cluster's pods run:
 	source /etc/environment
