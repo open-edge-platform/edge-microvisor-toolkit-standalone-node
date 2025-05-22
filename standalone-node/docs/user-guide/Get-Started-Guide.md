@@ -366,6 +366,14 @@ Install a WordPress application as a test application using `helm`.
    ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
+1. Creation of USB pendrive failed
+The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
+
+2. If any issues while provisioning the microvisor from Hook OS, automatically logs will be collected
+ from /var/log/os-installer.log file on Hook OS what caused the OS provisioning failed.
+
+3. After sucessful installation A banner is printed at the end, summarizing the installation status and
+ providing useful commands/logs path for further management.
 
 ### Edge Node Logs from Developer's System
 
