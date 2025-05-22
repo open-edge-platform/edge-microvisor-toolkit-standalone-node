@@ -54,7 +54,7 @@ cd edge-microvisor-toolkit-standalone-node
 - To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
    ```bash
-   make build
+   sudo make build
 
    ```
 
