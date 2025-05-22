@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
+# shellcheck disable=all
 
 IPCHECK="/var/lib/rancher/ip.log"
 # Check if the IP address changes, if changes print the banner
