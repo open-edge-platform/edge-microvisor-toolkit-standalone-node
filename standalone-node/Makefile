@@ -9,7 +9,7 @@
 # Optionally include tool version checks, not used in Docker builds
 TOOL_VERSION_CHECK ?= 0
 
-##### Variables #####
+##### Variables  #####
 
 # Defining the shell, users and groups
 SHELL       := bash -e -o pipefail
