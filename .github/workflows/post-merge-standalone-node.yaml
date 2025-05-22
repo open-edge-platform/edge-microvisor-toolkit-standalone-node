@@ -16,10 +16,10 @@ on:
 
 jobs:
   post-merge-pipeline:
-    #permissions:
-      #contents: read
-      #security-events: read
-      #id-token: read
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
     uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@main
     with:
       run_version_check: true
@@ -33,5 +33,9 @@ jobs:
       run_artifact: false
       prefix_tag_separator: "/"
       project_folder: "standalone-node"
-    secrets:  # zizmor: ignore[secrets-inherit]
-      inherit
+    secrets:
+      SYS_ORCH_GITHUB: ${{ secrets.SYS_ORCH_GITHUB }}
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
+      NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
