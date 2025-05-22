@@ -5,7 +5,7 @@ community to support adding new features, optimizing, and improving security.
 
 ## Areas for Contribution
 
-The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of bootable USB drives 
+The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of bootable USB drives
 on Linux-based operating systems. This capability opens up several avenues for contribution:
 
 USB-Based Provisioning: Improve and optimize the process for creating bootable USB drives and
@@ -15,7 +15,7 @@ Feature Development: Innovate by adding new features or enhancing existing micro
 Kubernetes RKE2 clusters along with cluster extensions to enhance scalability, manageability, and orchestration capabilities
 
 Empowerment for Enterprise Customers and Developers:
-Provides the tools and infrastructure needed to explore and implement Edge AI solutions, empowering users 
+Provides the tools and infrastructure needed to explore and implement Edge AI solutions, empowering users
 to leverage Intel's architecture for advanced edge computing applications.
 
 ## New Features
@@ -35,7 +35,7 @@ to the Edge Microvisor Toolkit Standalone Node repository:
 
 ## Release Cadence
 
-The Intel® Edge Microvisor Toolkit Standalone Node follows a regular release schedule, with updates every few weeks. 
+The Intel® Edge Microvisor Toolkit Standalone Node follows a regular release schedule, with updates every few weeks.
 Contributions are reviewed and integrated based on priority and alignment with upcoming releases.
 
 ## Contribution license
