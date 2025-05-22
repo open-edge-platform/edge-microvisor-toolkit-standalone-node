@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@zizmor_test
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.13
     with:
       run_security_scans: false
       run_version_check: true
