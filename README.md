@@ -22,7 +22,7 @@ The repository comprises the following components.
 
 [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions
 
-For more details refer to [Get Started Guide](docs/user-guide/Get-Started-Guide.md).
+For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
 
 ## Develop
 
@@ -30,8 +30,7 @@ To develop one of the Managers, please follow its guide in README.md located in 
 
 ## Contribute
 
-To learn how to contribute to the project, see the [Contributor's
-Guide](https://docs.openedgeplatform.intel.com/edge-manage-docs/main/developer_guide/contributor_guide/index.html).
+To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/user-guide/contriution.md).
 
 ## Community and Support
 
