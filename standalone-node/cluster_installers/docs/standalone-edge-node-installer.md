@@ -53,7 +53,7 @@ There is two options to build a package
 
 ## Installing
 
-To install the SEN on Tiber Microvisor
+To install the SEN on Microvisor
 
 1. Copy the package to a writable directory ie. `/tmp/rke2-artifacts` 
 

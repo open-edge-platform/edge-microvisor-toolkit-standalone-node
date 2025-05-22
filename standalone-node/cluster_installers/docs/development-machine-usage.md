@@ -198,7 +198,7 @@ PS C:\Users\user> kubectl port-forward --namespace wordpress svc/my-wordpress 80
 1. Login to registry
 
 ```shell
-PS C:\Users\user> helm registry login registry-rs.internal.ledgepark.intel.com
+PS C:\Users\user> helm registry login <RELEASE_SERVICE_URL>
 Username: user
 Password: <JWT Token>
 ```
@@ -216,7 +216,7 @@ env:
 3. Install PDD helmchart
 
 ```shell
-PS C:\Users\user> helm install pdd oci://registry-rs.internal.ledgepark.intel.com/pallet-defect-detection/pallet-defect-detection-reference-implementation --version 1.1.0 --insecure-skip-tls-verify -f ./pdd-values.yaml -n pdd --create-namespace
+PS C:\Users\user> helm install pdd oci://<RELEASE_SERVICE_URL>/pallet-defect-detection/pallet-defect-detection-reference-implementation --version 1.1.0 --insecure-skip-tls-verify -f ./pdd-values.yaml -n pdd --create-namespace
 ```
 
 4. List pods

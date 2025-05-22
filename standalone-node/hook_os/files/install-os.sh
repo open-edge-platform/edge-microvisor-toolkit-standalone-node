@@ -412,7 +412,7 @@ update_mac_under_dhcp_systemd() {
 
 }
 
-# Enable dm-verity on tiber os image
+# Enable dm-verity on Microvisor image
 enable_dm_verity() {
     echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC} [7/9]" | tee /dev/tty0
     dm_verity_script=/etc/scripts/enable-dmv.sh

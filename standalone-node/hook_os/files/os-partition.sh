@@ -215,10 +215,10 @@ else
     secondary_rootfs_disk="${secondary_rootfs_disk_num}"
 fi
 
-#expand the tiber_persistent partition on rootfs disk
+#expand the microvisor_persistent partition on rootfs disk
 
 if [ "$blk_disk_count" -eq 1 ]; then
-    #expand the tiber_persistent partition max to 100GB if only one disk
+    #expand the microvisor_persistent partition max to 100GB if only one disk
     new_disk_partition_size="100"
     #secondary rootfs partitions for A/B day2 upgrades
     secondary_rootfs_disk_end=$((new_disk_partition_size+secondary_rootfs_disk_size))
@@ -231,7 +231,7 @@ if [ "$blk_disk_count" -eq 1 ]; then
     fi
     partprobe "${disk}"
 else
-    #more than one disk detected expand the tiber_persistent partition to max-swap  partition
+    #more than one disk detected expand the microvisor_persistent partition to max-swap  partition
 
     #get the last partition end point
     data_part_end=$(parted -m "$disk" unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')

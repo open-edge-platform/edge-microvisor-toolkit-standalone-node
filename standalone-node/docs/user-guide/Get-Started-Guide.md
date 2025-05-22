@@ -135,10 +135,10 @@ cd edge-microvisor-toolkit-standalone-node
 - Set the BIOS boot manager to boot from the USB pen drive
 
 - Reboot the Standalone Node
-  This will start the HookOS boot followed by Tiber Microvisor installations.
+  This will start the HookOS boot followed by Microvisor installations.
 
 - Automatic Reboot
-  The standalone edge node will automatically reboot into Tiber Microvisor.
+  The standalone edge node will automatically reboot into Microvisor.
 
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
