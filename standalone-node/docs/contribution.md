@@ -22,7 +22,7 @@ to leverage Intel's architecture for advanced edge computing applications.
 
 New feature requests should always be made by opening an Architecture Decision Record (ADR)
 GitHub issue, regardless of whether you want to contribute directly or just file a request.
-To do so, use the [Design Proposal](TO DO) template
+To do so, use the [Design Proposal](TO DO :link to design proposal for SN) template
 and provide as much information as possible. This helps maintainers and stakeholders to
 review, better understand, and prioritize the request.
 
