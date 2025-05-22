@@ -4,10 +4,11 @@
 SECURITY.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
-standaone-node/cluster_installers/docs/development-machine-usage.md
-standaone-node/cluster_installers/readme.md
-standaone-node/docs/user-guide/Get-Started-Guide.md
-standaone-node/docs/user-guide/Overview.md
-standaone-node/hook_os/readme.md
-standaone-node/installation_scripts/readme.md
+standalone-node/cluster_installers/docs/development-machine-usage.md
+standalone-node/cluster_installers/readme.md
+standalone-node/docs/user-guide/Get-Started-Guide.md
+standalone-node/docs/user-guide/Overview.md
+standalone-node/hook_os/readme.md
+standalone-node/installation_scripts/readme.md
 README.md
+standalone-node/docs/contribution.md
