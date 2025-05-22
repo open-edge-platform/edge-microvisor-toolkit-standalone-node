@@ -30,7 +30,7 @@ To develop one of the Managers, please follow its guide in README.md located in 
 
 ## Contribute
 
-To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/user-guide/contribution.md).
+To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/contribution.md).
 
 ## Community and Support
 
