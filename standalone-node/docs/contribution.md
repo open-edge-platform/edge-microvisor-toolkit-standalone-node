@@ -42,4 +42,4 @@ Contributions are reviewed and integrated based on priority and alignment with u
 
 Since Edge Microvisor Toolkit Standalone Node is open source, by contributing to the project, you agree that
 your contributions will be licensed under the terms stated in the
-[LICENSE](../../LICENSE) file.
+[LICENSES](../../LICENSES) file.
