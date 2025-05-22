@@ -71,6 +71,20 @@ cd edge-microvisor-toolkit-standalone-node
 
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
+- Use the wipefs command to remove any existing filesystem signatures from the USB drive. This ensures a clean slate for formatting
+
+   ```bash
+   sudo wipefs --all --force /dev/sdX
+   ```
+   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+
+- Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
+
+   ```bash
+   sudo mkfs.vfat /dev/sdX
+   ```
+   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
   Extract the contents of sen-installation-files.tar.gz
