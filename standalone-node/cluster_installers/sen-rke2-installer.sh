@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+# shellcheck disable=all
 
 RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
 # for basic testing on a coder setup
