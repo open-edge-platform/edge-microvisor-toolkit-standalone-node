@@ -4,7 +4,4 @@
 
 # license checking
 reuse==5.0.2
-flake8==7.1.2
 yamllint~=1.27.1
-hypothesis==6.103.0
-termcolor==2.4.0
