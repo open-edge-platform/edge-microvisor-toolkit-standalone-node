@@ -1,6 +1,7 @@
 ---
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
+# shellcheck disable=all
 
 # NTP Time Sync Configuration
 ntp:
@@ -16,23 +17,19 @@ runcmd:
 
     iptables -A INPUT -p tcp -j ACCEPT
 
-    # Start the K8* scripts
-    mkdir -p /tmp/rke2-artifacts/
-    tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/
+    # Start the K8* scripts only once
+    if [ ! -f "/var/lib/rancher/rke2_status" ]; then
+        mkdir -p /tmp/rke2-artifacts/
+        tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/
 
-    cd /tmp/rke2-artifacts/
+        cd /tmp/rke2-artifacts/
 
-    chmod +x sen-rke2-installer.sh
+        chmod +x sen-rke2-installer.sh
 
-    bash sen-rke2-installer.sh
-
-    # Activate the USB device
-    efibootmgr | grep '^Boot[0-9A-Fa-f]\{4\}' | while read -r line; do
-      BOOTNUM=$(echo "$line" | cut -c5-8)
-      HAS_ASTERISK=$(echo "$line" | grep -o '\*')
-
-      if [ -z "$HAS_ASTERISK" ]; then
-        echo "Enabling disabled boot entry: $BOOTNUM"
-        efibootmgr -b "$BOOTNUM" -a
-      fi
-    done
+        bash sen-rke2-installer.sh
+    else
+       echo "RKE2 is already installed and running. Skipping installation."
+       cd /etc/cloud/
+       chmod +x rke2-setup-post-reboot.sh
+       bash rke2-setup-post-reboot.sh
+    fi
