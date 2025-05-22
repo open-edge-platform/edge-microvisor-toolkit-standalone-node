@@ -18,9 +18,11 @@ The repository comprises the following components.
 
 HookOS: contains the Tinkerbell installation environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
 
-Edge Microvisor Toolkit: Edge Microvisor toolkit immutable non-RT image
+Edge Microvisor Toolkit: Edge Microvisor toolkit immutable non-RT image as  hypervisor.
 
 Kubernetes Cluster: The Kubernetes RKE2 cluster is deployed along the cluster extensions
+
+For more details refer to [Get Started Guide](docs/user-guide/Get-Started-Guide.md).
 
 ## Develop
 
