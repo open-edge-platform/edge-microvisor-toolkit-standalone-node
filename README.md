@@ -17,7 +17,9 @@ and legacy VM-based applications.
 The repository comprises the following components.
 
 [**HookOS**](standalone-node/hook_os/): contains the Tinkerbell installation environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
+
 [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor toolkit immutable non-RT image as  hypervisor.
+
 [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions
 
 For more details refer to [Get Started Guide](docs/user-guide/Get-Started-Guide.md).
