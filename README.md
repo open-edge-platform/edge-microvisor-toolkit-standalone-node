@@ -30,13 +30,13 @@ To develop one of the Managers, please follow its guide in README.md located in 
 
 ## Contribute
 
-To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/user-guide/contriution.md).
+To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/user-guide/contribution.md).
 
 ## Community and Support
 
 To learn more about the project, its community, and governance, visit the Edge Orchestrator Community.
 
-For support, start with Troubleshooting [Troubleshooting section](standalone-node/docs/user-guide/Get-Started-Guide.md#troubleshooting)
+For support, start with Troubleshooting [Troubleshooting section](standalone-node/docs/user-guide/Get-Started-Guide.md#troubleshooting).
 
 ## License
 
