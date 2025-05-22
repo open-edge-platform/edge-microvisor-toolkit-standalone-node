@@ -5,8 +5,7 @@
 
 ## Overview
 
-The Standalone Node solution, designed to enable Edge AI applications evaluation on Intel platform
-is designed to empower enterprise customers and developers by providing a rapid and efficient
+The Edge Microvisor Toolkit Standalone Node is designed to empower enterprise customers and developers by providing a rapid and efficient
 means to familiarize, evaluate, and trial Edge AI applications on Intel Architecture-based platforms.
 This comprehensive solution stack includes the edge-optimized immutable Edge Microvisor Toolkit,
 integrated with Kubernetes and foundational extensions, enabling the deployment of both cloud-native
@@ -16,11 +15,11 @@ and legacy VM-based applications.
 
 The repository comprises the following components.
 
-[**HookOS**](standalone-node/hook_os/): contains the Tinkerbell installation environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
+* [**HookOS**](standalone-node/hook_os/): contains the Tinkerbell installation environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
 
-[**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor toolkit immutable non-RT image as  hypervisor.
+* [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor toolkit immutable non-RT image as  hypervisor.* 
 
-[**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions
+* [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions.
 
 For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
 
@@ -30,13 +29,13 @@ To develop one of the Managers, please follow its guide in README.md located in 
 
 ## Contribute
 
-To learn how to contribute to the project, see the Contributor's Guide.[Contributor's Guide](standalone-node/docs/contribution.md).
+To learn how to contribute to the project, see the [Contributor's Guide](standalone-node/docs/contribution.md).
 
 ## Community and Support
 
 To learn more about the project, its community, and governance, visit the Edge Orchestrator Community.
 
-For support, start with Troubleshooting [Troubleshooting section](standalone-node/docs/user-guide/Get-Started-Guide.md#troubleshooting).
+For support, see the [Troubleshooting section of the Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md#troubleshooting).
 
 ## License
 
