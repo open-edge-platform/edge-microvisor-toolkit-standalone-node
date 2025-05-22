@@ -71,6 +71,20 @@ cd edge-microvisor-toolkit-standalone-node
 
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
+- Use the wipefs command to remove any existing filesystem signatures from the USB drive. This ensures a clean slate for formatting
+
+   ```bash
+   sudo wipefs --all --force /dev/sdX
+   ```
+   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+
+- Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
+
+   ```bash
+   sudo mkfs.vfat /dev/sdX
+   ```
+   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
   Extract the contents of sen-installation-files.tar.gz
@@ -129,17 +143,11 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
-#### 2.1  Login to the Edge Node After Successful Installation
+#### 2.1  Login to the Edge Node After Installation complete
 
-Use the credentials provided as input while preparing the bootable USB drive.
+Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
-- Check Kubernetes Pods Status
-  Run the following commands to check the status of Kubernetes pods:
-
-  ```bash
-  source /etc/environment && export KUBECONFIG
-  kubectl get pods -A
-  ```
+Use the Linux login credentials which was provided while preparing the bootable USB drive.
 
 ## Step 3: Set up tools on Developer's System
 
