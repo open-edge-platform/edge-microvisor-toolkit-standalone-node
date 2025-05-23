@@ -2,11 +2,11 @@
 
 ## Get Started
 
-The current release of the Intel® Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
+The current release of the Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
 on Linux based operating systems. This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
 
-Source code for the Intel® Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 ### Step 1: Prerequisites
 
