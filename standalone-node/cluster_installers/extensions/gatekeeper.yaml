@@ -96,13 +96,6 @@ spec:
     postInstall:
       labelNamespace:
         enabled: true
-        extraRules:
-          - apiGroups:
-              - management.cattle.io
-            resources:
-              - projects
-            verbs:
-              - updatepsa
         image:
           repository: openpolicyagent/gatekeeper-crds
           tag: v3.17.1
