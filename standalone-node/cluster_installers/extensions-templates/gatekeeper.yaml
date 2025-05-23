@@ -4,7 +4,7 @@
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: gatekeeper-constraints
+  name: gatekeeper
   namespace: kube-system
 spec:
   chartContent:
@@ -65,7 +65,7 @@ spec:
           tag: v3.17.1
     postUpgrade:
       labelNamespace:
-        enabled: false
+        enabled: true
         image:
           repository: openpolicyagent/gatekeeper-crds
           tag: v3.17.1
@@ -95,14 +95,7 @@ spec:
         runAsUser: 1000
     postInstall:
       labelNamespace:
-        enabled: true
-        extraRules:
-          - apiGroups:
-              - management.cattle.io
-            resources:
-              - projects
-            verbs:
-              - updatepsa
+        enabled: false
         image:
           repository: openpolicyagent/gatekeeper-crds
           tag: v3.17.1

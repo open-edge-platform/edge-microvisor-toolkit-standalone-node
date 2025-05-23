@@ -7,7 +7,7 @@ IMG_DIR=./images
 CHRT_DIR=./charts
 EXT_DIR=./extensions
 TPL_DIR=./extensions-templates
-TAR_PRX=rke2-images
+TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
 
 # List of pre-downloaded docker images
@@ -19,12 +19,10 @@ images=(
 	docker.io/openpolicyagent/gatekeeper:v3.17.1
 	docker.io/openpolicyagent/gatekeeper-crds:v3.17.1
 	docker.io/curlimages/curl:8.11.0
-	docker.io/openebs/provisioner-localpv:4.2.0
 	registry.k8s.io/sig-storage/csi-resizer:v1.8.0
 	registry.k8s.io/sig-storage/csi-snapshotter:v6.2.2
 	registry.k8s.io/sig-storage/snapshot-controller:v6.2.2
 	registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
-	docker.io/openebs/lvm-driver:1.6.1
 	registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0
 	docker.io/bitnami/kubectl:1.25.15
 	registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0
@@ -49,14 +47,13 @@ images=(
 	docker.io/calico/cni:v3.30.0
 	docker.io/calico/node:v3.30.0
 	docker.io/calico/kube-controllers:v3.30.0
+	quay.io/tigera/operator:v1.38.0
 )
 
 charts=(
 	"cert-manager:jetstack:https://charts.jetstack.io:1.16.2"
 	"gatekeeper:gatekeeper:https://open-policy-agent.github.io/gatekeeper/charts:3.17.1"
 	"gatekeeper-constraints:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:1.0.15"
-	"openebs:openebs:https://openebs.github.io/openebs:4.2.0"
-	"openebs-config:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.0.2"
 	"kube-prometheus-stack:prometheus:https://prometheus-community.github.io/helm-charts:70.3.0"
 	"observability-config:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.0.2"
 	"network-policies:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.1.13"
@@ -65,9 +62,8 @@ charts=(
 	"node-feature-discovery:node-feature-discovery:https://kubernetes-sigs.github.io/node-feature-discovery/charts:0.17.0"
 	"grafana:grafana:https://grafana.github.io/helm-charts:8.11.1"
 )
-
-# Download RKE2 artifacts
-download_rke2_artifacts () {
+# Download k3s artifacts
+download_k3s_artifacts () {
 	
 	echo "Downloading RKE2 artifacts"
 	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images.linux-amd64.tar.zst
@@ -130,7 +126,11 @@ download_extension_images () {
 	echo "Downloading container images"
 	mkdir -p ${IMG_DIR}
 	for image in "${images[@]}" ; do
-		podman pull "${image}"
+		if podman image exists ${image}; then
+			echo "Image ${image} already exists, skipping download"
+		else
+			podman pull ${image}
+		fi
 		img_name=$(echo "${image##*/}" | tr ':' '-')
 		DEST=${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}
 		podman image save --output "${DEST}".tmp "${image}"
@@ -167,7 +167,7 @@ install_pkgs () {
 
 # Main
 install_pkgs
-download_rke2_artifacts
+download_k3s_artifacts
 download_extension_charts
 download_extension_images
 #download_other_manifests

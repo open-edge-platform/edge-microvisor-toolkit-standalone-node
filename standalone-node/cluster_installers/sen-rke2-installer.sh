@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-RKE_INSTALLER_PATH=/"${1:-/tmp/rke2-artifacts}"
-K3S_BIN_PATH=/"${2:-/var/lib/rancher/k3s/bin}"
+K3S_BIN_PATH=/"${1:-/var/lib/rancher/k3s/bin}"
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then
 	export IS_UBUNTU=true
@@ -15,12 +14,14 @@ fi
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
 
-#Configure RKE2
-echo "$(date): Configuring RKE2 1/13" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
+#Configure k3s
+echo "$(date): Configuring k3s 1/13" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo mkdir -p /etc/rancher/k3s
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
 cluster-cidr: "10.42.0.0/16"
+cluster-dns: "10.43.0.10"
+data-dir : /var/lib/rancher/k3s
 disable-kube-proxy: false
 etcd-arg:
   - --cipher-suites=[TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256,TLS_CHACHA20_POLY1305_SHA256]
@@ -40,11 +41,11 @@ EOF'
 # Set up coredns
 sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
 sudo mkdir -p /var/lib/rancher/k3s/bin
-sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/k3s-coredns-config.yaml
+sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/coredns-config.yaml
 apiVersion: helm.cattle.io/v1
 kind: HelmChartConfig
 metadata:
-  name: k3s-coredns
+  name: coredns
   namespace: kube-system
 spec:
   valuesContent: |-
@@ -88,9 +89,9 @@ spec:
           kubernetes: "NodeInternalIP"
 EOF'
 
-# Install RKE2
-echo "$(date): Installing RKE2 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_EXEC="--flannel-backend=none" sh install.sh
+# Install k3s
+echo "$(date): Installing k3s 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh install.sh
 
 # Copy the cni tarballs
 echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
@@ -99,21 +100,20 @@ echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluste
 
 # Copy extension images - if the images are part of the package - otherwise get pullled from internet
 if [ -d ./images ]; then
-	sudo cp ./images/* /var/lib/rancher/rke2/agent/images
+  sudo mkdir -p /var/lib/rancher/k3s/agent/images/
+	sudo cp ./images/* /var/lib/rancher/k3s/agent/images
 fi
 
 # Copy extensions (HelmChart definitions - charts encoded in yaml)
 sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
 
-if [ "$IS_UBUNTU" = true ]; then
-  sudo sed -i '14i EnvironmentFile=-/etc/environment' /usr/local/lib/systemd/system/k3s-server.service
-else
-  sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s-server.service
-fi
+
+sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
+
 
 # Start RKE2
 echo "$(date): Starting RKE2 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-# sudo systemctl enable --now rke2-server.service
+sudo systemctl enable --now k3s
 
 echo "$(date): Waiting for RKE2 to start 5/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 until sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
@@ -134,7 +134,6 @@ namespaces=("calico-system"
 	"kubernetes-dashboard"
 	"nfd"
 	"observability"
-	"openebs"
 	"tigera-operator")
 echo "$(date): Waiting for namespaces to be created 7/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
@@ -149,33 +148,6 @@ done
 
 echo "$(date): Namespaces created 8/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
-## Wait for NetworkPolicies to get created
-
-sudo bash -c "KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl apply -f - <<EOF
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: kubesystem-egress
-  namespace: kube-system
-spec:
-  egress:
-  - {}
-  podSelector: {}
-  policyTypes:
-  - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: kubesystem-ingress
-  namespace: kube-system
-spec:
-  ingress:
-  - {}
-  podSelector: {}
-  policyTypes:
-  - Ingress
-EOF"
 echo "$(date): Permissive network policies created 9/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
 ## Wait for all pods to deploy
