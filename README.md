@@ -13,8 +13,7 @@ The Edge Microvisor Toolkit Standalone Node solution is designed to empower deve
 performance on Intel Architecture-based platforms.
 - **Kubernetes Integration:** Seamlessly deploy and manage applications using Kubernetes and cloud-native tools.
 - **Foundational Extensions:** These extensions support the deployment of diverse application types, including both modern cloud-native as well as traditional VM-based applications.
-
-Edge Microvisor Toolkit Standalone Node is designed to evaluate Edge AI applications on Intel platforms, allowing customers can gain critical insights into their capabilities. 
+- **Easy Evaluation:** The Edge Microvisor Standalone Node allows for critical insights into the capabilities of Edge AI solutions, which is beneficial for deployments of use-case-specific applications and potential scale outs.
 
 ## System Requirements
 
