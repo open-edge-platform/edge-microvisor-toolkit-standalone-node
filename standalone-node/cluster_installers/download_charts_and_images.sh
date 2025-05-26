@@ -12,12 +12,6 @@ TAR_SFX=linux-amd64.tar
 
 # List of pre-downloaded docker images
 images=(
-	quay.io/jetstack/cert-manager-controller:v1.16.2
-	quay.io/jetstack/cert-manager-cainjector:v1.16.2
-	quay.io/jetstack/cert-manager-webhook:v1.16.2
-	quay.io/jetstack/cert-manager-startupapicheck:v1.16.2
-	docker.io/openpolicyagent/gatekeeper:v3.17.1
-	docker.io/openpolicyagent/gatekeeper-crds:v3.17.1
 	docker.io/curlimages/curl:8.11.0
 	registry.k8s.io/sig-storage/csi-resizer:v1.8.0
 	registry.k8s.io/sig-storage/csi-snapshotter:v6.2.2
@@ -27,17 +21,11 @@ images=(
 	docker.io/bitnami/kubectl:1.25.15
 	registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0
 	quay.io/brancz/kube-rbac-proxy:v0.19.0
-	quay.io/prometheus-operator/prometheus-operator:v0.81.0
-	quay.io/prometheus/prometheus:v3.2.1
 	docker.io/library/busybox:1.35.0
 	docker.io/library/busybox:latest
-	quay.io/prometheus-operator/prometheus-config-reloader:v0.81.0
-	quay.io/prometheus/node-exporter:v1.9.0
-	docker.io/library/telegraf:1.32-alpine
 	registry.k8s.io/nfd/node-feature-discovery:v0.17.0
 	docker.io/kubernetesui/dashboard:v2.7.0
 	docker.io/kubernetesui/metrics-scraper:v1.0.8
-	docker.io/grafana/grafana:11.6.0
 	docker.io/bats/bats:v1.4.1
 	docker.io/kubernetesui/dashboard-web:1.6.0
 	docker.io/kubernetesui/dashboard-metrics-scraper:1.2.1
@@ -48,30 +36,23 @@ images=(
 	docker.io/calico/node:v3.30.0
 	docker.io/calico/kube-controllers:v3.30.0
 	quay.io/tigera/operator:v1.38.0
+	docker.io/calico/pod2daemon-flexvol:v3.30.0
+	docker.io/calico/typha:v3.30.0
+	rancher/mirrored-pause:3.6
+	docker.io/rancher/mirrored-pause:3.6
+	docker.io/calico/apiserver:v3.30.0
+	docker.io/calico/csi:v3.30.0
+	docker.io/calico/node-driver-registrar:v3.30.0
+
 )
 
-charts=(
-	"cert-manager:jetstack:https://charts.jetstack.io:1.16.2"
-	"gatekeeper:gatekeeper:https://open-policy-agent.github.io/gatekeeper/charts:3.17.1"
-	"gatekeeper-constraints:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:1.0.15"
-	"kube-prometheus-stack:prometheus:https://prometheus-community.github.io/helm-charts:70.3.0"
-	"observability-config:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.0.2"
-	"network-policies:intel-rs:oci://registry-rs.edgeorchestration.intel.com/edge-orch/en/charts:0.1.13"
-	"prometheus-node-exporter:node-exporter:https://prometheus-community.github.io/helm-charts:4.45.0"
-	"telegraf:telegraf:https://helm.influxdata.com/:1.8.55"
-	"node-feature-discovery:node-feature-discovery:https://kubernetes-sigs.github.io/node-feature-discovery/charts:0.17.0"
-	"grafana:grafana:https://grafana.github.io/helm-charts:8.11.1"
-)
 # Download k3s artifacts
 download_k3s_artifacts () {
-	
-	echo "Downloading RKE2 artifacts"
-	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images.linux-amd64.tar.zst
-	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2.linux-amd64.tar.gz
-	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images-calico.linux-amd64.tar.zst
-	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/rke2-images-multus.linux-amd64.tar.zst
-	curl -OLs https://github.com/rancher/rke2/releases/download/v1.30.6%2Brke2r1/sha256sum-amd64.txt
+	echo "Downloading k3s artifacts"
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/k3s-airgap-images-amd64.tar.zst
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/sha256sum-amd64.txt
 	curl -sfL https://get.k3s.io --output install.sh
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/k3s
 }
 
 # Download charts and convert to base64 - the charts do not end up in installation package but the encoded base64 will be part of helmchart addon definition elswhere in extensions directory.
@@ -101,16 +82,6 @@ download_extension_charts () {
 			if [ "${name}" == "node-feature-discovery" ]; then version="chart-${version}"; fi
 			base64 -w 0 ${CHRT_DIR}/"${name}"-"${version}".tgz > ${CHRT_DIR}/"${name}".base64
 		fi
-		# Remove unnecessary files from kube-prometheus-stack, reason:  then base encoded file becomes to big and cannot be consumed when installing via add-on on RKE2
-		if [ "${name}" == "kube-prometheus-stack" ]; then
-			tar -xzf ${CHRT_DIR}/"${name}"-"${version}".tgz -C ${CHRT_DIR}
-			rm -rf ${CHRT_DIR}/"${name}"-"${version}".tgz
-			rm ${CHRT_DIR}/"${name}"/README.md
-			rm ${CHRT_DIR}/"${name}"/templates/grafana/dashboards-1.14/*windows*
-			rm -rf ${CHRT_DIR}/"${name}"/templates/thanos-ruler
-			tar -cf ${CHRT_DIR}/"${name}"-"${version}".tgz --use-compress-program="gzip -9" -C ${CHRT_DIR} "${name}"
-			base64 -w 0 ${CHRT_DIR}/"${name}"-"${version}".tgz > ${CHRT_DIR}/"${name}".base64
-		fi
 		# Template HelmChart addon manifets using the base64 chart
 		awk "/chartContent:/ {printf \"  chartContent: \"; while ((getline line < \"${CHRT_DIR}/${name}.base64\") > 0) printf \"%s\", line; close(\"${CHRT_DIR}/${name}.base64\"); print \"\"; next} 1" "${TPL_DIR}/${name}.yaml" > "${EXT_DIR}/${name}.yaml"
 
@@ -118,36 +89,40 @@ download_extension_charts () {
 }
 
 # Download images
-# Note: Docker images are repacked, inspired by https://github.com/rancher/rke2/blob/master/scripts/package-images
-# Note2: Simple "podman pull <image> > <image>.tar.gz" images did not work correctly at RKE2 level - the images did not get imported due to missing gzip header (tar.gz) or "magic number" (tar.zst) - did not try with artifacts pulled by docker.
-
 download_extension_images () {
 	
 	echo "Downloading container images"
 	mkdir -p ${IMG_DIR}
 	for image in "${images[@]}" ; do
-		if podman image exists ${image}; then
+		## check if image exists already in podman
+		if docker image inspect ${image} > /dev/null 2>&1; then
 			echo "Image ${image} already exists, skipping download"
 		else
-			podman pull ${image}
+			docker pull ${image}
 		fi
-		img_name=$(echo "${image##*/}" | tr ':' '-')
+		img_name=$(echo ${image##*/} | tr ':' '-')
 		DEST=${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}
-		podman image save --output "${DEST}".tmp "${image}"
-		bsdtar -c -f "${DEST}" --include=manifest.json --include=repositories @"${DEST}".tmp
-		bsdtar -r -f "${DEST}" --exclude=manifest.json --exclude=repositories @"${DEST}".tmp
-		rm -f "${DEST}".tmp
-		zstd -T0 -16 -f --long=25 --no-progress "${DEST}" -o ${IMG_DIR}/${TAR_PRX}-"${img_name}".${TAR_SFX}.zst
-		rm -f "${DEST}"
+		docker save -o ${DEST}.tmp ${image}
+		# Create temp dirs for processing
+        mkdir -p /tmp/image_repacking/{manifest,content}
+        
+        # Extract only manifest.json and repositories first
+        tar -xf ${DEST}.tmp -C /tmp/image_repacking/manifest manifest.json repositories 2>/dev/null
+        
+        # Create initial tar with just the manifest files
+        tar -cf ${DEST} -C /tmp/image_repacking/manifest .
+        
+        # Extract all remaining files (excluding manifest.json and repositories)
+        tar -xf ${DEST}.tmp --exclude="manifest.json" --exclude="repositories" -C /tmp/image_repacking/content
+        
+        # Append all other files to tar
+        tar -rf ${DEST} -C /tmp/image_repacking/content .
+        
+        # Clean up
+        rm -rf /tmp/image_repacking
+        rm -f ${DEST}.tmp
 	done
 }
-# Download K8s dashboard
-#download_other_manifests () {
-#	
-#	echo "Downloading K8s dashboard manifest"
-#	mkdir -p ${EXT_DIR}
-#	curl -Ls https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml -o ./extensions/dashboard.yaml
-#}
 
 #This function exists to ensure that if somebody accidentaly deletes additional manifests from extensions directory the manifests will be backed up from extensions-template dir
 copy_other_manifests_from_template_dir () {
@@ -170,5 +145,4 @@ install_pkgs
 download_k3s_artifacts
 download_extension_charts
 download_extension_images
-#download_other_manifests
 copy_other_manifests_from_template_dir

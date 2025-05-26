@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH=/"${1:-/var/lib/rancher/k3s/bin}"
+K3S_BIN_PATH="${1:-/var/lib/rancher/k3s/bin}"
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then
 	export IS_UBUNTU=true
@@ -90,13 +90,16 @@ spec:
 EOF'
 
 # Install k3s
+mkdir -p $K3S_BIN_PATH
 echo "$(date): Installing k3s 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh install.sh
+chmod +x k3s
+cp k3s $K3S_BIN_PATH
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh install.sh
 
 # Copy the cni tarballs
 echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-# sudo cp rke2-images-multus.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
-# sudo cp rke2-images-calico.linux-amd64.tar.zst /var/lib/rancher/rke2/agent/images
+mkdir -p /var/lib/rancher/k3s/agent/images/
+sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
 
 # Copy extension images - if the images are part of the package - otherwise get pullled from internet
 if [ -d ./images ]; then
@@ -111,13 +114,13 @@ sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
 sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
 
 
-# Start RKE2
-echo "$(date): Starting RKE2 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+# Start k3s
+echo "$(date): Starting k3s 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo systemctl enable --now k3s
 
-echo "$(date): Waiting for RKE2 to start 5/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for k3s to start 5/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 until sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
-echo "$(date): RKE2 started 6/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): k3s started 6/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Label node as a worker
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
 sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label node $hostname node-role.kubernetes.io/worker=true
@@ -125,15 +128,12 @@ sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label nod
 # Wait for the deployment to complete
 
 ## First wait for all namespaces to be created
-namespaces=("calico-system"
-	"cert-manager"
-	"gatekeeper-system"
+namespaces=(
+  "calico-system"
 	"kube-node-lease"
 	"kube-public"
 	"kube-system"
 	"kubernetes-dashboard"
-	"nfd"
-	"observability"
 	"tigera-operator")
 echo "$(date): Waiting for namespaces to be created 7/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
@@ -160,8 +160,8 @@ done
 echo "$(date): All extensions deployed 11/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
 echo "$(date): Configuring environment 12/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-## Add kubectl to path
-sed 's|PATH="|PATH="/var/lib/rancher/rke2/bin:|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
+## Add k3s binary to path
+sed 's|PATH="|PATH="'$K3S_BIN_PATH':|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
 source /etc/environment
 export KUBECONFIG
 
@@ -193,8 +193,8 @@ Edge Microvisor Toolkit - cluster installation complete
 Logs located at:
 	/var/log/cluster-init.log
 
-For RKE2 logs run:
-	sudo journalctl -fu rke2-server
+For k3s logs run:
+	sudo journalctl -fu k3s
 
 IP address of the Node:
 	$IP - Ensure IP address is persistent across the reboot!
@@ -208,7 +208,7 @@ To access and view the cluster's pods run:
 	kubectl get pods -A
 
 KUBECONFIG available at:
-	/etc/rancher/rke2/rke2.yaml
+	/etc/rancher/k3s/k3s.yaml
 ===================================================================
 "
 

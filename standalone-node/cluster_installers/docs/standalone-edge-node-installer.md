@@ -55,26 +55,26 @@ There is two options to build a package
 
 To install Microvisor on the Standalone Node
 
-1. Copy the package to a writable directory ie. `/tmp/rke2-artifacts` 
+1. Copy the package to a writable directory ie. `/tmp/k3s-artifacts` 
 
 ```shell
-mkdir /tmp/rke2-artifacts
-cp sen-rke2-package.tar.gz /tmp/rke2-artifacts
+mkdir /tmp/k3s-artifacts
+cp sen-k3s-package.tar.gz /tmp/k3s-artifacts
 ```
 
 2. Unpack the package
 
 ```shell
-cd /tmp/rke2-artifacts
-tar xf sen-rke2-package.tar.gz
+cd /tmp/k3s-artifacts
+tar xf sen-k3s-package.tar.gz
 ```
 
 3. Run installer
 
-- By default installer is expecting the packages in `/tmp/rke2-artifacts`
+- By default installer is expecting the packages in `/tmp/k3s-artifacts`
 
 ```shell
-./sen-rke2-installer.sh
+./sen-k3s-installer.sh
 ```
 
 - If different path is selected to download the artifacts to then the installer can be pointed to it by providing the path as an argument
