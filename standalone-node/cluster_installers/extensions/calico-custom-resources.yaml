@@ -14,7 +14,9 @@ spec:
       encapsulation: VXLAN
       natOutgoing: Enabled
       nodeSelector: all()
-    containerIPForwarding: Enabled
+    nodeAddressAutodetectionV4:
+      kubernetes: NodeInternalIP
+
 ---
 
 # This section configures the Calico API server.
@@ -24,5 +26,10 @@ kind: APIServer
 metadata:
   name: default
 spec: {}
-
-
+---
+apiVersion: crd.projectcalico.org/v1
+kind: FelixConfiguration
+metadata:
+  name: default
+spec:
+  wireguardEnabled: true
