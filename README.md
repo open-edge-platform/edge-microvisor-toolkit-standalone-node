@@ -7,12 +7,12 @@
 
 The Edge Microvisor Toolkit Standalone Node solution is designed to empower developers and enterprise customers by allowing for efficient trials and evaluation of Edge AI applications on Intel Architecture-based platforms. This comprehensive solution stack includes the edge-optimized immutable Edge Microvisor Toolkit integrated with Kubernetes and foundational extensions, which enables deployment of both cloud-native and legacy VM-based applications.
 
-Key Features:
+### Key Features:
 
-- Edge Optimized Immutable Toolkit: The Edge Microvisor Toolkit is specifically optimized for edge environments, ensuring security and robust
+- **Edge Optimized Immutable Toolkit:** The Edge Microvisor Toolkit is specifically optimized for edge environments, ensuring security and robust
 performance on Intel Architecture-based platforms.
-- Kubernetes Integration: Seamlessly deploy and manage applications using Kubernetes and cloud-native tools.
-- Foundational Extensions: These extensions support the deployment of diverse application types, including both modern cloud-native as well as traditional VM-based applications.
+- **Kubernetes Integration:** Seamlessly deploy and manage applications using Kubernetes and cloud-native tools.
+- **Foundational Extensions:** These extensions support the deployment of diverse application types, including both modern cloud-native as well as traditional VM-based applications.
 
 Edge Microvisor Toolkit Standalone Node is designed to evaluate Edge AI applications on Intel platforms, allowing customers can gain critical insights into their capabilities. 
 
@@ -41,9 +41,9 @@ The Edge Microvisor Toolkit Standalone Node solution is engineered to support a 
 
 The repository comprises the following components:
 
-* [**HookOS**](standalone-node/hook_os/): contains the Tinkerbell installation environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
+* [**HookOS**](standalone-node/hook_os/): contains the Tinkerbell Installation Environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
 
-* [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor toolkit immutable non-RT image as  hypervisor.
+* [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable non-RT image as  hypervisor.
 
 * [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions.
 
