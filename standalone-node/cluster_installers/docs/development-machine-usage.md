@@ -21,10 +21,10 @@ PS C:\Users\user> cd .kube
 PS C:\Users\user> New-Item config -type file
 ```
 
-2. Copy Kubeconfig from Edge Node at `/etc/rancher/rke2/rke2.yaml` into the development machine filesystem and save the content under `C:\Users\user\.kube\config`
+2. Copy Kubeconfig from Edge Node at `/etc/rancher/k3s/k3s.yaml` into the development machine filesystem and save the content under `C:\Users\user\.kube\config`
 
 ```shell
- PS C:\Users\user> scp -o MACs=hmac-sha2-512-etm@openssh.com user@<EN IP>:/etc/rancher/rke2/rke2.yaml C:\Users\user\.kube\config
+ PS C:\Users\user> scp -o MACs=hmac-sha2-512-etm@openssh.com user@<EN IP>:/etc/rancher/k3s/k3s.yaml C:\Users\user\.kube\config
 ```
 
 3. Edit the IP of the Edge Node in `C:\Users\user\.kube\config` from `localhost` to the actual IP of the Standalone Edge Node.
@@ -70,14 +70,14 @@ PS C:\Users\user> kubectl get pods -n kubernetes-dashboard
 2. Enable kube proxy
 
 ```shell
-PS C:\Users\user> kubectl proxy
-Starting to serve on 127.0.0.1:8001
+PS C:\Users\user> kubectl port-forward -n kubernetes-dashboard svc/kong-proxy 8001:443 --address=0.0.0.0
+Forwarding from 0.0.0.0:8001 -> 8443
 ```
 
   or following to run in background
 
 ```shell
-PS C:\Users\user> Start-Process kubectl proxy
+PS C:\Users\user> Start-Process kubectl port-forward -n kubernetes-dashboard svc/kong-proxy 8001:443 --address=0.0.0.0
 ```
 
 3. Generate access token
@@ -87,7 +87,7 @@ PS C:\Users\user> kubectl -n kubernetes-dashboard create token admin-user
 <token>
 ```
 
-4. Access the dashboard from browser at `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
+4. Access the dashboard from browser at `https://localhost:8001/#/login`
 
 ![Login page](./images/login.png "Login Page")
 
@@ -180,227 +180,13 @@ my-wordpress-mariadb-0         1/1     Running   0              10m
 6. Forward port to be able to access WP 
 
 ```shell
-PS C:\Users\user> kubectl port-forward --namespace wordpress svc/my-wordpress 80:80
+PS C:\Users\user> kubectl port-forward --namespace wordpress svc/my-wordpress 8080:443 --address=0.0.0.0
 ```
 
-7. Access the WP blog from browser using `http://127.0.0.1//admin` URL.
+7. Access the WP blog from browser using `http://localhost:8080/admin` URL.
 
 ![WP Login view](./images/wordpress-login.png "WP Login view")
 
 8. Login using the `admin` (login) and `password` (password) credentials
 
 ![WP Dashboard view](./images/wordpress-dash.png "WP Dashboard view")
-
-## Installing PDD application
-
-[The Get Started guide for PDD provides additional context for the PDD application](https://literate-adventure-7vjeyem.pages.github.io/edge_orchestrator/content/user_guide/ai_solutions/get_started_pdd.html)
-
-1. Login to registry
-
-```shell
-PS C:\Users\user> helm registry login <RELEASE_SERVICE_URL>
-Username: user
-Password: <JWT Token>
-```
-
-2. Create an override values file `pdd-values.yaml`
-
-```yaml
-namespace: pdd
-DOCKER_REGISTRY: rs-proxy.rs-proxy.svc.cluster.local:8443/pallet-defect-detection/
-env:
-  VISUALIZER_GRAFANA_USER: root
-  VISUALIZER_GRAFANA_PASSWORD: evam123
-```
-
-3. Install PDD helmchart
-
-```shell
-PS C:\Users\user> helm install pdd oci://<RELEASE_SERVICE_URL>/pallet-defect-detection/pallet-defect-detection-reference-implementation --version 1.1.0 --insecure-skip-tls-verify -f ./pdd-values.yaml -n pdd --create-namespace
-```
-
-4. List pods
-
-```shell
-PS C:\Users\user> kubectl get pods -n pdd
-NAME                                                              READY   STATUS    RESTARTS   AGE
-deployment-edge-video-analytics-microservice-5dd9b86b4c-lttvw     1/1     Running   0          15h
-deployment-multimodal-data-visualization-7985846c7-fszll          1/1     Running   0          15h
-deployment-multimodal-data-visualization-streaming-5c6fbb8rz25k   1/1     Running   0          15h
-```
-
-5. Apply network policy for `pdd` namespace create a file `pdd-net-policy.yaml` and apply.
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: pdd-egress
-  namespace: pdd
-spec:
-  egress:
-  - {}
-  policyTypes:
-  - Egress
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: pdd-ingress
-  namespace: pdd
-spec:
-  ingress:
-  - {}
-  podSelector: {}
-  policyTypes:
-  - Ingress
-```
-
-```shell
-PS C:\Users\user> kubectl apply -f pdd-net-policy.yaml
-```
-
-6. Get the node IP address
-
-```shell
-PS C:\Users\user> kubectl get nodes -o jsonpath="{range .items[*]}{.status.addresses[?(@.type=='InternalIP')].address}{'\n'}{end}"
-<IP>
-```
-
-7. Get the PDD application service port
-
-```shell
-PS C:\Users\user> kubectl -n pdd get svc multimodal-data-visualization -o jsonpath="{.spec.ports[0].nodePort}`n"
-<port>
-```
-If your edge node isn't externally accessible you can also port forward the service like so
-```shell
-PS C:\Users\user> kubectl port-forward -n pdd svc/multimodal-data-visualization 30101:3000 --address 0.0.0.0
-```
-Using this method you can access grafana on ``localhost:30101``.
-
-8. Access the PDD application `grafana` dashboard from browser using the `<IP>` and `<port>` to form the URL `http://<IP>:<port>`
-
-![Grafana Login view](./images/grafana-login.png "Grafana Login view")
-
-9. Login using the `root` (login) and `evam123` (password) credentials.
-
-![Grafana dashboard view](./images/grafana-dashboard.png "Grafana dashboard view")
-
-10. Navigate to `Dashboards` -> `Video Analytics Dashboard` and edit each dashboard to point to IP of the Standalone Edge Node by pressing on `...` menu button for each dashboard.
-
-![Grafana dashboard edit](./images/grafana-edit.png "Grafana dashboard edit")
-
-11.  In the `Active Streams` and `Complete Pipeline Streams` dashboards find the `Query` tab and change the default `localhost` address in the `URL` field to an `IP address` of the Standalone Edge Node and click `apply` button. 
-
-![Grafana dashboard edit](./images/grafana-url.png "Grafana dashboard edit")
-
-12. In the `edge_video_analytics_results` dashboard find the `Panel Options` tab and change the default `localhost` address in the `URL` field to an `IP address` of the Standalone Edge Node and click `apply` button.
-
-![Grafana dashboard 2 edit](./images/grafana-url2.png "Grafana dashboard 2 edit")
-
-13. Run the pipeline - change the `<EN_IP>` in the URI.
-
-```shell
-PS C:\Users\user> $json = @"
-{
-  "source": {
-    "uri": "file:///home/pipeline-server/resources/videos/warehouse.avi",
-    "type": "uri"
-  },
-  "parameters": {
-    "udfloader": {
-      "udfs": [
-        {
-          "name": "python.geti_udf.geti_udf",
-          "type": "python",
-          "device": "CPU",
-          "visualize": "true",
-          "deployment": "./resources/models/geti/pallet_defect_detection/deployment",
-          "metadata_converter": "null"
-        }
-      ]
-    }
-  }
-}
-"@
-# Replace the <EN_IP>
-PS C:\Users\user> $uri = "http://<EN_IP>:30107/pipelines/user_defined_pipelines/pallet_defect_detection"
-PS C:\Users\user> $headers = @{
-    "Content-Type" = "application/json"
-}
-
-PS C:\Users\user>  Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $json
-```
-
-14. View the stream and the analytic data from the dashboard
-
-![Grafana PDD stream](./images/grafana-stream.png "Grafana PDD stream")
-
-## Accessing metrics from Standalone Edge Node
-
-### Accessing Grafana
-
-Grafana is installed and used to access metrics form the Edge Node to access Grafana
-
-1. Get the username and password
-
-```shell
-PS C:\Users\dkopyto\.kube> kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | % { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
-```
-
-```shell
-PS C:\Users\dkopyto\.kube> kubectl get secret grafana -n observability -o jsonpath="{.data.admin-password}" | % { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
-```
-
-2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
-
-```shell
-http://<EN IP>:32000
-```
-
-![Login page](./images/obs-grafana-login.png "Login Page")
-
-### Adding prometheus metrics to Grafana 
-
-Next you'll need the prometheus TLS credentials.
-**Note**: The following commands are in powershell but using ``base64 --decode`` on a linux setup works just as well.
-
-1. Get Prometheus credentials
-```shell
-PS C:\Users\user> $key=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}"
-PS C:\Users\user> $cert=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}"
-PS C:\Users\user> $ca=kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}"
-PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($key)) 
-<key>
-PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($cert)) 
-<cert>
-PS C:\Users\user> [Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($ca)) 
-<ca>
-```
-
-2. In grafana navigate to ``connections/Data sources`` 
-
-![Prometheus data source](./images/obs-grafana-datasource.png "Prometheus data source")
-
-3. Add a new prometheus data source.
-
-![Prometheus new](./images/obs-grafana-add-prometheus.png "Prometheus new")
-
-4. Configure the data source, filling in the ca, cert and key gathered earlier. Set the url and server name as ``https://prometheus-prometheus.observability.svc.cluster.local:9090`` and save.
-
-![Prometheus save](./images/obs-grafana-set.png "Prometheus save")
-   
-### Querying metrics
-
-1. Create a dashboard using prometheus data source
-   
-   ![Prometheus dashboard](./images/obs-grafana-dashboard.png "Prometheus dashboard")
-
-2. Select the data source
-
-  ![Prometheus source](./images/obs-grafana-prometheus.png "Prometheus datasource")
-
-3. Select metrics to query, use metric explorer to view available metrics. User `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button.
-
-  ![Prometheus source](./images/obs-grafana-build-dashboard.png "Prometheus datasource")

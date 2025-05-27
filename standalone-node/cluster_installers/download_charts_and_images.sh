@@ -9,50 +9,43 @@ EXT_DIR=./extensions
 TPL_DIR=./extensions-templates
 TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
+DOWNLOAD_ARTIFACTS=true
 
 # List of pre-downloaded docker images
 images=(
-	docker.io/curlimages/curl:8.11.0
-	registry.k8s.io/sig-storage/csi-resizer:v1.8.0
-	registry.k8s.io/sig-storage/csi-snapshotter:v6.2.2
-	registry.k8s.io/sig-storage/snapshot-controller:v6.2.2
-	registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
-	registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.8.0
-	docker.io/bitnami/kubectl:1.25.15
-	registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0
-	quay.io/brancz/kube-rbac-proxy:v0.19.0
-	docker.io/library/busybox:1.35.0
-	docker.io/library/busybox:latest
-	registry.k8s.io/nfd/node-feature-discovery:v0.17.0
-	docker.io/kubernetesui/dashboard:v2.7.0
-	docker.io/kubernetesui/metrics-scraper:v1.0.8
-	docker.io/bats/bats:v1.4.1
-	docker.io/kubernetesui/dashboard-web:1.6.0
-	docker.io/kubernetesui/dashboard-metrics-scraper:1.2.1
-	docker.io/kubernetesui/dashboard-auth:1.2.2
-	docker.io/kubernetesui/dashboard-api:1.10.1
-	docker.io/library/kong:3.6
+	docker.io/calico/apiserver:v3.30.0
 	docker.io/calico/cni:v3.30.0
-	docker.io/calico/node:v3.30.0
+	docker.io/calico/csi:v3.30.0
 	docker.io/calico/kube-controllers:v3.30.0
-	quay.io/tigera/operator:v1.38.0
+	docker.io/calico/node-driver-registrar:v3.30.0
+	docker.io/calico/node:v3.30.0
 	docker.io/calico/pod2daemon-flexvol:v3.30.0
 	docker.io/calico/typha:v3.30.0
-	rancher/mirrored-pause:3.6
-	docker.io/rancher/mirrored-pause:3.6
-	docker.io/calico/apiserver:v3.30.0
-	docker.io/calico/csi:v3.30.0
-	docker.io/calico/node-driver-registrar:v3.30.0
-
+	docker.io/kubernetesui/dashboard-api:1.10.1
+	docker.io/kubernetesui/dashboard-auth:1.2.2
+	docker.io/kubernetesui/dashboard-metrics-scraper:1.2.1
+	docker.io/kubernetesui/dashboard-web:1.6.0
+	kong:3.6
+	quay.io/tigera/operator:v1.38.0
+	rancher/klipper-helm:v0.9.5-build20250306
+	rancher/klipper-lb:v0.4.13
+	rancher/local-path-provisioner:v0.0.31
+	rancher/mirrored-coredns-coredns:1.12.1
+	rancher/mirrored-library-traefik:3.3.6
+	rancher/mirrored-metrics-server:v0.7.2
+	registry.k8s.io/e2e-test-images/agnhost:2.39
 )
 
+charts=(
+	kubernetes-dashboard:kubernetes:https://kubernetes.github.io/dashboard/:7.10.0
+)
 # Download k3s artifacts
 download_k3s_artifacts () {
 	echo "Downloading k3s artifacts"
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/k3s-airgap-images-amd64.tar.zst
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/sha256sum-amd64.txt
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/sha256sum-amd64.txt
 	curl -sfL https://get.k3s.io --output install.sh
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.33.0%2Bk3s1/k3s
+	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s
 }
 
 # Download charts and convert to base64 - the charts do not end up in installation package but the encoded base64 will be part of helmchart addon definition elswhere in extensions directory.
@@ -142,7 +135,9 @@ install_pkgs () {
 
 # Main
 install_pkgs
-download_k3s_artifacts
+if [ "${DOWNLOAD_ARTIFACTS}" = true ]; then
+	download_k3s_artifacts
+fi
 download_extension_charts
 download_extension_images
 copy_other_manifests_from_template_dir

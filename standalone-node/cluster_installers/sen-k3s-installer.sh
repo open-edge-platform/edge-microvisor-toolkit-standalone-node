@@ -4,6 +4,7 @@
 # shellcheck disable=all
 
 K3S_BIN_PATH="${1:-/var/lib/rancher/k3s/bin}"
+COPY_ARTIFACTS="${2:-true}"
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then
 	export IS_UBUNTU=true
@@ -89,18 +90,18 @@ spec:
           kubernetes: "NodeInternalIP"
 EOF'
 
-# Install k3s
-mkdir -p $K3S_BIN_PATH
-echo "$(date): Installing k3s 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-chmod +x k3s
-cp k3s $K3S_BIN_PATH
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh install.sh
+if [ "$COPY_ARTIFACTS" = true ]; then
+  mkdir -p /var/lib/rancher/k3s/agent/images/
+  echo "Copying k3s airgap images and binary"
+  sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
+  mkdir -p $K3S_BIN_PATH
+  chmod +x k3s
+  cp k3s $K3S_BIN_PATH
+  cp install.sh /opt/install.sh
+fi
 
 # Copy the cni tarballs
-echo "$(date): Copying images and extensions 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-mkdir -p /var/lib/rancher/k3s/agent/images/
-sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
-
+echo "$(date): Copying images and extensions 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Copy extension images - if the images are part of the package - otherwise get pullled from internet
 if [ -d ./images ]; then
   sudo mkdir -p /var/lib/rancher/k3s/agent/images/
@@ -109,7 +110,8 @@ fi
 
 # Copy extensions (HelmChart definitions - charts encoded in yaml)
 sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
-
+echo "$(date): Installing k3s 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh /opt/install.sh
 
 sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
 

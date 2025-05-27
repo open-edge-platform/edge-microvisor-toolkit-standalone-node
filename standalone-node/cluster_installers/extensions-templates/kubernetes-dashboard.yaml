@@ -1,0 +1,162 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kube-prometheus-stack
+  namespace: kube-system
+spec:
+  chartContent:
+  targetNamespace: kubernetes-dashboard
+  createNamespace: true
+  valuesContent: |-
+    fullnameOverride: "kubernetes-dashboard"
+    kong:
+      fullnameOverride: "kong"
+      env:
+        plugins: "bundled"
+        declarative_config: "/kong-dbless-asp/kong.yml"
+        ADMIN_LISTEN: 127.0.0.1:8444 http2 ssl 
+        PROXY_LISTEN: 0.0.0.0:8443 http2 ssl 
+        STATUS_LISTEN: 0.0.0.0:8100
+      admin:
+        enabled: true
+        http:
+          enabled: true
+      manager:
+        enabled: true
+      deployment:
+        userDefinedVolumeMounts:
+          - name: kong-dbless-config-asp-volume
+            mountPath: /kong-dbless-asp
+            readOnly: true
+        userDefinedVolumes:
+          - name: kong-dbless-config-asp-volume
+            configMap:
+              name: kong-dbless-config-asp
+      proxy:
+        annotations:
+          service-proxy.app.orchestrator.io/ports: "https:443"
+          external-dns.alpha.kubernetes.io/hostname: "dashboard.example.org"
+    extras:
+      manifests:
+        - apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: admin-user
+            namespace: kubernetes-dashboard
+        - apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: dashboard-admin
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: cluster-admin
+          subjects:
+            - kind: ServiceAccount
+              name: admin-user
+              namespace: kubernetes-dashboard
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: admin-user-token
+            namespace: kubernetes-dashboard
+            annotations:
+              kubernetes.io/service-account.name: admin-user
+          type: kubernetes.io/service-account-token
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: kong-dbless-config-asp
+          data:
+            kong.yml: |
+              _format_version: "3.0"
+              services:
+                - name: auth
+                  host: kubernetes-dashboard-auth
+                  port: 8000
+                  protocol: http
+                  plugins:
+                  - name: request-transformer
+                    config:
+                      remove:
+                        headers: [ ]
+                        querystring: [ ]
+                        body: [ ]
+                      replace:
+                        headers: []
+                        body: [ ]
+                      rename:
+                        headers: [ ]
+                        querystring: [ ]
+                        body: [ ]
+                      add:
+                        headers:
+                          - Authorization:$(headers["x-app-authorization"] or headers["Authorization"])
+                          - X-Auth-Copied:"By request-transformer plugin for auth service"
+                        querystring: [ ]
+                        body: [ ]
+                  - name: file-log
+                    config:
+                      path: /dev/stdout
+                      reopen: false
+                  routes:
+                    - name: authLogin
+                      paths:
+                        - /api/v1/login
+                      strip_path: false
+                    - name: authCsrf
+                      paths:
+                        - /api/v1/csrftoken/login
+                      strip_path: false
+                    - name: authMe
+                      paths:
+                        - /api/v1/me
+                      strip_path: false
+                - name: api
+                  host: kubernetes-dashboard-api
+                  port: 8000
+                  protocol: http
+                  plugins:
+                  - name: request-transformer
+                    config:
+                      remove:
+                        headers: [ ]
+                        querystring: [ ]
+                        body: [ ]
+                      replace:
+                        headers: []
+                        body: [ ]
+                      rename:
+                        headers: [ ]
+                        querystring: [ ]
+                        body: [ ]
+                      add:
+                        headers:
+                          - Authorization:$(headers["x-app-authorization"] or headers["Authorization"])
+                          - X-Auth-Copied:"By request-transformer plugin for api service"
+                        querystring: [ ]
+                        body: [ ]
+                  - name: file-log
+                    config:
+                      path: /dev/stdout
+                      reopen: false
+                  routes:
+                    - name: api
+                      paths:
+                        - /api
+                      strip_path: false
+                    - name: metrics
+                      paths:
+                        - /metrics
+                      strip_path: false
+                - name: web
+                  host: kubernetes-dashboard-web
+                  port: 8000
+                  protocol: http
+                  routes:
+                    - name: root
+                      paths:
+                        - /
+                      strip_path: false

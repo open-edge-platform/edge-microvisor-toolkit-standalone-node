@@ -269,7 +269,7 @@ install_k8_script() {
     # Mount the OS disk
     check_mnt_mount_exist
 
-    if mount "$os_disk$os_data_part" /mnt && cp /mnt2/sen-rke2-package.tar.gz /mnt/; then
+    if mount "$os_disk$os_data_part" /mnt && cp /mnt2/sen-k3s-package.tar.gz /mnt/; then
         success "Successfuly copied the K8 scripts to /opt on the disk"
     else
         failure "Fail to copy the K8 scripts to /opt on the disk,please check!!!"
@@ -351,8 +351,8 @@ update_ssh_settings() {
 
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
-    # Update the rke2 path
-    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/rke2/bin"|' /mnt/etc/environment
+    # Update the k3s path
+    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/k3s/bin"|' /mnt/etc/environment
     
     # Get the lvm_size_ingb from config-file for creating the LVM
     lvm_size=$(grep '^lvm_size_ingb=' "$CONFIG_FILE" | cut -d '=' -f2)

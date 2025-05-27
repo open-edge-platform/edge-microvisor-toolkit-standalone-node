@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 # CustomResourceDefinitions for Calico and Tigera operator
 ---
 # Source: crds/operator.tigera.io_apiservers_crd.yaml

@@ -111,16 +111,16 @@ checksum_file="checksums.md5"
 if {
     md5sum emt-uos.iso 
     md5sum edge_microvisor_toolkit.raw.gz
-    md5sum sen-rke2-package.tar.gz
+    md5sum sen-k3s-package.tar.gz
 } >> $checksum_file; then
     echo "Checksum file $checksum_file created successfully in $(pwd)"
 else
     echo "Failed to create checksum file, please check!"
     exit 1
 fi
-tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
+tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null
 
-if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
+if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null; then
     if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
         echo ""
         echo ""
@@ -173,13 +173,13 @@ if ! bash build_package.sh > /dev/null; then
 else
     echo "Build pkgs successful"
 fi
-echo "Disk space usage after building rke2 packages:"
+echo "Disk space usage after building k3s packages:"
 df -h
 echo "Current directory: $(pwd)"
-echo "File exists: $(ls sen-rke2-package.tar.gz)"
+echo "File exists: $(ls sen-k3s-package.tar.gz)"
 echo "Target directory exists: $(ls ../installation_scripts/out/)"
-if [ ! -f sen-rke2-package.tar.gz ]; then
-    echo "File sen-rke2-package.tar.gz does not exist, please check!"
+if [ ! -f sen-k3s-package.tar.gz ]; then
+    echo "File sen-k3s-package.tar.gz does not exist, please check!"
     popd || return 1
     exit 1
 fi
@@ -188,15 +188,15 @@ if [ ! -d ../installation_scripts/out/ ]; then
     popd || return 1
     exit 1
 fi
-echo "Before copying sen rke2 packages"
-if ! cp  sen-rke2-package.tar.gz  ../installation_scripts/out/; then
+echo "Before copying sen k3s packages"
+if ! cp  sen-k3s-package.tar.gz  ../installation_scripts/out/; then
     echo "Build pkgs && Images copy failed to out directory, please check!!"
     popd || return 1
     exit 1
 else
     echo "Build pkgs && Images successfuly copied"
 fi
-echo "After copying sen rke2 packages"
+echo "After copying sen k3s packages"
 popd || return 1
 }
 
