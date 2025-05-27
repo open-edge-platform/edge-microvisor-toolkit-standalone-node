@@ -12,7 +12,7 @@ on:
     paths:
       - "standalone-node/**"
 
-#permissions: {}
+permissions: {}
 
 jobs:
   post-merge-pipeline:
