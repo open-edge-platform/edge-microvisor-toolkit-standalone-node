@@ -252,7 +252,7 @@ install_k8_script() {
     # Mount the OS disk
     check_mnt_mount_exist
 
-    if mount "$os_disk$os_data_part" /mnt && cp /mnt2/sen-rke2-package.tar.gz /mnt/; then
+    if mount "$os_disk$os_data_part" /mnt && cp /mnt2/sen-k3s-package.tar.gz /mnt/; then
         success "Successfuly copied the K8 scripts to /opt on the disk"
     else
         failure "Fail to copy the K8 scripts to /opt on the disk,please check!!!"
@@ -305,8 +305,8 @@ update_proxy_and_ssh_settings() {
         ! echo "$NO_PROXY" | grep -q '^""$' && echo "NO_PROXY=$NO_PROXY" >>/mnt/etc/environment
     fi
 
-    # update the rke2 path
-    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/rke2/bin"|' /mnt/etc/environment
+    # update the k3s path
+    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/k3s/bin"|' /mnt/etc/environment
     success "Proxy Settings updated"
 
     # SSH Configure

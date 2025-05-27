@@ -89,7 +89,7 @@ echo "Verifying MD5 checksum of required files..."
 checksum_file="usb_files/checksums.md5"
 if [ -f "$checksum_file" ]; then
     pushd usb_files >/dev/null || exit
-    for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
+    for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-k3s-package.tar.gz; do
         if [ -f "$file" ]; then
             calculated_md5=$(md5sum "$file" | awk '{print $1}')
             expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
@@ -203,7 +203,7 @@ copy_to_partition "$OS_PART" "$os_filename" "/mnt"
 echo ""
 echo "K8-Cluster scripts copying!!!"
 
-if copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
+if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
     echo "USB bootable device is ready!"
 else
     echo "USB Installation failed,please re-run the script again!!!"

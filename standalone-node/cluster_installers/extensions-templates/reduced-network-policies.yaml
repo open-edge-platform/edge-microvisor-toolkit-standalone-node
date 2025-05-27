@@ -1,0 +1,296 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  order: 10100
+  namespaceSelector: >
+    has(projectcalico.org/name) &&
+    projectcalico.org/name not in
+    {"kube-system", "calico-system", "calico-apiserver", "cattle-system",
+    "cattle-fleet-system", "cattle-impersonation-system", "tigera-operator" }
+  types:
+    - Ingress
+    - Egress
+  egress:
+    - action: Allow
+      protocol: UDP
+      destination:
+        selector: 'k8s-app == "kube-dns"'
+        ports:
+          - 53
+    - action: Allow
+      protocol: TCP
+      destination:
+        selector: 'k8s-app == "kube-dns"'
+        ports:
+          - 53
+    - action: Allow
+      protocol: TCP
+      destination:
+        services:
+          name: kubernetes
+          namespace: default
+---
+# TODO: remove this once more restrictive policies are available
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: kubesystem-egress
+  namespace: kube-system
+spec:
+  egress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kubesystem-ingress
+  namespace: kube-system
+spec:
+  ingress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: default
+spec:
+  order: 100
+  selector: all()
+  ingress:
+    - action: Deny
+  egress:
+    - action: Deny
+  types:
+    - Ingress
+    - Egress
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  namespace: calico-system
+  name: calico-system-deny-from-other-namespaces-except-tigera-operator
+spec:
+  policyTypes:
+    - Ingress
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: calico-system
+        - namespaceSelector:
+            matchLabels:
+              name: tigera-operator
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  namespace: calico-system
+  name: calico-system-allow-metrics-port-from-observability
+spec:
+  podSelector:
+    matchLabels:
+  ingress:
+    - ports:
+        - port: 9094
+      from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress
+  namespace: kube-system
+spec:
+  selector: all()
+  types:
+    - Ingress
+  ingress:
+    - action: Allow
+      protocol: TCP
+      destination:
+        ports:
+          - 4194
+          - 10250
+          - 10255
+      source:
+        namespaceSelector: kubernetes.io/metadata.name == 'observability'
+    - action: Pass
+---
+apiVersion: crd.projectcalico.org/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: kube-public
+spec:
+  order: 100
+  selector: all()
+  ingress:
+    - action: Deny
+  egress:
+    - action: Deny
+  types:
+    - Ingress
+    - Egress
+---
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: helmchart-installers-allow-egress
+spec:
+  selector: has(helmcharts.helm.cattle.io/chart)
+  order: 100
+  types:
+    - Egress
+  egress:
+    - action: Allow
+      destination:
+        notNets: ["10.42.0.0/16"] #cidr
+    - action: Pass
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: kubesystem-egress
+  namespace: kubernetes-dashboard
+spec:
+  egress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kubesystem-ingress
+  namespace: kubernetes-dashboard
+spec:
+  ingress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+---
+# Allow ingress to dashboard-web from anywhere (adjust as needed)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dashboard-web-allow-ingress
+  namespace: kubernetes-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kubernetes-dashboard-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}  # Allow from any namespace (restrict as needed)
+      ports:
+        - port: 8000
+          protocol: TCP
+
+---
+# Allow internal communication between dashboard components
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dashboard-allow-internal
+  namespace: kubernetes-dashboard
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - kubernetes-dashboard-web
+          - kubernetes-dashboard-api
+          - kubernetes-dashboard-auth
+          - kubernetes-dashboard-metrics-scraper
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - kubernetes-dashboard-web
+                  - kubernetes-dashboard-api
+                  - kubernetes-dashboard-auth
+                  - kubernetes-dashboard-metrics-scraper
+      ports:
+        - port: 8000
+          protocol: TCP
+
+---
+# Allow egress to Kubernetes API server
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dashboard-allow-egress-apiserver
+  namespace: kubernetes-dashboard
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              component: apiserver
+      ports:
+        - port: 443
+          protocol: TCP
+
+---
+# Default deny all other ingress/egress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dashboard-default-deny
+  namespace: kubernetes-dashboard
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-metrics
+  namespace: kube-system
+spec:
+  podSelector:
+    matchLabels:
+      ak8s-app: metrics-server
+  policyTypes:
+    - Egress
+    - Ingress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 10250
+  ingress: []
