@@ -14,72 +14,11 @@ env:
   MARKDOWNLINT_CLI_VER: 0.44.0
 
 jobs:
-  pre-checks:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      filtered_projects: ${{ steps.filter-changes.outputs.filtered_projects }}
-      other_changed_projects: ${{ steps.filter-changes.outputs.other_changed_projects }}
-    env:
-      GITHUB_ACTIONS: true
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@0.1.5
-      - name: "Discover Changed Subfolders"
-        id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@0.1.5
-      - name: "Filter Out Unwanted Changed Subfolders"
-        id: filter-changes
-        run: |
-          folders_to_remove='[".github",".reuse","LICENSES",""]'
-
-          changed_projects='${{ steps.discover-changes.outputs.changed_projects }}'
-          filtered_projects=$(echo "$changed_projects" | jq -cr --argjson folders_to_remove "$folders_to_remove" 'map(select(. as $item | $folders_to_remove | index($item) | not))')
-          other_changed_projects=$(echo "$changed_projects" | jq -cr --argjson filtered_projects "$filtered_projects" 'map(select(. as $item | $filtered_projects | index($item) | not))')
-
-          echo "filtered_projects=$filtered_projects" >> $GITHUB_OUTPUT
-          echo "other_changed_projects=$other_changed_projects" >> $GITHUB_OUTPUT
-  pre-merge-root:
-    needs: pre-checks
-    if: ${{ contains(needs.pre-checks.outputs.other_changed_projects, '.github') || contains(needs.pre-checks.outputs.other_changed_projects, '.reuse') || contains(needs.pre-checks.outputs.other_changed_projects, 'LICENSES') || contains(needs.pre-checks.outputs.other_changed_projects, '""')}}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
-        with:
-          node-version: '18'
-      - run: |
-          npm install -g \
-          "markdownlint-cli@${{ env.MARKDOWNLINT_CLI_VER }}"
-      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
-        id: setup_python
-        with:
-          python-version: '3.13'
-      - name: Restore cached virtualenv
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
-          path: venv_infra
-      - name: Run mdlint
-        run: make mdlint
-      - name: Run license check
-        run: make license
   pre-merge-pipeline:
     permissions:
       contents: read
-    needs: pre-checks
-    if: ${{ needs.pre-checks.outputs.filtered_projects != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
     uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.13
     with:
-      run_security_scans: false
       run_version_check: true
       run_dep_version_check: true
       run_freeup_ubuntu_space: true
@@ -90,8 +29,6 @@ jobs:
       run_docker_build: true
       run_artifact: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
-      prefix_tag_separator: "/"
-      project_folder: ${{ matrix.project_folder }}
       trivy_image_skip:  "postgres:16.4"
       trivy_config_path: ${{ matrix.project_folder }}/trivy.yaml
     secrets:
@@ -102,13 +39,12 @@ jobs:
       permissions:
         contents: read
       if: ${{ always() }}
-      needs: [pre-merge-root, pre-merge-pipeline]
+      needs: [pre-merge-pipeline]
       steps:
         - name: Final Status Check
+          env:
+            pre_merge_pipeline: ${{ needs.pre-merge-pipeline.result }}
           run: |
-            pre_merge_root_pipeline="${{ needs.pre-merge-root.result }}"
-            pre_merge_pipeline="${{ needs.pre-merge-pipeline.result }}"
-
             results=("pre_merge_root_pipeline" "pre_merge_pipeline")
             status="OK"
             
