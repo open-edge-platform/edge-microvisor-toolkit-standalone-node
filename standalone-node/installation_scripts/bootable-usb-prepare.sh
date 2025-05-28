@@ -89,7 +89,7 @@ echo "Verifying MD5 checksum of required files..."
 checksum_file="usb_files/checksums.md5"
 if [ -f "$checksum_file" ]; then
     pushd usb_files >/dev/null || exit
-    for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
+    for file in emt-uos.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
         if [ -f "$file" ]; then
             calculated_md5=$(md5sum "$file" | awk '{print $1}')
             expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
@@ -112,7 +112,7 @@ fi
 
 # Prepare USB device
 echo "Preparing the USB bootable device..."
-ISO="usb_files/hook-os.iso"
+ISO="usb_files/emt-uos.iso"
 OS_IMG_PARTITION_SIZE="3000"
 K8S_PARTITION_SIZE="8000"
 OS_PART=5
