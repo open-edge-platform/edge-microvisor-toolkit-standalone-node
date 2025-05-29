@@ -70,6 +70,17 @@ To develop an Edge Microvisor Toolkit Standalone Node, you'll need to follow the
 
 To learn how to contribute to the project, see the [Contributor's Guide](standalone-node/docs/contribution.md).
 
+## Getting Help
+
+If you encounter bugs, need assistance or have any feature requests
+[file a GitHub Issue](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/issues).
+
+Before submitting a new report, check the existing issues to see if a similar issue has
+been filed already. If no matching issue is found, feel free to file the issue as described
+in the [contribution guide](./contribution.md).
+
+For security-related concerns, please refer to [SECURITY.md](./SECURITY.md).
+
 ## Community and Support
 
 To learn more about the project, its community, and governance, visit the Edge Orchestrator Community.
