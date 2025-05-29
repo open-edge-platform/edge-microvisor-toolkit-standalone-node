@@ -129,7 +129,6 @@ prepare_usb_setup() {
         return 1 
     }
     cd "$working_dir" || return 1 
-
     # Verify MD5 checksum of required files
     echo "Verifying MD5 checksum of required files..."
     checksum_file="usb_files/checksums.md5"
