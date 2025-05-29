@@ -27,12 +27,6 @@ images=(
 	docker.io/kubernetesui/dashboard-web:1.6.0
 	kong:3.6
 	quay.io/tigera/operator:v1.38.0
-	rancher/klipper-helm:v0.9.5-build20250306
-	rancher/klipper-lb:v0.4.13
-	rancher/local-path-provisioner:v0.0.31
-	rancher/mirrored-coredns-coredns:1.12.1
-	rancher/mirrored-library-traefik:3.3.6
-	rancher/mirrored-metrics-server:v0.7.2
 	registry.k8s.io/e2e-test-images/agnhost:2.39
 )
 
