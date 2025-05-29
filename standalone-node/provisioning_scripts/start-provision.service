@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+
+[Unit]
+Description=EMT-S Provisioning 
+After=getty.target
+
+[Service]
+ExecStartPre=/bin/sleep 15
+WorkingDirectory=/etc/scripts/
+ExecStart=/etc/scripts/install-os.sh
+TTYPath=/dev/tty0 
+
+[Install]
+WantedBy=multi-user.target
