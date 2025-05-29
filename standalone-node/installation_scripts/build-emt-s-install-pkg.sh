@@ -204,17 +204,17 @@ main(){
 echo "Main func: Disk space usage before build:"
 df -h
 
-#instll-dep-pks
+instll-dep-pks
 
 download-uOS
 
-#download-tvm
+download-tvm
 
 create-emt-uos-iso
 
-#download-charts-and-images
+download-charts-and-images
 
-#pack-iso-image-k8scripts
+pack-iso-image-k8scripts
 
 }
 
