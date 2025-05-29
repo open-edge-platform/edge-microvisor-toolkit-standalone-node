@@ -1,5 +1,21 @@
 # Get Started
 
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can build your own bootable USB from source code, or use the downloadable ISO
+image that can be flashed to a USB device and installed on edge nodes. It
+installs the microvisor and Kubernetes to the edge node with the essential
+functionality to run a single node cluster. The edge node will serve as both the
+control and worker node. Additional worker nodes can be added to the cluster
+through Kubernetes.
+
+Future releases will enable standalone edge nodes to join an existing Edge
+Management Framework backend, deployed on-prem or in the cloud to support scale
+out and management of larger infrastructures. The Standalone Edge Node enables
+you to quickly get an edge node up and running without deploying backend
+services, ready to deploy Kubernetes applicationsthrough `kubectl`, `helm`, or
+Kubernetes web dashboard.
+
+>**Note**: The standalone edge node does not currently support the real-time version.
+
 ## Standalone Node Provisioning
 
 There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
