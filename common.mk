@@ -59,7 +59,7 @@ yamllint: $(VENV_NAME) ## lint YAML files
 
 mdlint: ## link MD files
 	markdownlint --version ;\
-	markdownlint "**/*.md" -c ../.markdownlint.yml --ignore venv_standalonenode/
+	markdownlint "**/*.md" -c .markdownlint.yml --ignore venv_standalonenode/
 
 common-clean:
 	rm -rf ${OUT_DIR} vendor
