@@ -39,29 +39,8 @@ protect-kernel-defaults: true
 EOF'
 
 
-# Set up coredns
 sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
 sudo mkdir -p /var/lib/rancher/k3s/bin
-sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/coredns-config.yaml
-apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
-metadata:
-  name: coredns
-  namespace: kube-system
-spec:
-  valuesContent: |-
-    global:
-      clusterCIDR: 10.42.0.0/16
-      clusterCIDRv4: 10.42.0.0/16
-      clusterDNS: 10.43.0.10
-      k3sDataDir: /var/lib/rancher/k3s
-      serviceCIDR: 10.43.0.0/16
-    resources:
-      limits:
-        cpu: "250m"
-      requests:
-        cpu: "250m"
-EOF'
 
 # Set up mirrors
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/registries.yaml
@@ -71,23 +50,6 @@ mirrors:
    
  rs-proxy.rs-proxy.svc.cluster.local:8443: 
    endpoint: ["https://localhost.internal:9443"]
-EOF'
-
-mkdir -p /var/lib/rancher/k3s/server/manifests/
-sudo bash -c 'cat << EOF >  /var/lib/rancher/k3s/server/manifests/k3s-calico-config.yaml
-apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
-metadata:
-  name: k3s-calico
-  namespace: kube-system
-spec:
-  valuesContent: |-
-    felixConfiguration:
-      wireguardEnabled: true
-    installation:
-      calicoNetwork:
-        nodeAddressAutodetectionV4:
-          kubernetes: "NodeInternalIP"
 EOF'
 
 if [ "$COPY_ARTIFACTS" = true ]; then

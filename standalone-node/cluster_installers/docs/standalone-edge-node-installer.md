@@ -87,7 +87,8 @@ tar xf sen-k3s-package.tar.gz
 ```shell
 sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl get pods -A
 ```
-TODO: move to /usr/local/bin/ when binaries are available
+TODO: move to /usr/local/bin/ when binaries are available.
+
 The k3s binary provides a wrapper of kubectl through the `k3s kubectl` command.
 ## Uninstalling
 
