@@ -46,7 +46,7 @@ jobs:
           env:
             pre_merge_pipeline: ${{ needs.pre-merge-pipeline.result }}
           run: |
-            results=("pre_merge_root_pipeline" "pre_merge_pipeline")
+            results=("pre_merge_pipeline")
             status="OK"
             
             for result in "${results[@]}"; do
