@@ -29,7 +29,7 @@ jobs:
       run_artifact: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       trivy_image_skip:  "postgres:16.4"
-      trivy_config_path: ${{ matrix.project_folder }}/trivy.yaml
+      trivy_config_path: trivy.yaml
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
