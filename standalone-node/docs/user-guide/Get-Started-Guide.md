@@ -383,6 +383,7 @@ Install a WordPress application as a test application using `helm`.
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
 ## Query Metrics
+## Query Metrics
 
 1. Create a dashboard using prometheus data source:
 
