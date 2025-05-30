@@ -11,10 +11,10 @@ Future releases will enable standalone edge nodes to join an existing Edge
 Management Framework backend, deployed on-prem or in the cloud to support scale
 out and management of larger infrastructures. The Standalone Edge Node enables
 you to quickly get an edge node up and running without deploying backend
-services, ready to deploy Kubernetes applicationsthrough `kubectl`, `helm`, or
+services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
 Kubernetes web dashboard.
 
->**Note**: The standalone edge node does not currently support the real-time version.
+> **Note**: The standalone edge node does not currently support the real-time version.
 
 ## Standalone Node Provisioning
 
@@ -149,13 +149,13 @@ cd edge-microvisor-toolkit-standalone-node
 
      > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
   
-  - Unplug the attached bootable USB from developer system before proceeding with deployment.
+  - Unplug the attached bootable USB drive from developer system before proceeding with deployment.
 
 ## Standalone Node Deployment
 
-- Plug the created bootable USB pen drive into the standalone node machine.
+- Plug the created bootable USB drive into the standalone node machine.
 
-- Set the BIOS boot manager to boot from the USB pen drive.
+- Set the BIOS boot manager to boot from the USB drive.
 
 - Reboot the Standalone Node
   This will start the HookOS boot followed by Microvisor installations.
@@ -382,7 +382,6 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
-## Query Metrics
 ## Query Metrics
 
 1. Create a dashboard using prometheus data source:
