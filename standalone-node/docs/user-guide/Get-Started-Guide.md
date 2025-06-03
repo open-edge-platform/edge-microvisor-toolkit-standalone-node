@@ -10,17 +10,9 @@ Source code for the Edge Microvisor Toolkit Standalone Node is available at [Ope
 
 ### Step 1: Prerequisites
 
-#### 1.1: Docker and docker proxy Setup
-
-Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
-Refer to the links below for Docker installation and proxy setup:
-
-- [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
-- [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
-
 > **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
 
-#### 1.2: Repository Setup
+#### 1.1: Repository Setup
 
 Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
 is crucial for accessing the tools required for standalone node
@@ -30,26 +22,7 @@ git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalo
 cd edge-microvisor-toolkit-standalone-node
 ```
 
-#### 1.3: Proxy settings
-
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
-
-- Update the config file
-  
-   ```bash
-   vi config
-
-   # Proxy configuration
-   # Uncomment and set the following variables if you need to use a proxy
-   # Replace <proxy_url> with your actual proxy URL and port
-   # http_proxy="<proxy_url>"
-   # https_proxy="<proxy_url>"
-   # ftp_proxy="<proxy_url>"
-   # no_proxy="127.0.0.1,localhost,10.0.0.0/8"
-
-   ```
-
-#### 1.4: Create the Standalone Installation Tar File
+#### 1.2: Create the Standalone Installation Tar File
 
 - To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
 
@@ -61,7 +34,7 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.5:  Prepare the USB Drive
+#### 1.3:  Prepare the USB Drive
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
