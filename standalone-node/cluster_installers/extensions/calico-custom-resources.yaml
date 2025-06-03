@@ -5,6 +5,7 @@ kind: Installation
 metadata:
   name: default
 spec:
+  flexVolumePath: /var/lib/kubelet/volumeplugins
   # Configures Calico networking.
   calicoNetwork:
     ipPools:
