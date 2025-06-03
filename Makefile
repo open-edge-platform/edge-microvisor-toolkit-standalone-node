@@ -66,7 +66,7 @@
 #         | xargs -I _ sh -c 'printf "%-20s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
 
 .DEFAULT_GOAL := help
-.PHONY: build lint license help fuzz
+.PHONY: build lint license help
 
 # Optionally include tool version checks, not used in Docker builds
 TOOL_VERSION_CHECK ?= 0
