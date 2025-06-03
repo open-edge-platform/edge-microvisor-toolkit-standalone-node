@@ -35,6 +35,7 @@ kubelet-arg:
   - "topology-manager-policy=best-effort"
   - "max-pods=250"
   - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+  - "volume-plugin-dir=/var/lib/kubelet/volumeplugins"
 protect-kernel-defaults: true
 EOF'
 
