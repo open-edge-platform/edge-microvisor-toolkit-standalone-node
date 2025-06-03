@@ -37,3 +37,15 @@ ssh_key=""
 
 user_name=""
 passwd=""
+
+# ------------------ Edge Data Collection ------------------------
+# Creates files /etc/edge-node/metrics/<partner_id,endpoint,token,disabled>
+# reporting_partner_id containing Partner ID (as exchanged between Partner and Intel)
+# reporting_endpoint containing URI to cloud backend API
+# reporting_token containing access token to send data to cloud backend
+# reporting_disabled which adds opt-out option (false if absent)
+
+reporting_partner_id=""
+reporting_endpoint =""
+reporting_token=""
+reporting_disabled=""

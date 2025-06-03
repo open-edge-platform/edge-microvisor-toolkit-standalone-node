@@ -32,7 +32,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.3: Proxy settings
 
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
+> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the hook_os/config file
 
 - Update the config file
   
