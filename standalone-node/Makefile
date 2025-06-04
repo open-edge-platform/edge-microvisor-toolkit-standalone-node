@@ -98,7 +98,7 @@ list:
 	@# Help: displays make targets
 	help
 
-upload:
+fileserver-upload:
 	@echo "---Uploading all build tar files---"
 	@for profile in $(PROFILES); do \
 	    suffix=$${profile##*-}; \
