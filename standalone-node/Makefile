@@ -98,7 +98,7 @@ list:
 	@# Help: displays make targets
 	help
 
-fileserver-upload:
+artifact-publish:
 	@echo "---Uploading all build tar files---"
 	@for profile in $(PROFILES); do \
 	    suffix=$${profile##*-}; \
