@@ -10,7 +10,7 @@ The Edge Microvisor Toolkit Standalone (EMT-S) provides a simplified approach to
 (EMT) edge. There are usecases where customer would like to deploy native container apps without using Kubernetes for
 container orchestration.
 
-To enable this usecase going forward EMT will support container runtime and kubernetes installer as part of the same
+To enable this use case, going forward EMT will support container runtime and kubernetes installer as part of the same
 immutable image.
 
 This proposal focuses on enabling the installation of container only host and kubernetes host using the same image.
