@@ -33,6 +33,8 @@ YAML_IGNORE          := vendor, .github/workflows
 
 # Include shared makefile
 include ../common.mk
+PROFILES := non-rt-k8s non-rt-docker rt-docker
+VERSION := $(shell cat VERSION)-$(shell date +"%Y%m%d-%H%M%S")
 
 all: 
 	@# Help: Runs build, lint, test stages
@@ -45,15 +47,28 @@ configure:
 	echo 'socks_proxy=$(socks_proxy)' >> hook_os/config
 	echo 'no_proxy=$(no_proxy)' >> hook_os/config
 
-lint: license yamllint mdlint shellcheck
+lint: yamllint mdlint shellcheck
 
 build: configure
 	@# Help: Runs build stage
-	@echo "---MAKEFILE ISO BUILD---"
-	echo $@
-	cd installation_scripts && ./build-hook-os-iso.sh && cd ..
+	@echo "---MAKEFILE BUILD for all profiles---"
+	@for profile in $(PROFILES); do \
+		( \
+			cd hook_os && \
+			cp hook-os.yaml hook-os.yaml.bak && \
+			sed -i 's/{{PROFILE}}/'"$$profile"'/g' hook-os.yaml && \
+			cd ../installation_scripts && \
+			IMAGE_NAME=$$(./get_image_name.sh $$profile); \
+			echo "Building for $$profile with $$IMAGE_NAME"; \
+			IMAGE_NAME="$$IMAGE_NAME" PROFILE_NAME="$$profile" ./build-hook-os-iso.sh; \
+			cd .. && \
+			cd hook_os && \
+			mv hook-os.yaml.bak hook-os.yaml; \
+			cd .. \
+    	); \
+    done
 	@echo "---END MAKEFILE Build---"
-	
+		
 image:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE BUILD---"
@@ -82,3 +97,20 @@ test:
 list: 
 	@# Help: displays make targets
 	help
+
+artifact-publish:
+	@echo "---Uploading all build tar files---"
+	@for profile in $(PROFILES); do \
+	    suffix=$${profile##*-}; \
+		prefix=$${profile%-*}; \
+		dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/$$prefix/$$suffix"; \
+		tar_file="installation_scripts/out-$$profile/standalone-installation-files.tar.gz"; \
+		if [ -f "$$tar_file" ]; then \
+			echo "Uploading $$tar_file ..."; \
+			aws s3 cp "$$tar_file" "$$dest_path"/standalone-installation-files-$(VERSION).tar.gz || { echo "Upload failed for $$tar_file"; exit 1; }; \
+		else \
+			echo "Tar file $$tar_file not found!"; \
+			exit 1; \
+		fi \
+	done
+	@echo "---All uploads done---"

@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - release-*
+      - feature-enhancement*
 
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
@@ -77,7 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.13
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.22
     with:
       run_security_scans: false
       run_version_check: true
@@ -89,6 +90,7 @@ jobs:
       run_validate_clean_folder: false
       run_docker_build: true
       run_artifact: true
+      run_artifact_push: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}

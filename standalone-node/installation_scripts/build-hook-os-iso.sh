@@ -5,6 +5,12 @@
 #set -x
 
 os_filename=""
+
+if [ -z "$PROFILE_NAME" ]; then
+  echo "ERROR: PROFILE_NAME is not set"
+  exit 1
+fi
+OUTPUT_DIR=out-"$PROFILE_NAME"
 # Build the hook os with and generate kernel && initramfs file
 build-hook-os(){
 
@@ -27,6 +33,10 @@ popd > /dev/null || return 1
 download-tvm(){
 
 pushd ../host_os > /dev/null || return 1
+if [ -z "$IMAGE_NAME" ]; then
+  echo "ERROR: IMAGE_NAME is not set"
+  exit 1
+fi
 
 chmod +x download_tmv.sh
 if bash download_tmv.sh; then
@@ -51,12 +61,12 @@ else
     # Install the required tool
     sudo apt install grub2-common xorriso mtools dosfstools -y > /dev/null
     # Cleanup the files if exist
-    if [ -d out ]; then
-        rm -rf out
+    if [ -d "$OUTPUT_DIR" ]; then
+        rm -rf "$OUTPUT_DIR"
     fi
-    mkdir -p out
-    cp ../hook_os/out/hook_x86_64.tar.gz out/
-    pushd out/ || return 1
+    mkdir -p "$OUTPUT_DIR"
+    cp ../hook_os/out/hook_x86_64.tar.gz "$OUTPUT_DIR"/
+    pushd "$OUTPUT_DIR"/ || return 1
     tar -xzf  hook_x86_64.tar.gz
 
     # Create the ISO structure
@@ -81,7 +91,7 @@ EOF
     # Create the bootable iso that support uefi && bios formats
 
     if grub-mkrescue -o hook-os.iso iso; then
-        echo "ISO created successfully under $(pwd)/out"
+        echo "ISO created successfully under $(pwd)/"$OUTPUT_DIR""
     else
         echo "ISO creation failed,please check!!"
         popd >/dev/null || return 1
@@ -97,13 +107,13 @@ pack-iso-image-k8scripts(){
 
 # Create the tar file for k8 scripts
 
-mv "$os_filename" out/ 
-cp bootable-usb-prepare.sh out/
-cp config-file out/
-cp edgenode-logs-collection.sh out/
+mv "$os_filename" "$OUTPUT_DIR"/ 
+cp bootable-usb-prepare.sh "$OUTPUT_DIR"/
+cp config-file "$OUTPUT_DIR"/
+cp edgenode-logs-collection.sh "$OUTPUT_DIR"/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
-pushd out > /dev/null || return 1
+pushd "$OUTPUT_DIR" > /dev/null || return 1
 checksum_file="checksums.md5"
 
 
@@ -120,16 +130,16 @@ fi
 tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
 
 if tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
-    if tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
         echo ""
 	echo ""
 	echo ""
-	# Delete all other generated files other than sen-installation-files.tar.gz
-        find . -mindepth 1 -not -name "sen-installation-files.tar.gz" -delete
+	# Delete all other generated files other than standalone-installation-files.tar.gz
+        find . -mindepth 1 -not -name standalone-installation-files.tar.gz -delete
         echo "##############################################################################################"
         echo "                                                                                              "
         echo "                                                                                              "
-        echo "Standalone Installation files--> sen-installation-files.tar.gz created successfuly, under $(pwd)"
+        echo "Standalone Installation files--> standalone-installation-files.tar.gz created successfuly, under $(pwd)"
         echo "                                                                                              "
         echo "                                                                                              "
         echo "###############################################################################################"
@@ -176,20 +186,20 @@ echo "Disk space usage after building rke2 packages:"
 df -h
 echo "Current directory: $(pwd)"
 echo "File exists: $(ls sen-rke2-package.tar.gz)"
-echo "Target directory exists: $(ls ../installation_scripts/out/)"
+echo "Target directory exists: $(ls ../installation_scripts/"$OUTPUT_DIR"/)"
 if [ ! -f sen-rke2-package.tar.gz ]; then
     echo "File sen-rke2-package.tar.gz does not exist, please check!"
     popd || return 1
     exit 1
 fi
-if [ ! -d ../installation_scripts/out/ ]; then
-    echo "Directory ../installation_scripts/out/ does not exist, please check!"
+if [ ! -d ../installation_scripts/"$OUTPUT_DIR"/ ]; then
+    echo "Directory ../installation_scripts/"$OUTPUT_DIR"/ does not exist, please check!"
     popd || return 1
     exit 1
 fi
 echo "Before copying sen rke2 packages"
-if ! cp  sen-rke2-package.tar.gz  ../installation_scripts/out/; then
-    echo "Build pkgs && Images copy failed to out directory, please check!!"
+if ! cp  sen-rke2-package.tar.gz  ../installation_scripts/"$OUTPUT_DIR"/; then
+    echo "Build pkgs && Images copy failed to "$OUTPUT_DIR" directory, please check!!"
     popd || return 1
     exit 1
 else

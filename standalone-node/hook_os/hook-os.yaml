@@ -184,7 +184,7 @@ files:
     mode: "0777"
 
   - path: etc/scripts/cloud-init.yaml
-    source: "files/cloud-init.yaml"
+    source: "files/{{PROFILE}}-cloud-init.yaml"
     mode: "0777"
 
   - path: etc/scripts/enable-dmv.sh

@@ -1,0 +1,64 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+# shellcheck disable=all
+
+# NTP Time Sync Configuration
+ntp:
+  enabled: true
+  ntp_client: systemd-timesyncd
+  servers:
+    - time.google.com
+
+# Cloud-config file to start the rke2 cluster.
+runcmd:
+  - |
+    source /etc/environment
+
+    iptables -A INPUT -p tcp -j ACCEPT 
+    mkdir -p /opt/docker
+    mkdir -p /etc/docker
+    if [ ! -f /etc/docker/daemon.json ] || ! grep -q '"data-root": "/opt/docker"' /etc/docker/daemon.json; then
+      echo '{ "data-root": "/opt/docker" }' | tee /etc/docker/daemon.json
+    else
+      echo "/etc/docker/daemon.json already has the required content."
+    fi
+    mkdir -p /etc/systemd/system/docker.service.d/
+    ENV_FILE=/etc/environment
+    DOCKER_PROXY_CONF="/etc/systemd/system/docker.service.d/http-proxy.conf"
+    if grep -q '^http_proxy=' "$ENV_FILE"; then
+        http_proxy=$(grep '^http_proxy=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if grep -q "https_proxy" "$ENV_FILE"; then
+        https_proxy=$(grep '^https_proxy=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if grep -q '^no_proxy=' "$ENV_FILE"; then
+        no_proxy=$(grep '^no_proxy=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if grep -q "HTTP_PROXY" "$ENV_FILE"; then
+        HTTP_PROXY=$(grep '^HTTP_PROXY=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if grep -q '^HTTPS_PROXY=' "$ENV_FILE"; then
+        HTTPS_PROXY=$(grep '^HTTPS_PROXY=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if grep -q '^NO_PROXY=' "$ENV_FILE"; then
+        NO_PROXY=$(grep '^NO_PROXY=' "$ENV_FILE" | cut -d '=' -f2)
+    fi
+    if [ -n "$HTTPS_PROXY" ] &&  [ -n "$HTTP_PROXY" ] && [ -n "$NO_PROXY" ]; then
+        cat > "$DOCKER_PROXY_CONF" <<EOF
+        [Service]
+        Environment="HTTP_PROXY=${HTTP_PROXY}"
+        Environment="HTTPS_PROXY=${HTTPS_PROXY}"
+        Environment="NO_PROXY=${NO_PROXY}"
+    EOF
+    elif [ -n "$http_proxy" ] &&  [ -n "$http_proxy" ] && [ -n "$no_proxy" ]; then
+        cat > "$DOCKER_PROXY_CONF" <<EOF
+        [Service]
+        Environment="HTTP_PROXY=${http_proxy}"
+        Environment="HTTPS_PROXY=${https_proxy}"
+        Environment="NO_PROXY=${no_proxy}"
+    EOF
+    fi
+    systemctl enable docker.service
+    systemctl daemon-reload
+    systemctl start docker.service
