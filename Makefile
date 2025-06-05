@@ -64,3 +64,9 @@ help:
         | sort \
         | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' \
         | xargs -I _ sh -c 'printf "%-20s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
+
+fileserver-upload:
+	@# Help: Upload files to the fileserver
+	@echo "---MAKEFILE FILESERVER UPLOAD---"
+	@for dir in $(SUBPROJECTS); do $(MAKE) -C $$dir fileserver-upload; done
+	@echo "---END MAKEFILE FILESERVER UPLOAD---"

@@ -83,9 +83,10 @@ list:
 	@# Help: displays make targets
 	help
 
-artifact-publish:
+fileserver-upload:
+	@# Help: Runs file upload stage
 	@echo "---Uploading all build tar files---"
-	dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/$$prefix/$$suffix"; \
+	dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/non-rt/base"; \
 	tar_file="installation_scripts/out/standalone-installation-files.tar.gz"; \
 	if [ -f "$$tar_file" ]; then \
 		echo "Uploading $$tar_file ..."; \
@@ -93,5 +94,5 @@ artifact-publish:
 	else \
 		echo "Tar file $$tar_file not found!"; \
 		exit 1; \
-	fi \
+	fi
 	@echo "---All uploads done---"
