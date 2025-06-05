@@ -82,3 +82,16 @@ test:
 list: 
 	@# Help: displays make targets
 	help
+
+artifact-publish:
+	@echo "---Uploading all build tar files---"
+	dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/$$prefix/$$suffix"; \
+	tar_file="installation_scripts/out/standalone-installation-files.tar.gz"; \
+	if [ -f "$$tar_file" ]; then \
+		echo "Uploading $$tar_file ..."; \
+		aws s3 cp "$$tar_file" "$$dest_path"/standalone-installation-files-$(VERSION).tar.gz || { echo "Upload failed for $$tar_file"; exit 1; }; \
+	else \
+		echo "Tar file $$tar_file not found!"; \
+		exit 1; \
+	fi \
+	@echo "---All uploads done---"

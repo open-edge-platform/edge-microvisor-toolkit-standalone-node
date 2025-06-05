@@ -120,16 +120,16 @@ fi
 tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
 
 if tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
-    if tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
         echo ""
 	echo ""
 	echo ""
-	# Delete all other generated files other than sen-installation-files.tar.gz
-        find . -mindepth 1 -not -name "sen-installation-files.tar.gz" -delete
+	# Delete all other generated files other than standalone-installation-files.tar.gz
+        find . -mindepth 1 -not -name "standalone-installation-files.tar.gz" -delete
         echo "##############################################################################################"
         echo "                                                                                              "
         echo "                                                                                              "
-        echo "Standalone Installation files--> sen-installation-files.tar.gz created successfuly, under $(pwd)"
+        echo "Standalone Installation files--> standalone-installation-files.tar.gz created successfuly, under $(pwd)"
         echo "                                                                                              "
         echo "                                                                                              "
         echo "###############################################################################################"
