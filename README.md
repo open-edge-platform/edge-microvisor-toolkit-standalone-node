@@ -65,6 +65,17 @@ The repository comprises the following components.
 
 For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
 
+## Getting Help
+
+If you encounter bugs, have feature requests, or need assistance,
+[file a GitHub Issue](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/issues).
+
+Before submitting a new report, check the existing issues to see if a similar one has not
+been filed already. If no matching issue is found, feel free to file the issue as described
+in the [contribution guide](./contribution.md).
+
+For security-related concerns, please refer to [SECURITY.md](./SECURITY.md).
+
 ## Develop
 
 To develop an Edge Microvisor Toolkit Standalone Node, you'll need to follow the instructions provided in the [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md) located in its respective folder.
