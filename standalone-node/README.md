@@ -66,7 +66,7 @@ This document explains the procedure to create a bootable USB device for Standal
 
 ### Step 5: USB Bootable Preparation
 
-1. Now the USB will be listed on the Ubuntu terminal. You can start the USB bootable preparation as mentioned in the [![Intel Wiki](https://wiki.ith.intel.com/pages/viewpage.action?pageId=3996554119#EdgeMicrovisorToolkitStandaloneNode-StandaloneEdgeNodeinstallationusingESCpackage)].
+1. Now the USB will be listed on the Ubuntu terminal. You can start the USB bootable preparation as mentioned in the [Intel Wiki](https://wiki.ith.intel.com/pages/viewpage.action?pageId=3996554119#EdgeMicrovisorToolkitStandaloneNode-StandaloneEdgeNodeinstallationusingESCpackage).
 
 ### Step 6: Copy ESH Package to Ubuntu
 
