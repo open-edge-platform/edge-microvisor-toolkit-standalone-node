@@ -68,5 +68,5 @@ help:
 artifact-publish:
 	@# Help: Upload files to the fileserver
 	@echo "---MAKEFILE FILESERVER UPLOAD---"
-	@for dir in $(SUBPROJECTS); do $(MAKE) -C $$dir fileserver-upload; done
+	@for dir in $(SUBPROJECTS); do $(MAKE) -C $$dir artifact-publish; done
 	@echo "---END MAKEFILE FILESERVER UPLOAD---"
