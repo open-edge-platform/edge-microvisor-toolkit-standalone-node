@@ -83,7 +83,7 @@ list:
 	@# Help: displays make targets
 	help
 
-fileserver-upload:
+artifact-publish:
 	@# Help: Runs file upload stage
 	@echo "---Uploading all build tar files---"
 	dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/non-rt/base"; \
