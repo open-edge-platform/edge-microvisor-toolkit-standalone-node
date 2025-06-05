@@ -7,6 +7,30 @@
 # shellcheck source=installation_scripts/config-file
 source config-file
 
+#### Global variables
+# Color codes ####### 
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+BLUE='\033[1;34m'
+NC='\033[0m'
+YELLOW='\033[0;33m'
+
+#####################
+
+ISO="usb_files/emt-uos.iso"
+OS_IMG_PARTITION_SIZE="3000"
+K8S_PARTITION_SIZE="8000"
+OS_PART=5
+K8_PART=6
+BAR_WIDTH=50        
+TOTAL_USB_PREPARATION_STEPS=7 
+USB_PREPARE_STEP=0
+LOG_FILE="bootable_usb_setup_log.txt"
+MAX_STATUS_MESSAGE_LENGTH=28
+
+>$LOG_FILE
+
 working_dir=$(pwd)
 
 # Usage info for user
@@ -72,61 +96,84 @@ if [ -z "$user_name" ] || [ -z "$passwd" ]; then
     exit 1
 fi
 
+# --- Progress Bar Function ---
+show_progress_bar() {
+    progress=$1 
+    message=$2 
 
-# Extract USB bootable files
-echo "Extracting USB bootable files..."
-rm -rf usb_files && mkdir -p usb_files
-cp "$USB_FILES" usb_files
-cd usb_files || exit 1
-tar -xzvf "$USB_FILES" || {
-    echo "Error: Failed to extract USB bootable files!"
-    exit 1
+    # Calculate percentage
+    percentage=$(( (progress * 100) / TOTAL_USB_PREPARATION_STEPS ))
+
+    # Calculate number of green and red characters
+    green_chars=$(( (progress * BAR_WIDTH) / TOTAL_USB_PREPARATION_STEPS ))
+    red_chars=$(( BAR_WIDTH - green_chars-1 ))
+    padded_status_message=$(printf "%-*s" "$MAX_STATUS_MESSAGE_LENGTH" "$message")
+
+    # Print the Installation Progressbar
+    printf "\r\033[K"
+    printf "\r${YELLOW}%s${NC} [" "$padded_status_message"
+    printf "${GREEN}%0.s#" $(seq 1 $green_chars)
+    printf "${RED}%0.s-" $(seq 1 $red_chars)
+    printf "${NC}] %3d%%" "$percentage"
 }
-cd "$working_dir" || exit 1
 
-# Verify MD5 checksum of required files
-echo "Verifying MD5 checksum of required files..."
-checksum_file="usb_files/checksums.md5"
-if [ -f "$checksum_file" ]; then
-    pushd usb_files >/dev/null || exit
-    for file in hook-os.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
-        if [ -f "$file" ]; then
-            calculated_md5=$(md5sum "$file" | awk '{print $1}')
-            expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
-            if [ "$calculated_md5" != "$expected_md5" ]; then
-                echo "Error: MD5 checksum mismatch for $file!"
-                exit 1
+# Prepare the USB setup 
+prepare_usb_setup() {
+    # Extract USB bootable files
+    echo "Extracting USB bootable files..."
+    rm -rf usb_files && mkdir -p usb_files
+    cp "$USB_FILES" usb_files
+    cd usb_files || exit 1
+    tar -xzvf "$USB_FILES" || {
+        echo "Error: Failed to extract USB bootable files!"
+        return 1 
+    }
+    cd "$working_dir" || return 1 
+    # Verify MD5 checksum of required files
+    echo "Verifying MD5 checksum of required files..."
+    checksum_file="usb_files/checksums.md5"
+    if [ -f "$checksum_file" ]; then
+        pushd usb_files >/dev/null || exit
+        for file in emt-uos.iso edge_microvisor_toolkit.raw.gz sen-rke2-package.tar.gz; do
+            if [ -f "$file" ]; then
+                calculated_md5=$(md5sum "$file" | awk '{print $1}')
+                expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
+                if [ "$calculated_md5" != "$expected_md5" ]; then
+                    echo "Error: MD5 checksum mismatch for $file!"
+		    return 1 
+                else
+                    echo "MD5 checksum verified for $file."
+                fi
             else
-                echo "MD5 checksum verified for $file."
+                echo "Error: $file not found!"
+		return 1
             fi
-        else
-            echo "Error: $file not found!"
-            exit 1
-        fi
-    done
-    popd >/dev/null || exit
-else
-    echo "Error: Checksum file $checksum_file not found!"
-    exit 1
-fi
+        done
+        popd >/dev/null || exit
+    else
+        echo "Error: Checksum file $checksum_file not found!"
+	return 1
+    fi
+    return 0
+}
 
-# Prepare USB device
-echo "Preparing the USB bootable device..."
-ISO="usb_files/hook-os.iso"
-OS_IMG_PARTITION_SIZE="3000"
-K8S_PARTITION_SIZE="8000"
-OS_PART=5
-K8_PART=6
+# Wipeoff the USB before install 
+wipe_disk() {
+    echo "Wipe of the disk"
+    sudo wipefs --all "$USB_DEVICE" || return 1
+}
 
-echo "Wipe of the disk"
-sudo wipefs --all "$USB_DEVICE"
-
-echo "Write the ISO to USB"
-
-sudo dd if="$ISO" of="$USB_DEVICE" bs=4M status=progress && sudo sync
-sudo sgdisk -e "$USB_DEVICE" >/dev/null 2>&1
-blockdev --rereadpt "${USB_DEVICE}"
-printf "fix\nq\n" | sudo parted "$USB_DEVICE" print >/dev/null 2>&1
+# Flash iso to USB
+flash_iso() {
+    echo "Write the ISO to USB"
+    if sudo dd if="$ISO" of="$USB_DEVICE" bs=4M status=progress && sudo sync; then
+        sudo sgdisk -e "$USB_DEVICE" >/dev/null 2>&1
+        blockdev --rereadpt "${USB_DEVICE}"
+	return 0
+    else
+    	return 1
+    fi
+}
 
 # Wait for the newly created partition for next operation from userspace
 wait_for_partition() {
@@ -152,22 +199,28 @@ create_partition() {
 
     echo y | mkfs.ext4 "${USB_DEVICE}${part_num}" >/dev/null || {
         echo "Error: mkfs failed on ${USB_DEVICE}${part_num}!"
-        exit 1
+        return 1 
     }
     echo "${label} partition created successfully."
+    return 0
 }
 
-# Calculate the start and end points for partitions
-LAST_END=$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')
-if [ -z "$LAST_END" ]; then
-    echo "Error: Failed to determine the last partition end point!"
-    exit 1
-fi
+partitions_setup() {
+    # Calculate the start and end points for partitions
+    LAST_END=$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')
+    if [ -z "$LAST_END" ]; then
+        echo "Error: Failed to determine the last partition end point!"
+        return 1 
+    fi
 
-echo "Creating OS Image,K8 Storage partitions,please wait !!!"
-echo ""
-create_partition "${LAST_END}" "$(echo "${LAST_END} + ${OS_IMG_PARTITION_SIZE}" | bc)MB" "OS image storage"
-create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${K8S_PARTITION_SIZE}" "K8 storage"
+    echo "Creating OS Image,K8 Storage partitions,please wait !!!"
+    echo ""
+    START_MB=$(echo "$LAST_END" | sed 's/MB//')
+    END_MB=$(echo "$START_MB + $OS_IMG_PARTITION_SIZE" | bc)
+    create_partition "${START_MB}MB" "${END_MB}MB" "OS image storage" || return 1
+    create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${K8S_PARTITION_SIZE}" "K8 storage" || return 1
+
+}
 
 # Copy files to partitions
 copy_to_partition() {
@@ -191,21 +244,79 @@ copy_to_partition() {
         attempt=$((attempt + 1))
         if [ "$attempt" -eq 2 ]; then
             echo "Error: Failed to copy $src to $dest after $retries attempts!"
-            exit 1
+            return 1 
         fi
     done
 }
-echo "Copying files to USB device..."
-echo ""
-echo "OS image copying!!!"
-os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
-copy_to_partition "$OS_PART" "$os_filename" "/mnt"
-echo ""
-echo "K8-Cluster scripts copying!!!"
 
-if copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
-    echo "USB bootable device is ready!"
+copy_files() {
+    echo "Copying files to USB device..."
+    echo ""
+    echo "OS image copying!!!"
+    os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
+    copy_to_partition "$OS_PART" "$os_filename" "/mnt"
+    echo ""
+    echo "K8-Cluster scripts copying!!!"
+
+    if copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
+        echo "USB bootable device is ready!"
 else
-    echo "USB Installation failed,please re-run the script again!!!"
-fi
+        echo "USB Installation failed,please re-run the script again!!!"
+    fi
+}
 
+main() {
+
+    # Step 1: Prepare the USB setup with required files and checksum
+    USB_PREPARE_STEP=0
+    show_progress_bar "$USB_PREPARE_STEP" "Preparing USB Setup,please wait"
+    if ! prepare_usb_setup  >> "$LOG_FILE" 2>&1; then 
+        echo -e "${RED}\nERROR: Preparing USB Setup Failed. Aborting.${NC}"
+        exit 1
+    fi
+    USB_PREPARE_STEP=$((USB_PREPARE_STEP+1))
+    show_progress_bar "$USB_PREPARE_STEP" "Preparing USB Setup Done"
+
+    # Step 2: Wipe off the USB disk before install 
+    USB_PREPARE_STEP=2
+    show_progress_bar "$USB_PREPARE_STEP" "Wipeoff the USB device "
+    if ! wipe_disk  >> "$LOG_FILE" 2>&1; then 
+        echo -e "${RED}\nERROR: Wipeoff USB device faild. Aborting.${NC}"
+        exit 1
+    fi
+
+    # Step 3: Flash the ISO to USB 
+    USB_PREPARE_STEP=3
+    show_progress_bar "$USB_PREPARE_STEP" "Flashing ISO Image to USB"
+    if ! flash_iso  >> "$LOG_FILE" 2>&1; then
+        echo -e "${RED}\nWARNING: Flashing ISO image failed, but main process completed.${NC}"
+    fi
+
+    # Step 4: Create the USB partitions for storing OS && K8S scripst 
+    USB_PREPARE_STEP=4
+    show_progress_bar "$USB_PREPARE_STEP" "Creating USB Partitions"
+        if ! partitions_setup  >> "$LOG_FILE" 2>&1; then 
+        echo -e "${RED}\nWARNING: Creating USB failed, but main process completed.${NC}"
+    fi
+
+    # Step 5: Copy the OS && K8S files to USB 
+    USB_PREPARE_STEP=5
+    show_progress_bar "$USB_PREPARE_STEP" "Copying OS && K8S files to USB"
+    if ! copy_files  >> "$LOG_FILE" 2>&1; then 
+        echo -e "${RED}\nWARNING: Copying files to USB failed, but main process completed.${NC}"
+    fi
+
+    # Step 6: sync the USB device 
+    USB_PREPARE_STEP=6
+    show_progress_bar "$USB_PREPARE_STEP" ""
+    sync
+
+    # Final bar completion and message
+    show_progress_bar "$TOTAL_USB_PREPARATION_STEPS" "Complete!"
+
+}
+#####@main
+echo -e "${BLUE}Started the Bootable USB creation, it will take a few minutes. Please wait!!!${NC}" 
+main
+echo -e "\n"
+echo -e "\n${BLUE}Bootable USB Device is ready!!${NC}"

@@ -628,11 +628,13 @@ EOT
 	mount "${DEST_DISK}${suffix}${roothash_partition}" /temp
 	check_return_value $? "Failed to mount rootfs"
 
+	set -o pipefail
 	veritysetup format "${DEST_DISK}${suffix}${rootfs_partition}" "${DEST_DISK}${suffix}${root_hashmap_a_partition}" | grep Root | cut -f2 > /temp/part_a_roothash
 	check_return_value $? "Failed to do veritysetup"
 
 	if $TEST_ENABLE_DM_ON_ROOTFSB;
 	then
+	    set -o pipefail
 	    veritysetup format "${DEST_DISK}${suffix}${rootfs_b_partition}" "${DEST_DISK}${suffix}${root_hashmap_b_partition}" | grep Root | cut -f2 > /temp/part_b_roothash
 	    check_return_value $? "Failed to do veritysetup"
 	fi
