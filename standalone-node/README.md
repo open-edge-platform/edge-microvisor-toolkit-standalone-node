@@ -28,6 +28,7 @@ This document explains the procedure to create a bootable USB device for Standal
 3. Select Ubuntu 22.04 from the list and Install Ubuntu 22.04:
     ```shell
     wsl –install -d  Ubuntu-22.04
+    ```
    During installation, it will ask for a username and password. Please provide valid credentials.
 4. After Ubuntu installation completes, PowerShell may ask to reboot the system to apply the new changes.If prompted, please reboot the system once.
 
@@ -42,6 +43,7 @@ This document explains the procedure to create a bootable USB device for Standal
 1. Start Ubuntu by running the command in PowerShell:
     ```shell
     ubuntu2204.exe
+    ```
    It will ask for the username and password you set previously. Upon successful login, you will see the Ubuntu terminal.
 
 ### Step 4: Attach USB Device to Ubuntu
@@ -50,6 +52,7 @@ This document explains the procedure to create a bootable USB device for Standal
 2. Install usbipd to share the USB device with Ubuntu from Windows:
     ```shell
     winget install usbipd
+    ```
     Restart the PowerShell terminal
 3. Get the bus number of the USB device attached to the system:
     ```shell
