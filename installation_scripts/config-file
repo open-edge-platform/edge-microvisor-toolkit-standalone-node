@@ -46,6 +46,6 @@ passwd=""
 # reporting_disabled which adds opt-out option (false if absent)
 
 reporting_partner_id=""
-reporting_endpoint =""
+reporting_endpoint=""
 reporting_token=""
 reporting_disabled=""
