@@ -105,6 +105,8 @@ jobs:
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
+      NO_AUTH_S3_PUSH_USERNAME: ${{ secrets.NO_AUTH_S3_PUSH_USERNAME }}
+      NO_AUTH_S3_PUSH_PASSWD: ${{ secrets.NO_AUTH_S3_PUSH_PASSWD }}
   final-check:
       runs-on: ubuntu-latest
       permissions:
