@@ -187,6 +187,10 @@ files:
     source: "files/cloud-init.yaml"
     mode: "0777"
 
+  - path: etc/scripts/os-update.sh
+    source: "files/os-update.sh"
+    mode: "0777"
+
   - path: etc/scripts/enable-dmv.sh
     source: "files/enable-dmv.sh"
     mode: "0777"
