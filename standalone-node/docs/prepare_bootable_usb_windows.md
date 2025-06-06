@@ -4,71 +4,92 @@
 
 This document explains the procedure to create a bootable USB device for Standalone Edge Node installation.
 
-## Pre-requisites
+## Prerequisites
 
-- PowerShell must be installed.
-- Ensure that the Windows Subsystem for Linux (WSL) is enabled on your system.
+- WSL Ubuntu-22.04 distribution installed on your system.
 
-### Steps to Enable WSL
+### Enable Windows Subsystem for Linux (WSL)
 
-1. Open the Control Panel on your Windows computer.
-2. Navigate to Programs.
-3. Click on "Turn Windows features on or off."
-4. In the list of features, locate and select "Windows Subsystem for Linux."
-5. Click OK to apply the changes.
+1. Navigate to "Programs and Features" in the Control Panel:
 
-## Procedure
+   Press `Win + R` to open the "Run" dialog, type `appwiz.cpl`, and hit Enter.
+2. Click on "Turn Windows features on or off."
+3. In the list of features, locate and select "Windows Subsystem for Linux."
+4. Click OK to apply the changes.
 
-### Step 1: Install Ubuntu 22.04 Linux Sub-system on Windows
+### Install Ubuntu 22.04 on Windows Subsystem for Linux
 
-1. Open a PowerShell prompt as an Administrator.
-2. Run the command to list available distributions:
-    ```shell
-    wsl --list --online
-3. Select Ubuntu 22.04 from the list and Install Ubuntu 22.04:
-    ```shell
-    wsl –install -d  Ubuntu-22.04
-    ```
-   During installation, it will ask for a username and password. Please provide valid credentials.
-4. After Ubuntu installation completes, PowerShell may ask to reboot the system to apply the new changes.If prompted, please reboot the system once.
+1. Open PowerShell in administrator mode by right-clicking and selecting "Run as administrator".
+2. List available Linux distributions with the following command:
 
-### Step 2: Enable Network for WSL
+   ```shell
+   wsl --list --online
+   ```
+3. Select `Ubuntu-22.04` from the list and install it:
 
-1. Open PowerShell in admin mode (if applicable) and run the following command to enable the network:
-    ```shell
-    Get-NetAdapter | Where-Object Name -Like "*WSL*" | Enable-NetAdapter
+   ```shell
+   wsl –install -d  Ubuntu-22.04
+   ```
+   During installation, you will be asked to provide a username and a password.
+4. If prompted by PowerShell, reboot the system after the installation to apply the new changes.
+5. Enable Network for WSL:
 
-### Step 3: Start Ubuntu
+   Open PowerShell in administrator mode (if applicable) and run the following command:
 
-1. Start Ubuntu by running the command in PowerShell:
-    ```shell
-    ubuntu2204.exe
-    ```
-   It will ask for the username and password you set previously. Upon successful login, you will see the Ubuntu terminal.
+   ```shell
+   Get-NetAdapter | Where-Object Name -Like "*WSL*" | Enable-NetAdapter
+   ```
 
-### Step 4: Attach USB Device to Ubuntu
+## Prepare a USB Drive
 
-1. Open another PowerShell terminal with Administrator privileges (if applicable).
-2. Install usbipd to share the USB device with Ubuntu from Windows:
-    ```shell
-    winget install usbipd
-    ```
-    Restart the PowerShell terminal
-3. Get the bus number of the USB device attached to the system:
-    ```shell
-    usbipd list
-4. Bind the device using the following command:
-    ```shell
-    usbipd bind --force --busid <busid for USB Device>
-5. Attach the USB to WSL Ubuntu. Use the following command and restart the machine before running this command:
-    ```shell
-    usbipd attach --wsl --busid <busid for USB Device>
+### Step 1: Attach a USB Drive to Ubuntu
 
-### Step 5: USB Bootable Preparation
+1. Install `usbipd` to share the USB drive with Ubuntu from Windows.
 
-1. Now the USB will be listed on the Ubuntu terminal. You can start the USB bootable preparation as mentioned in the [Intel Wiki](https://wiki.ith.intel.com/pages/viewpage.action?pageId=3996554119#EdgeMicrovisorToolkitStandaloneNode-StandaloneEdgeNodeinstallationusingESCpackage).
+   Make sure to use PowerShell terminal with administrative privileges:
 
-### Step 6: Copy ESH Package to Ubuntu
+   ```shell
+   winget install usbipd
+   ```
+   Restart the PowerShell terminal.
+3. Get the bus number of the USB drive attached to the system:
 
-1. Copy the ESH package from the Windows machine to the Ubuntu Linux machine using the following command:
-    - By default,`/mnt/c` from the Linux terminal will take you to the Windows system. From there, navigate to the folder and use `cp -r` to copy to the Linux system.
+   ```shell
+   usbipd list
+   ```
+4. Bind the drive using the following command:
+
+   ```shell
+   usbipd bind --force --busid <busid for USB Drive>
+   ```
+5. Start Ubuntu by running the command in PowerShell:
+
+   ```shell
+   ubuntu2204.exe
+   ```
+   It will ask for the username and password you set previously. Upon successful login, the Ubuntu terminal will open.
+
+5. Use PowerShell to attach the drive:
+
+   ```shell
+   usbipd attach --wsl --busid <busid for USB Drive>
+   ```
+
+   Now, the USB drive will be mounted in Ubuntu.
+   You may need to restart Ubuntu to see the changes.
+
+6. In the Ubuntu terminal, verify if the attached USB drive is listed:
+
+   ```shell
+   lsusb
+   ```
+
+### Step 2: Create a Bootable USB drive
+
+Follow the [instructions to prepare a bootable USB drive](./user-guide/Get-Started-Guide.md#15--prepare-the-usb-drive).
+
+### Step 3: Copy the ESH Package to Ubuntu
+
+Use `cp -r` in the Ubuntu terminal to copy the ESH package from Windows to Linux.
+
+> **NOTE**: By default, in WSL, the `/mnt/c` directory points to `C:\` in Windows.
