@@ -59,43 +59,6 @@ PS C:\Users\user> $env:HTTP_PROXY="http://<PROXY_ADDRESS>:<PORT>"
 PS C:\Users\user> $env:NO_PROXY="<EN-IP>"
 ```
 
-## Accessing K8s dashboard
-
-1. To view the K8s dashboard pods run:
-
-```shell
-PS C:\Users\user> kubectl get pods -n kubernetes-dashboard
-```
-
-2. Enable kube proxy
-
-```shell
-PS C:\Users\user> kubectl port-forward -n kubernetes-dashboard svc/kong-proxy 8001:443 --address=0.0.0.0
-Forwarding from 0.0.0.0:8001 -> 8443
-```
-
-  or following to run in background
-
-```shell
-PS C:\Users\user> Start-Process kubectl port-forward -n kubernetes-dashboard svc/kong-proxy 8001:443 --address=0.0.0.0
-```
-
-3. Generate access token
-
-```shell
-PS C:\Users\user> kubectl -n kubernetes-dashboard create token admin-user
-<token>
-```
-
-4. Access the dashboard from browser at `https://localhost:8001/#/login`
-
-![Login page](./images/login.png "Login Page")
-
-
-1. Login with the previously generated `<token>`
-
-![Dashboard view](./images/dashboard.png "Dashboard view")
-
 ## Installing WordPress Application
 
 WordPress application can be used as a test application.

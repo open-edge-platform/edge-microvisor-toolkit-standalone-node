@@ -21,18 +21,11 @@ images=(
 	docker.io/calico/node:v3.30.0
 	docker.io/calico/pod2daemon-flexvol:v3.30.0
 	docker.io/calico/typha:v3.30.0
-	docker.io/kubernetesui/dashboard-api:1.10.1
-	docker.io/kubernetesui/dashboard-auth:1.2.2
-	docker.io/kubernetesui/dashboard-metrics-scraper:1.2.1
-	docker.io/kubernetesui/dashboard-web:1.6.0
 	kong:3.6
 	quay.io/tigera/operator:v1.38.0
 	registry.k8s.io/e2e-test-images/agnhost:2.39
 )
 
-charts=(
-	kubernetes-dashboard:kubernetes:https://kubernetes.github.io/dashboard/:7.10.0
-)
 # Download k3s artifacts
 download_k3s_artifacts () {
 	echo "Downloading k3s artifacts"
