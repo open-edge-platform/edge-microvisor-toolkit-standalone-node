@@ -20,7 +20,7 @@ jobs:
       contents: read
       security-events: write
       id-token: write
-    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@3bdd409ccf738472c6e1547d14628b51c70dbe99  # 0.1.21
+    uses: open-edge-platform/orch-ci/.github/workflows/post-merge.yml@0.1.24
     with:
       run_version_check: true
       run_dep_version_check: true
@@ -29,9 +29,9 @@ jobs:
       run_lint: true
       run_docker_build: true
       run_artifact_push: true
+      artifact_to_s3: true
       run_docker_push: false
       run_version_tag: true
-      run_artifact: false
       prefix_tag_separator: "/"
       project_folder: "standalone-node"
     secrets:

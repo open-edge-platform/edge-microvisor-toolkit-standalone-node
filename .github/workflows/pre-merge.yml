@@ -83,7 +83,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.23
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.24
     with:
       run_security_scans: false
       run_version_check: true
@@ -96,6 +96,7 @@ jobs:
       run_docker_build: true
       run_artifact: true
       run_artifact_push: true
+      artifact_to_s3: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
