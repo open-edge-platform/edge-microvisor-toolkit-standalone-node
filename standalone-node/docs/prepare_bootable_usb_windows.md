@@ -52,17 +52,17 @@ This document explains the procedure to create a bootable USB device for Standal
    winget install usbipd
    ```
    Restart the PowerShell terminal.
-3. Get the bus number of the USB drive attached to the system:
+2. Get the bus number of the USB drive attached to the system:
 
    ```shell
    usbipd list
    ```
-4. Bind the drive using the following command:
+3. Bind the drive using the following command:
 
    ```shell
    usbipd bind --force --busid <busid for USB Drive>
    ```
-5. Start Ubuntu by running the command in PowerShell:
+4. Start Ubuntu by running the command in PowerShell:
 
    ```shell
    ubuntu2204.exe
