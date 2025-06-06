@@ -11,7 +11,6 @@
 
 - Download all extension charts into `./charts` directory and convert them to base64 encoding 
 - Download all the images used by the extensions into `./images` directory and package them as `tar.zst`
-- Download K8s dashboard as an extensions (manifest + images)
 - Create helmchart addon definitions based on extension templates and base64 encoded helmcharts downloaded
 
 ```shell

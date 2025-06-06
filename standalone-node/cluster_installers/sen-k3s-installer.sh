@@ -98,7 +98,6 @@ namespaces=(
 	"kube-node-lease"
 	"kube-public"
 	"kube-system"
-	"kubernetes-dashboard"
 	"tigera-operator")
 echo "$(date): Waiting for namespaces to be created 7/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
