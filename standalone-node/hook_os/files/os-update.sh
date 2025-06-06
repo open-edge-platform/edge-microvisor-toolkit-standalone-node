@@ -44,7 +44,8 @@ if [ "$1" == "-u" ]; then
     # Download the OS image
     IMAGE_PATH="$TEMP_DIR/os-image.img"
     echo "Downloading OS image from $IMAGE_URL..."
-    curl -L "$IMAGE_URL" -o "$IMAGE_PATH"
+    #curl -L "$IMAGE_URL" -o "$IMAGE_PATH"
+    wget "$IMAGE_URL" -O "$IMAGE_PATH"
     check_success "Downloading OS image"
 
     # Download the SHA file
