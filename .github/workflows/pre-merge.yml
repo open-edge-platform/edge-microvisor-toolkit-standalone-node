@@ -5,11 +5,9 @@
 name: Pre-Merge CI Pipeline
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
-      - release-*
-      - sn-emt-uOS-integration
+      - test-check
 
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
