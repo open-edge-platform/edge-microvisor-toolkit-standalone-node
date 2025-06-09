@@ -6,7 +6,7 @@
 
 # Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
-FILE_RS_URL="https://af01p-png.devtools.intel.com/artifactory/edge_system-png-local/images"
+FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/uos/emt_uos_x86_64_20250529.tar.gz"
 #EMT_VERSION=3.0
 EMT_BUILD_DATE=20250529
 #EMT_BUILD_NO=0639
@@ -14,8 +14,7 @@ EMT_BUILD_DATE=20250529
 EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
-
-wget --user="intel" --password="intel@123" -O edge_uos.tar.gz ${FILE_RS_URL}/${EMT_RAW_GZ}  
+curl -k ${FILE_RS_URL} -O edge_uos.tar.gz 
 
 if [ ! -d uOS ]; then
     mkdir -p uOS
