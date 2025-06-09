@@ -15,7 +15,7 @@ EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
 
-wget -O edge_uos.tar.gz --no-proxy --no-check-certificate ${FILE_RS_URL}/${EMT_RAW_GZ}  
+wget -O edge_uos.tar.gz ${FILE_RS_URL}/${EMT_RAW_GZ}  
 
 if [ ! -d uOS ]; then
     mkdir -p uOS
