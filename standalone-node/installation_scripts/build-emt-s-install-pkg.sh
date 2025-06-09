@@ -5,18 +5,23 @@
 #set -x
 
 os_filename=""
-# Build the hook os with and generate kernel && initramfs file
-build-hook-os(){
 
-echo "Started the Hook OS build!!,it will take some time"
+# Install system dependent packages
+instll-dep-pks() {
+    sudo apt install -y build-essential bison flex cpio
+    sudo apt install -y grub2-common xorriso mtools dosfstools
+}
+# Download the generate kernel && initramfs file
+download-uOS() {
 
-pushd ../hook_os/ || return 1
+echo "Started the ld!!,it will take some time"
 
-
-if make build; then
-    echo "Hook OS Build Successful"
+pushd ../emt_uos/ || return 1
+chmod +download_emt_ous_with_custom_scripts.sh
+if bash download_emt_ous_with_custom_scripts.sh; then
+    echo "emt-uOS kernel && initramfs files downloaded successfully"
 else
-    echo "Hook OS build Failed,Please check!!"
+    echo "emt-uOS kernel && initramfs files downloaded Failed,Please check!!"
     exit 1
 fi
 popd > /dev/null || return 1
@@ -24,7 +29,7 @@ popd > /dev/null || return 1
 }
 
 # Download tvm image and store it under out directory
-download-tvm(){
+download-tvm() {
 
 pushd ../host_os > /dev/null || return 1
 
@@ -41,23 +46,19 @@ fi
 popd > /dev/null || return 1
 }
 
-# Create alpine-iso
-create-hook-os-iso(){
-#Check hook_x86_64.tar.gz file  present under build directory
-if [ ! -e ../hook_os/out/hook_x86_64.tar.gz ]; then
-    echo "Looks hook_x86_64.tar.gz not presnet, build the Hook OS first!!"
-    exit 1
-else
-    # Install the required tool
-    sudo apt install grub2-common xorriso mtools dosfstools -y > /dev/null
-    # Cleanup the files if exist
-    if [ -d out ]; then
-        rm -rf out
-    fi
-    mkdir -p out
-    cp ../hook_os/out/hook_x86_64.tar.gz out/
+# Create emt-uos iso 
+create-emt-uos-iso() {
+    
+# Install the required tool
+sudo apt install grub2-common xorriso mtools dosfstools -y > /dev/null
+# Cleanup the files if exist
+if [ -d out ]; then
+    rm -rf out
+fi
+mkdir -p out
+cp ../emt_uos/vmlinuz-x86_64 out/
+cp ../emt_uos/initramfs-x86_64 out/
     pushd out/ || return 1
-    tar -xzf  hook_x86_64.tar.gz
 
     # Create the ISO structure
     mkdir -p iso/boot/grub
@@ -74,13 +75,13 @@ else
         set gfxmode=text
 
         menuentry "Alpine Linux" {
-	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quite loglevel=7 usbcore.delay_ms=2000 usbcore.autosuspend=-1 modloop=none text
+	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quiet loglevel=7 usbcore.delay_ms=2000 usbcore.autosuspend=-1 modloop=none root=tmpfs rootflags=size=1G,mode=0755 rd.skipfsck noresume text
         initrd /boot/initrd
 }
 EOF
     # Create the bootable iso that support uefi && bios formats
 
-    if grub-mkrescue -o hook-os.iso iso; then
+    if grub-mkrescue -o emt-uos.iso iso; then
         echo "ISO created successfully under $(pwd)/out"
     else
         echo "ISO creation failed,please check!!"
@@ -88,7 +89,6 @@ EOF
 	exit 1
     fi
     popd >/dev/null || return 1
-fi
 
 }
 
@@ -108,7 +108,7 @@ checksum_file="checksums.md5"
 
 
 if {
-    md5sum hook-os.iso
+    md5sum emt-uos.iso 
     md5sum edge_microvisor_toolkit.raw.gz
     md5sum sen-rke2-package.tar.gz
 } >> $checksum_file; then
@@ -117,18 +117,18 @@ else
     echo "Failed to create checksum file, please check!"
     exit 1
 fi
-tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
+tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
 
-if tar -czf usb-bootable-files.tar.gz hook-os.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
+if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
     if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
         echo ""
-	echo ""
-	echo ""
+        echo ""
+        echo ""
 	# Delete all other generated files other than standalone-installation-files.tar.gz
         find . -mindepth 1 -not -name "standalone-installation-files.tar.gz" -delete
         echo "##############################################################################################"
         echo "                                                                                              "
-        echo "                                                                                              "
+        echo "                                                                              "
         echo "Standalone Installation files--> standalone-installation-files.tar.gz created successfuly, under $(pwd)"
         echo "                                                                                              "
         echo "                                                                                              "
@@ -203,11 +203,14 @@ main(){
 
 echo "Main func: Disk space usage before build:"
 df -h
-build-hook-os
+
+instll-dep-pks
+
+download-uOS
 
 download-tvm
 
-create-hook-os-iso
+create-emt-uos-iso
 
 download-charts-and-images
 
@@ -217,3 +220,4 @@ pack-iso-image-k8scripts
 
 ######@main#####
 main
+                

@@ -39,11 +39,6 @@ all:
 	build lint test 	
 
 configure:
-	echo 'http_proxy=$(http_proxy)' > hook_os/config
-	echo 'https_proxy=$(http_proxy)' >> hook_os/config
-	echo 'ftp_proxy=$(ftp_proxy)' >> hook_os/config
-	echo 'socks_proxy=$(socks_proxy)' >> hook_os/config
-	echo 'no_proxy=$(no_proxy)' >> hook_os/config
 
 lint: license yamllint mdlint shellcheck
 
@@ -51,7 +46,7 @@ build: configure
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-hook-os-iso.sh && cd ..
+	cd installation_scripts && ./build-emt-s-install-pkg.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 	
 image:
