@@ -14,11 +14,13 @@ ntp:
 runcmd:
   - |
     source /etc/environment
+    source /etc/cloud/config-file
 
     iptables -A INPUT -p tcp -j ACCEPT
 
+    if [ "$host_type" = "kubernetes" ]; then
     # Start the K8* scripts only once
-    if [ ! -f "/var/lib/rancher/rke2_status" ]; then
+      if [ ! -f "/var/lib/rancher/rke2_status" ]; then
         mkdir -p /tmp/rke2-artifacts/
         tar -xf /opt/sen-rke2-package.tar.gz -C /tmp/rke2-artifacts/
 
@@ -27,9 +29,52 @@ runcmd:
         chmod +x sen-rke2-installer.sh
 
         bash sen-rke2-installer.sh
+      else
+        echo "RKE2 is already installed and running. Skipping installation."
+        cd /etc/cloud/
+        chmod +x rke2-setup-post-reboot.sh
+        bash rke2-setup-post-reboot.sh
+      fi
+    elif [ "$host_type" = "container" ]; then
+      echo "Host type is not Kubernetes. Skipping RKE2 installation."
     else
-       echo "RKE2 is already installed and running. Skipping installation."
-       cd /etc/cloud/
-       chmod +x rke2-setup-post-reboot.sh
-       bash rke2-setup-post-reboot.sh
+      echo "Host type is not recognized."
+      exit 1    
     fi
+    if [ -n "$enable_services" ]; then
+      for svc in $(echo "$enable_services" | tr ',' ' '); do
+        echo "Enabling and starting $svc"
+        systemctl enable "$svc"
+        systemctl start "$svc"
+      done
+    fi
+    if [ -n "$disable_services" ]; then
+      for svc in $(echo "$disable_services" | tr ',' ' '); do
+        echo "Disabling and stopping $svc"
+        systemctl disable "$svc"
+        systemctl stop "$svc"
+      done
+    fi
+    if [ -n "$custom_file_path" ] && [ -n "$custom_file_content" ] && [ -n "$custom_file_permissions" ]; then
+      echo "Creating custom file at $custom_file_path"
+      if [[ "$custom_file_content" == *","* ]]; then
+        # Comma-separated: split by comma
+        printf "%b\n" "$(echo "$custom_file_content" | tr ',' '\n')" > "$custom_file_path"
+      elif [[ "$custom_file_content" == *" "* && "$custom_file_content" != *$'\n'* ]]; then
+        # Space-separated (but not already multi-line): split by space
+        printf "%b\n" $(echo "$custom_file_content") > "$custom_file_path"
+      else
+        # Already multi-line or single line
+        printf "%b\n" "$custom_file_content" > "$custom_file_path"
+      fi
+      chmod "$custom_file_permissions" "$custom_file_path"
+    fi
+    if [ -n "$runcmd" ]; then
+      echo "Running custom commands from runcmd"
+      IFS=',' read -ra CMDS <<< "$runcmd"
+      for cmd in "${CMDS[@]}"; do
+        echo "Executing: $cmd"
+        eval "$cmd"
+      done
+    fi
+

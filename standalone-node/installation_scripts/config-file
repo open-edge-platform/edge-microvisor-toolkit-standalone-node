@@ -37,3 +37,37 @@ ssh_key=""
 
 user_name=""
 passwd=""
+
+# ------------------ Host type ------------------------
+# Choose the type of host to deploy: container or kubernetes.
+# Example: host_type="container" or host_type="kubernetes"
+
+host_type="kubernetes"
+
+# ------------------- Custom configurations ------------------
+# Update the applicable sections below; leave unchanged if no customization is needed.
+
+# - Enable/Disable a service (if present in the image, e.g., docker, k3s, kubernetes) comma-separated
+# Example: enable_services="docker,ssh" or disable_services="docker,ssh"
+
+enable_services=""
+disable_services=""
+
+# - Create custom configuration files
+# Create shell, text, or YAML files as needed.
+# Expand the write_files section to create multiple files.
+# Example custom_file_path="/etc/cloud/test.sh"
+# custom_file_content="#!/bin/sh,echo "This is Example""
+# custom_file_permissions="0644"
+
+custom_file_path=""
+custom_file_content=""
+custom_file_permissions=""
+
+# - Custom run commands
+# Execute custom scripts, files, or commands with comma-separated.
+# Example: "source filename,bash /etc/cloud/test.sh" 
+
+runcmd=""
+
+
