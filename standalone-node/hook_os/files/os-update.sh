@@ -31,15 +31,15 @@ check_success "Creating temporary directory"
 # URL mode
 if [ "$1" == "-u" ]; then
     # Check if the correct number of arguments is provided for URL mode
-    if [ "$#" -ne 7 ]; then
-        error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> <URL_to_SHA_file> -r <version> -v <build_version>"
+    # Example usage: ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
+    if [ "$#" -ne 5 ]; then
+        error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> -r <release> -v <build_version>"
     fi
 
     # URL mode
     IMAGE_BASE_URL="$2"
-    SHA_ID="$3"
-    IMG_VER="$5"
-    IMAGE_BUILD="$7"
+    IMG_VER="$4"
+    IMAGE_BUILD="$6"
 
     # Determine the domain and construct the IMAGE_URL accordingly
     if [[ "$IMAGE_BASE_URL" == *"files-rs.edgeorchestration.intel.com"* ]]; then
@@ -55,6 +55,18 @@ if [ "$1" == "-u" ]; then
     IMAGE_PATH="$TEMP_DIR/edge_microvisor_toolkit.raw.gz"
     echo "Downloading microvisor image from $IMAGE_URL..."
     curl -k "$IMAGE_URL" -o "$IMAGE_PATH" || error_exit "Failed to download microvisor image"
+
+    # Construct the SHA URL
+    SHA_URL="${IMAGE_URL}.sha256sum"
+
+    # Download the SHA256 checksum file
+    SHA_FILE="$TEMP_DIR/edge_microvisor_readonly.sha256sum"
+    echo "Downloading SHA256 checksum from $SHA_URL..."
+    curl -k "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
+
+    # Extract the SHA256 checksum
+    SHA_ID=$(awk '{print $1}' "$SHA_FILE")
+    echo "Extracted SHA256 checksum: $SHA_ID"
 
 else
     # Check if the correct number of arguments is provided for direct mode
