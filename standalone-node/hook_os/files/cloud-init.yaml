@@ -15,6 +15,15 @@ runcmd:
   - |
     source /etc/environment
 
+    # Add user
+    CONFIG_FILE="/etc/cloud/config-file"
+    user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
+    user_name=${user_name//\"/}
+    passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
+    passwd=${passwd//\"/}
+    useradd -m -s /bin/bash $user_name && echo "$user_name:$passwd" | chpasswd && echo '$user_name ALL=(ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/$user_name
+    usermod -aG sudo "$user_name"
+
     iptables -A INPUT -p tcp -j ACCEPT
 
     # Start the K8* scripts only once
