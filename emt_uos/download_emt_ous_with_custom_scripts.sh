@@ -6,16 +6,14 @@
 
 # Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
-FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/uos/emt_uos_x86_64_20250529.tar.gz"
-#EMT_VERSION=3.0
+
+FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
 EMT_BUILD_DATE=20250529
-#EMT_BUILD_NO=0639
-#EMT_FILE_NAME="emt_uos_image-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
-EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
+EMT_FILE_NAME="microvisor/uos/emt_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
 
-curl -k ${FILE_RS_URL} -O edge_uos.tar.gz
+curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
 
 if [ ! -d uOS ]; then
     mkdir -p uOS
@@ -23,18 +21,18 @@ else
    rm -rf uOS/*
 fi
 
-tar -xzvf edge_uos.tar.gz -C uOS > /dev/null
+tar -xzvf uos.tar.gz -C uOS > /dev/null
 
 vmlinuz_file=$(find uOS -maxdepth 1 -type f -name 'vmlinuz-*' -printf '%f\n' | head -n1)
 initramfs_file=$(find uOS -maxdepth 1 -type f -name 'initramfs*' -printf '%f\n' | head -n1)
 
-cp uOS/$vmlinuz_file  vmlinuz-x86_64 || { echo "download of vmlinuz-x86_64"; exit 1; } 
-cp uOS/$initramfs_file initramfs-x86_64 || { echo "download of initramfs-x86_64"; exit 1; } 
+cp uOS/"$vmlinuz_file"  vmlinuz-x86_64 || { echo "download of vmlinuz-x86_64"; exit 1; } 
+cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_64"; exit 1; } 
 
 echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
 
 # cleanup the files
-rm -rf edge_uos.tar.gz uOS/*
+rm -rf uos.tar.gz uOS/*
 
 # Add custom provision scripts to init-rams file
 

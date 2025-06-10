@@ -34,18 +34,11 @@ include common.mk
 
 all: 
 	@# Help: Runs build, lint, test stages
-	build lint test 	
-
-configure:
-	echo 'http_proxy=$(http_proxy)' > hook_os/config
-	echo 'https_proxy=$(http_proxy)' >> hook_os/config
-	echo 'ftp_proxy=$(ftp_proxy)' >> hook_os/config
-	echo 'socks_proxy=$(socks_proxy)' >> hook_os/config
-	echo 'no_proxy=$(no_proxy)' >> hook_os/config
+	build lint test
 
 lint: license yamllint mdlint shellcheck
 
-build: configure
+build:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@

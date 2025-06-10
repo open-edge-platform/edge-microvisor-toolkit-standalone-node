@@ -1,7 +1,7 @@
 version = 1
 
 [[annotations]]
-path = ["VERSION", "**.md", "docs/**", "images/**", "requirements.txt", "**.md", "cluster_installers/**", "hook_os/**", "host_os/edge_microvisor_toolkit.raw.gz.sha256sum", "installation_scripts/final_release/**", "installation_scripts/temp_extraction/**"]
+path = ["VERSION", "**.md", "docs/**", "images/**", "requirements.txt", "**.md", "cluster_installers/**", "hook_os/**", "host_os/edge_microvisor_toolkit.raw.gz.sha256sum", "installation_scripts/final_release/**", "installation_scripts/temp_extraction/**", "emt_uos/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 Intel Corporation"
 SPDX-License-Identifier = "Apache-2.0"
