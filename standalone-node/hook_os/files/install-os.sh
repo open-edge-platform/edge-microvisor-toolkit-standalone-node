@@ -433,7 +433,7 @@ copy_os_update_script() {
     mount "$os_disk$os_rootfs_part" /mnt
 
     if cp /etc/scripts/os-update.sh /mnt/etc/cloud/os-update.sh; then
-        success "Successfully copied os-update.sh to /opt of the OS disk"
+        success "Successfully copied os-update.sh to /etc/cloud of the OS disk"
     else
         failure "Failed to copy os-update.sh to the OS disk, please check!!"
         umount /mnt

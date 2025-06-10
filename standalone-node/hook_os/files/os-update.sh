@@ -70,19 +70,32 @@ if [ "$1" == "-u" ]; then
 
 else
     # Check if the correct number of arguments is provided for direct mode
-    if [ "$#" -ne 2 ]; then
-        error_exit "Usage: $0 <Direct_path_to_Microvisor_image> <SHA256_checksum>"
+    # Example usage: ./os-update.sh /path/to/microvisor_image.raw.gz
+    if [ "$#" -ne 1 ]; then
+        error_exit "Usage: $0 <Direct_path_to_Microvisor_image>"
     fi
 
     # Direct path mode
     IMAGE_PATH="$1"
-    SHA_ID="$2"
 
     # Verify that the image file exists
     if [ ! -f "$IMAGE_PATH" ]; then
         echo "Error: microvisor image file not found at $IMAGE_PATH"
         exit 1
     fi
+
+    # Construct the SHA file path based on the image path
+    SHA_FILE="${IMAGE_PATH}.sha256sum"
+
+    # Verify that the SHA file exists
+    if [ ! -f "$SHA_FILE" ]; then
+        echo "Error: SHA256 checksum file not found at $SHA_FILE"
+        exit 1
+    fi
+
+    # Extract the SHA256 checksum
+    SHA_ID=$(awk '{print $1}' "$SHA_FILE")
+    echo "Extracted SHA256 checksum: $SHA_ID"
 fi
 
 # Invoke the os-update-tool.sh script
