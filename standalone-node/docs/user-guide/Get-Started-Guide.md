@@ -3,7 +3,7 @@
 ## Get Started
 
 The current release of the Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
-on Linux based operating systems. This section provides step-by-step instructions to set up the environment required
+on Linux* Operating Systems. This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
 
 Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
@@ -125,6 +125,36 @@ cd edge-microvisor-toolkit-standalone-node
      ```
 
      > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
+     >
+#### 1.6:  Install GPU plugin - Node Feature Discovery (NFD)
+
+- Start NFD. If your cluster does not have NFD installed, use the following command: 
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.32.0'
+	```
+
+- Create NodeFeatureRules for detecting GPUs on nodes
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.32.0'
+	```
+	
+- Create GPU plugin daemonset
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/nfd_labeled_nodes?ref=v0.32.0'
+	```
+	
+- Check if the plugin is visible
+
+	```sh
+	kubectl get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{'\n'}{' i915: '}{.status.allocatable.gpu\.intel\.com/i915}{'\n'}"
+	```
+	
+- Output
+
+	https://github.com/intel-innersource/os.linux.tiberos.tiberlinuxos.bronzetest/blob/krishna-sen/SEN/Usecase.md#output
 
 ## Step 2: Deploy on Standalone Node
 
@@ -189,7 +219,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    kubectl get pods -A
    ```
 
-5. Install `helm`:
+5. Install Helm*:
 
    ```bash
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -197,7 +227,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
-## Step 4: Set Up Kubernetes Dashboard Access
+## Step 4: Set Up Kubernetes* Dashboard Access
 
 1. View the Kubernetes dashboard pods:
 
@@ -319,7 +349,7 @@ Install a WordPress application as a test application using `helm`.
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
 
-## Step 6: Accessing Grafana
+## Step 6: Access Grafana
 
 1. Retrieve Grafana credentials:
 
@@ -334,7 +364,7 @@ Install a WordPress application as a test application using `helm`.
    http://<EN IP>:32000
    ```
 
-## Step 7: Adding Prometheus metrics to Grafana
+## Step 7: Add Prometheus metrics to Grafana
 
 1. Get Prometheus credentials:
 
@@ -359,7 +389,7 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
-## Step 8: Querying Metrics
+## Step 8: Query Metrics
 
 1. Create a dashboard using prometheus data source:
 
