@@ -20,7 +20,7 @@ else
    rm -rf uOS/*
 fi
 
-tar -xzvf edge_uos.tar.gz -C uOS > /dev/null
+tar -xzvf uos.tar.gz -C uOS > /dev/null
 
 vmlinuz_file=$(find uOS -maxdepth 1 -type f -name 'vmlinuz-*' -printf '%f\n' | head -n1)
 initramfs_file=$(find uOS -maxdepth 1 -type f -name 'initramfs*' -printf '%f\n' | head -n1)
@@ -31,7 +31,7 @@ cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_6
 echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
 
 # cleanup the files
-rm -rf edge_uos.tar.gz uOS/*
+rm -rf uos.tar.gz uOS/*
 
 # Add custom provision scripts to init-rams file
 
