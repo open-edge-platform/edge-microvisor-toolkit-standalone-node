@@ -8,8 +8,8 @@
 ## Organizationonal proxy config (default is intel)
 #
 #
-http_proxy=http://proxy-dmz.intel.com:911
-https_proxy=http://proxy-dmz.intel.com:911
-ftp_proxy=http://proxy-dmz.intel.com:911
-socks_proxy=socks://proxy-dmz.intel.com:1080
-no_proxy=localhost,*.intel.com,*intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock
+http_proxy=""
+https_proxy=""
+ftp_proxy=""
+socks_proxy=""
+no_proxy=""
