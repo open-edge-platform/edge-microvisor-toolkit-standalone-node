@@ -31,7 +31,7 @@ TOTAL_PROVISION_STEPS=8
 PROVISION_STEP=0
 MAX_STATUS_MESSAGE_LENGTH=25
 
->$LOG_FILE
+: >"$LOG_FILE"
 
 # Dump the failure logs to USB for debugging
 dump_logs_to_usb() {

@@ -29,7 +29,7 @@ USB_PREPARE_STEP=0
 LOG_FILE="bootable_usb_setup_log.txt"
 MAX_STATUS_MESSAGE_LENGTH=28
 
->$LOG_FILE
+: >"$LOG_FILE"
 
 working_dir=$(pwd)
 
@@ -215,7 +215,7 @@ partitions_setup() {
 
     echo "Creating OS Image,K8 Storage partitions,please wait !!!"
     echo ""
-    START_MB=$(echo "$LAST_END" | sed 's/MB//')
+    START_MB="${LAST_END//MB/}"
     END_MB=$(echo "$START_MB + $OS_IMG_PARTITION_SIZE" | bc)
     create_partition "${START_MB}MB" "${END_MB}MB" "OS image storage" || return 1
     create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${K8S_PARTITION_SIZE}" "K8 storage" || return 1
