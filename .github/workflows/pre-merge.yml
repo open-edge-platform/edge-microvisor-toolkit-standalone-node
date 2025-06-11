@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - release-*
+      - sn-emt-uOS-integration
 
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
@@ -82,7 +83,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@f341738d975c38b2b91f25d405baeb2d39bf2ddb  # 0.1.14
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.25
     with:
       run_security_scans: false
       run_version_check: true
@@ -94,6 +95,8 @@ jobs:
       run_validate_clean_folder: false
       run_docker_build: true
       run_artifact: true
+      run_artifact_push: true
+      artifact_to_s3: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
@@ -102,6 +105,8 @@ jobs:
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
+      NO_AUTH_S3_PUSH_USERNAME: ${{ secrets.NO_AUTH_S3_PUSH_USERNAME }}
+      NO_AUTH_S3_PUSH_PASSWD: ${{ secrets.NO_AUTH_S3_PUSH_PASSWD }}
   final-check:
       runs-on: ubuntu-latest
       permissions:
