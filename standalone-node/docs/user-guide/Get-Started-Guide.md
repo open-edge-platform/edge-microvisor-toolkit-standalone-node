@@ -12,7 +12,7 @@ Source code for the Edge Microvisor Toolkit Standalone Node is available at [Ope
 
 #### 1.1: Docker and docker proxy Setup
 
-Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.  
+Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.
 Refer to the links below for Docker installation and proxy setup:
 
 - [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
@@ -22,8 +22,9 @@ Refer to the links below for Docker installation and proxy setup:
 
 #### 1.2: Repository Setup
 
-Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
-is crucial for accessing the tools required for standalone node
+Begin by cloning the repository that contains all necessary scripts and
+configurations for deployment. This step is crucial for accessing the tools
+required for standalone node
 
 ```bash
 git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
@@ -32,10 +33,11 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.3: Proxy settings
 
-> **Note:** If the development system is behind a firewall, ensure to add the proxy configuration in the standalone-node/hook_os/config file
+> **Note:** If the development system is behind a firewall, ensure to add
+  the proxy configuration in the standalone-node/hook_os/config file
 
 - Update the config file
-  
+
    ```bash
    vi config
 
@@ -51,14 +53,15 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.4: Create the Standalone Installation Tar File
 
-- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
+- To create the standalone installation tar file with all required files
+  for preparing a bootable USB device, run the following command
 
    ```bash
    sudo make build
 
    ```
 
-> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
+> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
 #### 1.5:  Prepare the USB Drive
@@ -71,11 +74,13 @@ cd edge-microvisor-toolkit-standalone-node
 
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Use the wipefs command to remove any existing filesystem signatures from the USB drive. This ensures a clean slate for formatting
+- Use the wipefs command to remove any existing filesystem signatures from
+  the USB drive. This ensures a clean slate for formatting
 
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
@@ -83,6 +88,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo mkfs.vfat /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
@@ -95,13 +101,12 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Extracted files will include
 
-  ```
-  usb-bootable-files.tar.gz
-  config-file
-  bootable-usb-prepare.sh
-  edgenode-logs-collection.sh
-
-  ```
+   ```bash
+   usb-bootable-files.tar.gz
+   config-file
+   bootable-usb-prepare.sh
+   edgenode-logs-collection.sh
+   ```
 
 - Run the preparation script to create the bootable USB
 
@@ -143,7 +148,7 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
-#### 2.1  Login to the Edge Node After Installation complete
+### 2.1  Login to the Edge Node After Installation complete
 
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
@@ -151,9 +156,12 @@ Use the Linux login credentials which was provided while preparing the bootable 
 
 ## Step 3: Set up tools on Developer's System
 
-Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
+Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
-> **Note:** The commands are executed from `Linux` environment, but the same can be achieved from any environment supporting `kubectl` and `helm` by using equivalent commands.
+> **Note:** The commands are executed from `Linux` environment, but the same can
+be achieved from any environment supporting `kubectl` and `helm` by using equivalent
+commands.
 
 1. Install `kubectl`:
 
@@ -267,7 +275,10 @@ Install a WordPress application as a test application using `helm`.
 
 3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
 
-   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the allowed traffic per needs of an application in non-test app deployments. By default the ingress and egress traffic is set to be denied.
+   > **Note:** This policy opens up all ingress and egress traffic in
+   the namespace - tailor down the allowed traffic per needs of an application
+   in non-test app deployments. By default the ingress and egress traffic is set
+   to be denied.
 
    ```yaml
    apiVersion: networking.k8s.io/v1
@@ -317,7 +328,8 @@ Install a WordPress application as a test application using `helm`.
 
 7. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
-> **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
+> **Note:** Edge AI applications from the Edge software catalog can be installed
+using `helm` and evaluated using similar steps.
 
 ## Step 6: Accessing Grafana
 
@@ -355,7 +367,9 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus new](../../images/obs-grafana-add-prometheus.png "Prometheus new")
 
-4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
+4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier.
+Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``,
+`server name` as `prometheus` and save.
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
@@ -369,17 +383,21 @@ Install a WordPress application as a test application using `helm`.
 
    ![Prometheus source](../../images/obs-grafana-prometheus.png "Prometheus datasource")
 
-3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
+3. Select metrics to query, use metric explorer to view available metrics. Use
+`Run query` button to run queries. Build the required dashboard and save using
+the `Save dashboard` button:
 
    ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
 
 1. Creation of USB pendrive failed
-The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
+The possible reason could be USB device is mounted. Please unmount the USB drive
+and retry creating the bootable USB drive.
 
-2. If any issues while provisioning the microvisor from Hook OS, automatically logs will be collected
- from /var/log/os-installer.log file on Hook OS what caused the OS provisioning failed.
+2. If any issues while provisioning the microvisor from Hook OS, automatically
+logs will be collected from `/var/log/os-installer.log` file on Hook OS what caused
+the OS provisioning failed.
 
 3. After sucessful installation A banner is printed at the end, summarizing the installation status and
  providing useful commands/logs path for further management.
@@ -388,4 +406,7 @@ The possible reason could be USB device is mounted. Please unmount the USB drive
 
 ### Edge Node IP address
 
-The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster. It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
+The edge node operates both the Kubernetes control plane and node services, making it
+a single-node cluster. It is essential to ensure that the IP address of the edge node
+remains unchanged after deployment to prevent any indeterminate behavior of the
+Kubernetes control plane.
