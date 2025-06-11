@@ -7,15 +7,20 @@ This document explains the procedure to create a bootable USB device for Standal
 ## Prerequisites
 
 - WSL Ubuntu-22.04 distribution installed on your system.
+- Alternatively, Ubuntu-22.04 Virtual Machine in Hyper-V
 
-### Enable Windows Subsystem for Linux (WSL)
+### Enable Windows Subsystem for Linux (WSL) or Hyper-V Manager
 
 1. Navigate to "Programs and Features" in the Control Panel:
 
    Press `Win + R` to open the "Run" dialog, type `appwiz.cpl`, and hit Enter.
 2. Click on "Turn Windows features on or off."
-3. In the list of features, locate and select "Windows Subsystem for Linux."
+3. In the list of features, locate and select:
+   - "Windows Subsystem for Linux", or
+   - "Hyper-V".
 4. Click OK to apply the changes.
+
+> **NOTE**: A reboot may be required to apply changes to the operating system.
 
 ### Install Ubuntu 22.04 on Windows Subsystem for Linux
 
@@ -40,6 +45,33 @@ This document explains the procedure to create a bootable USB device for Standal
    Get-NetAdapter | Where-Object Name -Like "*WSL*" | Enable-NetAdapter
    ```
 
+### Install Ubuntu 22.04 in a Hyper-V Virtual Machine
+
+1. Download the .ISO image for Ubuntu 22.04.5 LTS (Jammy Jellyfish).
+2. Start Hyper-V Manager and select *Action-> New-> Virtual Machine*.
+3. Provide a name for your VM and press *Next*.
+4. Select *Generation 2 (VHDX)*, then press *Next*.
+5. Set the desired amount of memory to allocate, then press *Next*.
+6. Select a virtual network switch, then press *Next*.
+7. Select *Create a virtual hard disk* and one of two options:
+
+   - Select a location for your VHDX and set your desired disk size, then press *Next*.
+   - Select *Install an operating system from a bootable image file* and browse to the
+      .ISO image.
+   - Press *Finish*.
+
+8. Right click your virtual machine from Hyper-V Manager. Select *Settings...*
+9. Select *Security* and enable *Secure Boot*. Choose the *Microsoft UEFFI Certificate Authority*
+   template.
+10. Select *Firmware* and adjust the boot order so *DVD Drive* is the first and *Hard Drive*
+    is second.
+11. Select *Integration services* under *Management* and check *Guest Services*.
+12. Click *Apply* to apply all changes.
+13. Right click your VM and select *Connect...*. Select *Start*.
+14. Follow the installer prompts to install Ubuntu. Then, *Restart* to reboot the machine.
+    The installation ISO will be automatically ejected.
+
+
 ## Prepare a USB Drive
 
 ### Step 1: Attach a USB Drive to Ubuntu
@@ -62,34 +94,66 @@ This document explains the procedure to create a bootable USB device for Standal
    ```shell
    usbipd bind --force --busid <busid for USB Drive>
    ```
-4. Start Ubuntu by running the command in PowerShell:
+4. Start Ubuntu:
 
-   ```shell
-   ubuntu2204.exe
-   ```
-   It will ask for the username and password you set previously. Upon successful login, the Ubuntu terminal will open.
+   a. (WSL) Run the command in PowerShell:
 
-5. Use PowerShell to attach the drive:
+      ```shell
+      ubuntu2204.exe
+      ```
+      It will ask for the username and password you set previously. Upon successful login,
+      the Ubuntu terminal will open.
 
-   ```shell
-   usbipd attach --wsl --busid <busid for USB Drive>
-   ```
+   b. (Hyper-V) Run Hyper-V Manager, right click your VM, and select *Connect...*.
+      Select *Start*.
 
-   Now, the USB drive will be mounted in Ubuntu.
-   You may need to restart Ubuntu to see the changes.
+
+5. Attach the drive:
+
+   a. (WSL) Use PowerShell and run the command:
+
+      ```shell
+      usbipd attach --wsl --busid <busid for USB Drive>
+      ```
+
+   b. (Hyper-V) Start the Ubuntu terminal:
+
+
+      - Install Usbip tools:
+
+        ```bash
+        sudo apt install linux-tools-virtual hwdata
+        sudo update-alternatives --install /usr/local/bin/usbip usbip `ls /usr/lib/linux-tools/*/usbip | tail -n1` 20
+        sudo modprobe vhci-hcd
+        ```
+
+      - Run the following command:
+
+        ```bash
+        usbip attach --remote=<IPv4 address of host> --busid=<busid for USB Drive>
+        ```
+
+   **Now, the USB drive will be mounted in Ubuntu.**
+
+   > **Note**:
+   >
+   > * If the system reboots, the USB device attachment is lost. You can either
+   >   re-attach it after Ubuntu has restarted, or configure the OS to
+   >   [automatically re-attach the device](https://wiki.archlinux.org/title/USB/IP#Binding_with_systemd_service).
+   > * To quickly obtain the IPv4 address of your host machine, start *Command Prompt*,
+   >   and run the following command:
+   >
+   >   ```shell
+   >   ping <name-of-your-computer> -4
+   >   ```
+
 
 6. In the Ubuntu terminal, verify if the attached USB drive is listed:
 
-   ```shell
+   ```bash
    lsusb
    ```
 
 ### Step 2: Create a Bootable USB drive
 
 Follow the [instructions to prepare a bootable USB drive](./user-guide/Get-Started-Guide.md#15--prepare-the-usb-drive).
-
-### Step 3: Copy the ESH Package to Ubuntu
-
-Use `cp -r` in the Ubuntu terminal to copy the ESH package from Windows to Linux.
-
-> **NOTE**: By default, in WSL, the `/mnt/c` directory points to `C:\` in Windows.
