@@ -16,6 +16,12 @@ check_success() {
     fi
 }
 
+# Function to exit with an error message
+error_exit() {
+    echo "Error: $1"
+    exit 1
+}
+
 # Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root."
@@ -70,22 +76,20 @@ if [ "$1" == "-u" ]; then
 
 else
     # Check if the correct number of arguments is provided for direct mode
-    # Example usage: ./os-update.sh /path/to/microvisor_image.raw.gz
-    if [ "$#" -ne 1 ]; then
-        error_exit "Usage: $0 <Direct_path_to_Microvisor_image>"
+    # Example usage: ./os-update.sh  -i /path/to/microvisor_image.raw.gz -c /path/to/microvisor_image.sha256sum
+    if [ "$#" -ne 4 ]; then
+        error_exit "Usage: $0 -i <Direct_path_to_Microvisor_image> -c <Checksum_file>"
     fi
 
     # Direct path mode
     IMAGE_PATH="$1"
+    SHA_FILE="$4"
 
     # Verify that the image file exists
     if [ ! -f "$IMAGE_PATH" ]; then
         echo "Error: microvisor image file not found at $IMAGE_PATH"
         exit 1
     fi
-
-    # Construct the SHA file path based on the image path
-    SHA_FILE="${IMAGE_PATH}.sha256sum"
 
     # Verify that the SHA file exists
     if [ ! -f "$SHA_FILE" ]; then

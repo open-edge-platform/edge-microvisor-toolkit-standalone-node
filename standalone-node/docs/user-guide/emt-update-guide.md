@@ -59,7 +59,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>signed.sha256sum"
   ```
-  
+
   Example usage:
 
   ```bash
@@ -96,9 +96,9 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 - Run the microvisor update script located in `/etc/cloud`
 
   ```bash
-  sudo ./os-update.sh <path to microvisor image>
+  sudo ./os-update.sh -i /path/to/microvisor_image.raw.gz -c /path/to/microvisor_image.sha256sum
   # Example:
-  sudo ./os-update.sh /mnt/edge-readonly-3.0.20250611.0526-signed.raw.gz
+  sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250611.0526-signed.raw.gz -c /mnt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
   ```
 
 ### URL Mode
