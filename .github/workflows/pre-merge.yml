@@ -10,6 +10,7 @@ on:
       - main
       - release-*
       - add-wrapper-script-upgrade
+      - feature-enhancement-3.1
 
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
