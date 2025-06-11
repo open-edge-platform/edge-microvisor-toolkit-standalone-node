@@ -7,7 +7,7 @@
 # Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
-EMT_BUILD_DATE=20250529
+EMT_BUILD_DATE=20250604
 EMT_FILE_NAME="microvisor/uos/emt_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
@@ -25,8 +25,8 @@ tar -xzvf uos.tar.gz -C uOS > /dev/null
 vmlinuz_file=$(find uOS -maxdepth 1 -type f -name 'vmlinuz-*' -printf '%f\n' | head -n1)
 initramfs_file=$(find uOS -maxdepth 1 -type f -name 'initramfs*' -printf '%f\n' | head -n1)
 
-cp uOS/$vmlinuz_file  vmlinuz-x86_64 || { echo "download of vmlinuz-x86_64"; exit 1; } 
-cp uOS/$initramfs_file initramfs-x86_64 || { echo "download of initramfs-x86_64"; exit 1; } 
+cp uOS/"$vmlinuz_file"  vmlinuz-x86_64 || { echo "download of vmlinuz-x86_64"; exit 1; } 
+cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_64"; exit 1; } 
 
 echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
 
