@@ -8,17 +8,17 @@ instructions for setting up the environment necessary to update the Edge Microvi
 
 ### Step 1: Prerequisites
 
-#### 1.1:
 Ensure your standalone node is provisioned with the specified version of the Edge Microvisor Toolkit.
 Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md#Prerequisites) to complete the initial setup.
 
-#### 1.2: Prepare the USB Drive
+#### 1.1: Prepare the USB Drive
 
 - Connect the USB drive to your developer system and identify the correct USB disk using the following command
 
   ```bash
   lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
   ```
+
   > **Note:** Ensure you select the correct USB drive to avoid data loss.
 
 - Copy the standalone installation tar file to the developer system to prepare the bootable USB.
@@ -31,7 +31,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 - The extracted files will include
 
-  ```
+  ```bash
   usb-bootable-files.tar.gz
   write-image-to-usb.sh
   config-file
@@ -59,6 +59,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>signed.sha256sum"
   ```
+  
   Example usage:
 
   ```bash
@@ -71,7 +72,9 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   ```bash
   sudo ./write-image-to-usb.sh /dev/sdX /path/to/microvisor_image.raw.gz /path/to/microvisor_image.raw.gz.sha256sum
   ```
+
   Example usage:
+
   ```bash
   sudo ./write-image-to-usb.sh /dev/sdc /path/to/microvisor_image.raw.gz /path/to/microvisor_image.raw.gz.sha256sum
   ```
@@ -100,7 +103,8 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 ### URL Mode
 
-- Log in to the Microvisor Toolkit with your user credentials and execute the microvisor update script with the following options
+- Log in to the Microvisor Toolkit with your user credentials and execute the microvisor update
+  script with the following options
 
   ```bash
   sudo ./os-update.sh -u <base url> -r <release> -v <build version>
