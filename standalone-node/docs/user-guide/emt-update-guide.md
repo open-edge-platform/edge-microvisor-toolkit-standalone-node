@@ -14,7 +14,8 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 #### 1.2: Prepare the USB Drive
 
-- Connect the USB drive to your developer system and identify the correct USB disk using the following command:
+- Connect the USB drive to your developer system and identify the correct USB disk using the following command
+
   ```bash
   lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
   ```
@@ -22,12 +23,14 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 - Copy the standalone installation tar file to the developer system to prepare the bootable USB.
 
-- Extract the contents of `sen-installation-files.tar.gz`:
+- Extract the contents of `sen-installation-files.tar.gz`
+
   ```bash
   tar -xzf sen-installation-files.tar.gz
   ```
 
-- The extracted files will include:
+- The extracted files will include
+
   ```
   usb-bootable-files.tar.gz
   write-image-to-usb.sh
@@ -36,29 +39,35 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   edgenode-logs-collection.sh
   ```
 
-- Download the Edge Microvisor Toolkit image and the corresponding sha256sum file:
+- Download the Edge Microvisor Toolkit image and the corresponding sha256sum file
+
   ```bash
   wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
   wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
   ```
+
   Example usage:
+
   ```bash
   wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz
   wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz.sha256sum
   ```
 
-  Alternatively, for no Auth File server public registry:
+  Alternatively, for no Auth File server public registry
+
   ```bash
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>signed.sha256sum"
   ```
   Example usage:
+
   ```bash
   wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz
   wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
   ```
 
-- Execute the preparation script to write the new Edge Microvisor Toolkit image which needs to be updated to the USB drive:
+- Execute the preparation script to write the new Edge Microvisor Toolkit image which needs to be updated to the USB drive
+
   ```bash
   sudo ./write-image-to-usb.sh /dev/sdX /path/to/microvisor_image.raw.gz /path/to/microvisor_image.raw.gz.sha256sum
   ```
@@ -76,11 +85,13 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 - Unplug the prepared bootable USB from the developer system.
 - Plug the bootable USB drive into the standalone node.
 - Mount the USB device to `/mnt`:
+
   ```bash
   sudo mount /dev/sdX1 /mnt
   ```
 
-- Run the microvisor update script located in `/etc/cloud`:
+- Run the microvisor update script located in `/etc/cloud`
+
   ```bash
   sudo ./os-update.sh <path to microvisor image>
   # Example:
@@ -89,7 +100,8 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 ### URL Mode
 
-- Log in to the Microvisor Toolkit with your user credentials and execute the microvisor update script with the following options:
+- Log in to the Microvisor Toolkit with your user credentials and execute the microvisor update script with the following options
+
   ```bash
   sudo ./os-update.sh -u <base url> -r <release> -v <build version>
   # Example:
@@ -97,14 +109,16 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   ```
 
 - Automatic Reboot
-  The standalone edge node will automatically reboot into the updated Microvisor OS after the update process completes.
+  The standalone edge node will automatically reboot into the updated Microvisor OS after the update process completes
 
-- Upon successful boot, verify that the system is running correctly with the new image:
+- Upon successful boot, verify that the system is running correctly with the new image
+
   ```bash
   sudo bootctl list
   ```
 
-- Check the updated image details in `/etc/image-id`:
+- Check the updated image details in `/etc/image-id`
+
   ```bash
   cat /etc/image-id
   ```
