@@ -41,6 +41,8 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 - Download the Edge Microvisor Toolkit image and the corresponding sha256sum file
 
+  > **Note:** TO DO: only download the microvisor image from no Auth file registry
+  
   ```bash
   wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
   wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
