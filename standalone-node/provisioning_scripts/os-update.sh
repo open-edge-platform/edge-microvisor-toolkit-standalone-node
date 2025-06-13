@@ -35,6 +35,7 @@ mkdir -p "$TEMP_DIR"
 check_success "Creating temporary directory"
 
 # URL mode
+# TO DO: Improvement scripts to use getopts to parse command line arguments.
 if [ "$1" == "-u" ]; then
     # Check if the correct number of arguments is provided for URL mode
     # Example usage: ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
