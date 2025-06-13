@@ -474,6 +474,24 @@ enable_dm_verity() {
     return 0
 }
 
+copy_os_update_script() {
+
+    echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" | tee /dev/tty0
+
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
+
+    if cp /etc/scripts/os-update.sh /mnt/etc/cloud/os-update.sh; then
+        success "Successfully copied os-update.sh to /etc/cloud of the OS disk"
+    else
+        failure "Failed to copy os-update.sh to the OS disk, please check!!"
+        umount /mnt
+        exit 1
+    fi
+
+    umount /mnt
+}
+
 # Check provision pre-conditions
 system_readiness_check() {
 
@@ -486,6 +504,8 @@ system_readiness_check() {
 platform_config_manager() {
 
     install_cloud_init_file || return 1
+
+    copy_os_update_script || return 1
 
     create_user || return 1
 
