@@ -6,9 +6,10 @@
 #####################################################################################
 
 ## Organizationonal proxy config (default is intel)
+#
+#
 http_proxy=""
 https_proxy=""
 ftp_proxy=""
 socks_proxy=""
 no_proxy=""
-
