@@ -23,10 +23,10 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 - Copy the standalone installation tar file to the developer system to prepare the bootable USB.
 
-- Extract the contents of `sen-installation-files.tar.gz`
+- Extract the contents of `standalone-installation-files.tar.gz`
 
   ```bash
-  tar -xzf sen-installation-files.tar.gz
+  tar -xzf standalone-installation-files.tar.gz
   ```
 
 - The extracted files will include
