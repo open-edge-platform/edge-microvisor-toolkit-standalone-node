@@ -41,7 +41,7 @@ $(VENV_NAME): requirements.txt
 
 #### Lint and Validator Targets ####
 # https://github.com/koalaman/shellcheck
-SH_FILES := $(shell find . -type f \( -name '*.sh' \) ! -path './cluster_installers/install.sh' -print)
+SH_FILES := $(shell find . -type f -name '*.sh' ! -path './cluster_installers/install.sh' ! -path './ci/scripts/*' -print)
 shellcheck: ## lint shell scripts with shellcheck
 	shellcheck --version
 	shellcheck -x -S style $(SH_FILES)
@@ -59,7 +59,7 @@ yamllint: $(VENV_NAME) ## lint YAML files
 
 mdlint: ## link MD files
 	markdownlint --version ;\
-	markdownlint "**/*.md" -c ../.markdownlint.yml --ignore venv_standalonenode/
+	markdownlint "**/*.md" -c .markdownlint.yml --ignore venv_standalonenode/
 
 common-clean:
 	rm -rf ${OUT_DIR} vendor
