@@ -14,6 +14,7 @@
 
 #curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
 
+# TO DO: Use no-auth file server registry to download the Edge Microvisor Toolkit image
 FILE_RS_URL="https://af01p-png.devtools.intel.com/artifactory/edge_system-png-local/images"
 EMT_BUILD_DATE=20250529
 EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
