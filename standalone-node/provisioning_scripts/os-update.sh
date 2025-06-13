@@ -38,7 +38,7 @@ check_success "Creating temporary directory"
 if [ "$1" == "-u" ]; then
     # Check if the correct number of arguments is provided for URL mode
     # Example usage: ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
-    if [ "$#" -ne 5 ]; then
+    if [ "$#" -ne 6 ]; then
         error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> -r <release> -v <build_version>"
     fi
 
