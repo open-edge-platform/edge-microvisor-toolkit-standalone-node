@@ -118,10 +118,10 @@ else
     echo "Failed to create checksum file, please check!"
     exit 1
 fi
-tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null
+tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" standalone-installation-files.tar.gz $checksum_file > /dev/null
 
-if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-rke2-package.tar.gz $checksum_file > /dev/null; then
-    if tar -czf sen-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
+if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" standalone-installation-files.tar.gz $checksum_file > /dev/null; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
         echo ""
         echo ""
         echo ""
