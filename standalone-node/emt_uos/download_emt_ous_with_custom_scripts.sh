@@ -23,12 +23,12 @@
 #wget -O uos.tar.gz --no-proxy --no-check-certificate ${FILE_RS_URL}/${EMT_RAW_GZ}
 
 if [ ! -d uOS ]; then
-    mkdir -p uOS
+    mkdir -p uOS || { echo "Failed to create uOS directory"; exit 1; }
 else
    rm -rf uOS/*
 fi
 
-cp ../emt_uos/uos.tar.gz uOS
+cp ../emt_uos/uos.tar.gz uOS || { echo "Failed to copy uos.tar.gz from ../emt_uos/ to uOS"; exit 1; }
 
 tar -xzvf uos.tar.gz -C uOS > /dev/null
 
