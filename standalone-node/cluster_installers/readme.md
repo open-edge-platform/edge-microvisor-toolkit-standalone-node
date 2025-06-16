@@ -4,10 +4,10 @@
 # README
 
 This directory contains scripts, artifacts and documentation necessary to:
-- download RKE2 artifacts for Standalone Edge Node installer
-- build the RKE2 Standalone Edge Node installer
-- run the installer and install the RKE2 stack and the extension on a Microvisor Edge Node
-- perform operations on the Standalone Edge Node RKE2 stack - view dashboard, pods and install applications
+- download k3s artifacts for Standalone Edge Node installer
+- build the k3s Standalone Edge Node installer
+- run the installer and install the k3s stack and the extension on a Microvisor Edge Node
+- perform operations on the Standalone Edge Node k3s stack - view dashboard, pods and install applications
 
 For detailed instructions follow:
 

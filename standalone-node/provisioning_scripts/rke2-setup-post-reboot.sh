@@ -21,15 +21,15 @@ do
 done
 if [[ "$host_ip" != "$host_prev_ip" ]]; then
    echo "IP changed"
-   CHANGE_MSG="Warning: The Edge Node IP($host_ip) has changed since RKE2 install!"
+   CHANGE_MSG="Warning: The Edge Node IP($host_ip) has changed since k3s install!"
    banner="
 ================================================================================
 Edge Microvisor Toolkit - cluster bring up problem
 
-****Looks the IP address of the system chnaged since RKE2 install*****
+****Looks the IP address of the system chnaged since k3s install*****
 
-OLD RKE2 cluster IP $host_prev_ip
-NEW RKE2 cluster IP $host_ip
+OLD k3s cluster IP $host_prev_ip
+NEW k3s cluster IP $host_ip
 
 IP address of the Node:
         $host_prev_ip - Ensure IP address is persistent across the reboot!
@@ -46,17 +46,17 @@ else
    CHANGE_MSG="IP address remained same after reboot." 
    while [ true ]
    do
-      rke2_status=$(systemctl is-active rke2-server)
-      if [[ "$rke2_status" == "active" ]]; then
+      k3s_status=$(systemctl is-active k3s)
+      if [[ "$k3s_status" == "active" ]]; then
 	  
           echo "Waiting for all extensions to complete the deployment..." | sudo tee /dev/tty0
-          while sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
+          while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
           echo "Some pods are still not ready. Checking again in 5 seconds..." | sudo tee /dev/tty0
           sleep 5
           done
 	  break
       else
-	  echo "Waiting for rke2 services to running state,please wait checking again in few seconds" | sudo tee /dev/tty0
+	  echo "Waiting for k3s services to running state,please wait checking again in few seconds" | sudo tee /dev/tty0
 	  sleep 30
       fi
    done
@@ -69,8 +69,8 @@ Edge Microvisor Toolkit - cluster bringup complete
 Logs located at:
         /var/log/cluster-init.log
 
-For RKE2 logs run:
-        sudo journalctl -fu rke2-server
+For k3s logs run:
+        sudo journalctl -fu k3s
 
 IP address of the Node:
         $IP - Ensure IP address is persistent across the reboot!
@@ -84,7 +84,7 @@ To access and view the cluster's pods run:
         kubectl get pods -A
 
 KUBECONFIG available at:
-        /etc/rancher/rke2/rke2.yaml
+        /etc/rancher/k3s/k3s.yaml
 ===================================================================
 "
     # Print the banner

@@ -142,12 +142,12 @@ if [ ! -f "$IPCHECK" ]; then
     echo "$IP" | sudo tee "$IPCHECK"
 fi
 
-# Add rke2 installation flag, so that on next reboot it will not start again from begining.
+# Add k3s installation flag, so that on next reboot it will not start again from begining.
 
-RKE2_STATUS="/var/lib/rancher/rke2_status"
+K3S_STATUS="/var/lib/rancher/rk3s_status"
 
-if [ ! -f "$RKE2_STATUS" ]; then
-    echo "success" | sudo tee "$RKE2_STATUS"
+if [ ! -f "$K3S_STATUS" ]; then
+    echo "success" | sudo tee "$K3S_STATUS"
 fi
 
 # Print banner

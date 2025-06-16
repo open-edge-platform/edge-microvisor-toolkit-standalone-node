@@ -91,7 +91,7 @@ TODO: move to /usr/local/bin/ when binaries are available.
 The k3s binary provides a wrapper of kubectl through the `k3s kubectl` command.
 ## Uninstalling
 
-To uninstall RKE2 with SEN
+To uninstall k3s with SEN
 
 ```shell
 /var/lib/rancher/k3s/bin/k3s-killall.sh

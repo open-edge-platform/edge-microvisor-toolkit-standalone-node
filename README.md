@@ -61,7 +61,7 @@ The repository comprises the following components.
 
 * [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor toolkit immutable non-RT image as  hypervisor.
 
-* [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions.
+* [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes k3s cluster is deployed along the cluster extensions.
 
 For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
 
