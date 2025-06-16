@@ -96,8 +96,6 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
   ```bash
   sudo ./os-update.sh -u <base url> -r <release> -v <build version>
-  # Example:
-  sudo ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
   ```
 
 - Automatic Reboot
