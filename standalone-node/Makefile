@@ -39,11 +39,6 @@ all:
 	build lint test 	
 
 configure:
-	echo 'http_proxy=$(http_proxy)' > hook_os/config
-	echo 'https_proxy=$(http_proxy)' >> hook_os/config
-	echo 'ftp_proxy=$(ftp_proxy)' >> hook_os/config
-	echo 'socks_proxy=$(socks_proxy)' >> hook_os/config
-	echo 'no_proxy=$(no_proxy)' >> hook_os/config
 
 lint: license yamllint mdlint shellcheck
 
@@ -51,7 +46,7 @@ build: configure
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-hook-os-iso.sh && cd ..
+	cd installation_scripts && ./build-emt-s-install-pkg.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 	
 image:
@@ -82,3 +77,17 @@ test:
 list: 
 	@# Help: displays make targets
 	help
+
+artifact-publish:
+	@# Help: Runs file upload stage
+	@echo "---Uploading all build tar files---"
+	dest_path="s3://ensp-prod-rs-files/files-edge-orch/repository/standalone-node/non-rt/base"; \
+	tar_file="installation_scripts/out/standalone-installation-files.tar.gz"; \
+	if [ -f "$$tar_file" ]; then \
+		echo "Uploading $$tar_file ..."; \
+		aws s3 cp "$$tar_file" "$$dest_path"/standalone-installation-files-$(VERSION).tar.gz || { echo "Upload failed for $$tar_file"; exit 1; }; \
+	else \
+		echo "Tar file $$tar_file not found!"; \
+		exit 1; \
+	fi
+	@echo "---All uploads done---"
