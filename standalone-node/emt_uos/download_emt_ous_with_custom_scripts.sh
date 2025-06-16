@@ -28,7 +28,7 @@ else
    rm -rf uOS/*
 fi
 
-cp ../emt_uos/uos.tar.gz uOS || { echo "Failed to copy uos.tar.gz from ../emt_uos/ to uOS"; exit 1; }
+cp -r ../emt_uos/uos.tar.gz uOS || { echo "Failed to copy uos.tar.gz from ../emt_uos/ to uOS"; exit 1; }
 
 tar -xzvf uos.tar.gz -C uOS > /dev/null
 
@@ -41,7 +41,7 @@ cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_6
 echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
 
 # cleanup the files
-rm -rf uos.tar.gz uOS/*
+#rm -rf uos.tar.gz uOS/*
 
 # Add custom provision scripts to init-rams file
 
