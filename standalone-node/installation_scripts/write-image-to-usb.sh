@@ -116,10 +116,7 @@ create_partition() {
     wait_for_partition "${USB_DEVICE}${part_num}"
     sleep 2
 
-    echo y | mkfs.ext4 "${USB_DEVICE}${part_num}" >/dev/null || {
-        echo "Error: mkfs failed on ${USB_DEVICE}${part_num}!"
-        exit 1
-    }
+    mkfs.ext4 -F "${USB_DEVICE}${part_num}"
     echo "${label} partition created successfully."
 }
 
