@@ -43,20 +43,6 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 - Download the Edge Microvisor Toolkit image and the corresponding sha256sum file
 
   > **Note:** TO DO: only download the microvisor image from no Auth file registry, export BASE_URL_NO_AUTH_RS
-  
-  ```bash
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
-  ```
-
-  Example usage:
-
-  ```bash
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz.sha256sum
-  ```
-
-  Alternatively, for no Auth File server public registry
 
   ```bash
   wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
