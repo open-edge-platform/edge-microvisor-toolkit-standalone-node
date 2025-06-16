@@ -2,8 +2,8 @@
 
 ## Get Started
 
-The Edge Microvisor Toolkit operates on an immutable OS, where OS packages are integrated into the image itself.
-To update these packages, a new OS image with updated package versions is required. This guide provides step-by-step
+The Edge Microvisor Toolkit operates on an immutable EMT image, where EMT image packages are integrated into the image itself.
+To update these packages, a new EMT image with updated package versions is required. This guide provides step-by-step
 instructions for setting up the environment necessary to update the Edge Microvisor Toolkit on a standalone node.
 
 ### Step 1: Prerequisites
