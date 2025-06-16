@@ -5,6 +5,9 @@
 
 #set -x
 
+# TODO: Address below comments in next PR
+# echo "Error: Please run this script with sudo!" >&2
+# No need for sudo if running as root, since you already enforce it at the start. Remove sudo from commands inside functions.
 working_dir=$(pwd)
 
 # Usage info for user
