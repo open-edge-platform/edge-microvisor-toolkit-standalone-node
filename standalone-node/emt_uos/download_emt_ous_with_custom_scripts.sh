@@ -31,7 +31,7 @@ fi
 echo "working directory $PWD"
 cp -r ../emt_uos/uos.tar.gz uOS || { echo "Failed to copy uos.tar.gz from ../emt_uos/ to uOS"; exit 1; }
 
-tar -xzvf uos.tar.gz -C uOS > /dev/null
+tar -xzvf uos.tar.gz -C uOS || { echo "Failed to extract uos.tar.gz"; exit 1; }
 
 vmlinuz_file=$(find uOS -maxdepth 1 -type f -name 'vmlinuz-*' -printf '%f\n' | head -n1)
 initramfs_file=$(find uOS -maxdepth 1 -type f -name 'initramfs*' -printf '%f\n' | head -n1)
@@ -42,7 +42,7 @@ cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_6
 echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
 
 # cleanup the files
-#rm -rf uos.tar.gz uOS/*
+rm -rf uos.tar.gz uOS/*
 
 # Add custom provision scripts to init-rams file
 
