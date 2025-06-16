@@ -21,7 +21,7 @@
 #EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
 #wget -O uos.tar.gz --no-proxy --no-check-certificate ${FILE_RS_URL}/${EMT_RAW_GZ}
-
+echo "Current working directory is: $PWD"
 if [ ! -d uOS ]; then
     mkdir -p uOS || { echo "Failed to create uOS directory"; exit 1; }
 else
