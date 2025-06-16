@@ -87,6 +87,18 @@ OS_IMG_PARTITION_SIZE="3000"
 
 wipe_partition
 
+# Check if blockdev is installed
+if ! command -v blockdev &> /dev/null; then
+    echo "Error: blockdev is not installed. Please install it before proceeding."
+    exit 1
+fi
+
+# Check if partprobe is installed
+if ! command -v partprobe &> /dev/null; then
+    echo "Error: partprobe is not installed. Please install it before proceeding."
+    exit 1
+fi
+
 sudo sgdisk -e "$USB_DEVICE" >/dev/null 2>&1
 blockdev --rereadpt "${USB_DEVICE}"
 
