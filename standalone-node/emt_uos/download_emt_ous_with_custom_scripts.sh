@@ -22,11 +22,13 @@
 
 #wget -O uos.tar.gz --no-proxy --no-check-certificate ${FILE_RS_URL}/${EMT_RAW_GZ}
 
-#if [ ! -d uOS ]; then
-#    mkdir -p uOS
-#else
-#   rm -rf uOS/*
-#fi
+if [ ! -d uOS ]; then
+    mkdir -p uOS
+else
+   rm -rf uOS/*
+fi
+
+cp ../emt_uos/uos.tar.gz uOS
 
 tar -xzvf uos.tar.gz -C uOS > /dev/null
 
