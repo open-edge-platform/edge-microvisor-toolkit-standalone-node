@@ -42,7 +42,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 - Download the Edge Microvisor Toolkit image and the corresponding sha256sum file
 
-  > **Note:** TO DO: only download the microvisor image from no Auth file registry
+  > **Note:** TO DO: only download the microvisor image from no Auth file registry, export BASE_URL_NO_AUTH_RS
   
   ```bash
   wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
@@ -106,8 +106,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
 
 ### URL Mode
 
-- Log in to the Microvisor Toolkit with your user credentials and execute the microvisor update
-  script with the following options
+- Execute the microvisor update script with the following options
 
   ```bash
   sudo ./os-update.sh -u <base url> -r <release> -v <build version>
