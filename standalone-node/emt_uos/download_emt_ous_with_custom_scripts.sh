@@ -28,6 +28,7 @@ else
    rm -rf uOS/*
 fi
 
+echo "working directory $PWD"
 cp -r ../emt_uos/uos.tar.gz uOS || { echo "Failed to copy uos.tar.gz from ../emt_uos/ to uOS"; exit 1; }
 
 tar -xzvf uos.tar.gz -C uOS > /dev/null
