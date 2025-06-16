@@ -20,6 +20,7 @@ echo "$(date): Configuring k3s 1/13" | sudo tee /var/log/cluster-init.log | sudo
 sudo mkdir -p /etc/rancher/k3s
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
+cluster-init: true
 cluster-cidr: "10.42.0.0/16"
 cluster-dns: "10.43.0.10"
 data-dir : /var/lib/rancher/k3s
