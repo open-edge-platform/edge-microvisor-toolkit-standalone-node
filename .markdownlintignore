@@ -1,14 +1,4 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-SECURITY.md
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-standalone-node/cluster_installers/docs/development-machine-usage.md
-standalone-node/cluster_installers/readme.md
-standalone-node/docs/user-guide/Get-Started-Guide.md
-standalone-node/docs/user-guide/Overview.md
-standalone-node/hook_os/readme.md
-standalone-node/installation_scripts/readme.md
 README.md
-standalone-node/docs/contribution.md
