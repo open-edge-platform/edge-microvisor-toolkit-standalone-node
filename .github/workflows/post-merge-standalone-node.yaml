@@ -34,7 +34,6 @@ jobs:
       run_docker_push: false
       run_version_tag: true
       prefix_tag_separator: "/"
-      project_folder: "standalone-node"
     secrets:
       SYS_ORCH_GITHUB: ${{ secrets.SYS_ORCH_GITHUB }}
       COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}

@@ -99,6 +99,3 @@ popd || exit
 sudo rm -rf initramfs_extract
 
 echo "Successully injected the custom provision scripts to initramfs"
-
-
-
