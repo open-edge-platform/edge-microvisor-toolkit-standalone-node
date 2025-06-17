@@ -83,7 +83,7 @@ else
     fi
 
     # Direct path mode
-    IMAGE_PATH="$1"
+    IMAGE_PATH="$2"
     SHA_FILE="$4"
 
     # Verify that the image file exists
