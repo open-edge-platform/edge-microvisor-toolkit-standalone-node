@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH="${1:-/var/lib/rancher/k3s/bin}"
-COPY_ARTIFACTS="${2:-true}"
+K3S_BIN_PATH="${1:-/usr/bin}"
+COPY_ARTIFACTS="${2:-false}"
 # for basic testing on a coder setup
 if grep -q "Ubuntu" /etc/os-release; then
 	export IS_UBUNTU=true
@@ -75,7 +75,7 @@ fi
 # Copy extensions (HelmChart definitions - charts encoded in yaml)
 sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
 echo "$(date): Installing k3s 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh /opt/install.sh
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh /opt/install.sh
 
 sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
 

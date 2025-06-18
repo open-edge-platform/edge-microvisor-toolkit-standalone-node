@@ -9,7 +9,7 @@ EXT_DIR=./extensions
 TPL_DIR=./extensions-templates
 TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
-DOWNLOAD_ARTIFACTS=true
+DOWNLOAD_ARTIFACTS=false
 
 # List of pre-downloaded docker images
 images=(
