@@ -144,7 +144,7 @@ fi
 
 # Add k3s installation flag, so that on next reboot it will not start again from begining.
 
-K3S_STATUS="/var/lib/rancher/rk3s_status"
+K3S_STATUS="/var/lib/rancher/k3s_status"
 
 if [ ! -f "$K3S_STATUS" ]; then
     echo "success" | sudo tee "$K3S_STATUS"
