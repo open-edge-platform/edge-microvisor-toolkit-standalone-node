@@ -76,6 +76,7 @@ tar xf sen-k3s-package.tar.gz
 ```
 
 - If different path is selected to download the artifacts to then the installer can be pointed to it by providing the path as an argument
+- The installer will set a CIDR of ``10.42.0.0/16``. This may need to be set in your NO_PROXY and no_proxy environemnt variables before install.
 
 ```shell
 ./sen-k3s-installer.sh /some/other/directory
