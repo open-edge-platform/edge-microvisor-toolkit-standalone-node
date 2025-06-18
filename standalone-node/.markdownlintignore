@@ -4,10 +4,4 @@
 out/
 vendor/
 venv_standalonenode/
-cluster_installers/docs/
-cluster_installers/readme.md
-docs/user-guide/Get-Started-Guide.md
-docs/user-guide/Overview.md
-hook_os/readme.md
-installation_scripts/readme.md
-README.md
+cluster_installers/charts/**
