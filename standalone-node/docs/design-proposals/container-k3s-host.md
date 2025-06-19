@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+SPDX-License-Identifier: Apache-2.0
+ -->
+
 # Design Proposal: Kubernetes Installer Enhancement
 
 Author(s): Krishna, Mats, Shankar, Anand.
