@@ -49,3 +49,13 @@ reporting_group_id=""
 reporting_endpoint=""
 reporting_token=""
 reporting_disabled=""
+
+
+# ------------------ LVM partition size ------------------------
+# Set the LVM partition size in GB. This will be used for creating
+# the LVM partition that will be used for user data. By default,
+# `lvm_size_ingb` will be set to ZERO. Update the size in GB if required.
+# Example: lvm_size_ingb="20"
+
+# Note: If the Edge Node has only a single hard disk, update the lvm_size_ingb value; otherwise, skip it.
+lvm_size_ingb="0"
