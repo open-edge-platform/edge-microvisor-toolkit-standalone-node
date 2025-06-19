@@ -4,19 +4,12 @@
 # shellcheck disable=all
 
 K3S_BIN_PATH="${1:-/usr/bin}"
-COPY_ARTIFACTS="${2:-false}"
-# for basic testing on a coder setup
-if grep -q "Ubuntu" /etc/os-release; then
-	export IS_UBUNTU=true
-else
-	export IS_UBUNTU=false
-fi
 
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
 
 #Configure k3s
-echo "$(date): Configuring k3s 1/13" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Configuring k3s 1/12" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo mkdir -p /etc/rancher/k3s
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
@@ -42,7 +35,7 @@ EOF'
 
 
 sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
-sudo mkdir -p /var/lib/rancher/k3s/bin
+sudo mkdir -p $K3S_BIN_PATH
 
 # Set up mirrors
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/registries.yaml
@@ -54,39 +47,19 @@ mirrors:
    endpoint: ["https://localhost.internal:9443"]
 EOF'
 
-if [ "$COPY_ARTIFACTS" = true ]; then
-  mkdir -p /var/lib/rancher/k3s/agent/images/
-  echo "Copying k3s airgap images and binary"
-  sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
-  mkdir -p $K3S_BIN_PATH
-  chmod +x k3s
-  cp k3s $K3S_BIN_PATH
-  cp install.sh /opt/install.sh
-fi
-
-# Copy the cni tarballs
-echo "$(date): Copying images and extensions 2/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-# Copy extension images - if the images are part of the package - otherwise get pullled from internet
-if [ -d ./images ]; then
-  sudo mkdir -p /var/lib/rancher/k3s/agent/images/
-	sudo cp ./images/* /var/lib/rancher/k3s/agent/images
-fi
-
-# Copy extensions (HelmChart definitions - charts encoded in yaml)
-sudo cp ./extensions/* /var/lib/rancher/k3s/server/manifests
-echo "$(date): Installing k3s 3/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy" sh /opt/install.sh
+echo "$(date): Installing k3s 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy --disable traefik --disable servicelb" sh /opt/install.sh
 
 sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
 
 
 # Start k3s
-echo "$(date): Starting k3s 4/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Starting k3s 3/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo systemctl enable --now k3s
 
-echo "$(date): Waiting for k3s to start 5/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for k3s to start 4/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 until sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
-echo "$(date): k3s started 6/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): k3s started 5/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 # Label node as a worker
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
 sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label node $hostname node-role.kubernetes.io/worker=true
@@ -100,7 +73,7 @@ namespaces=(
 	"kube-public"
 	"kube-system"
 	"tigera-operator")
-echo "$(date): Waiting for namespaces to be created 7/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for namespaces to be created 6/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
   all_exist=true
   for ns in "${namespaces[@]}"; do
@@ -111,27 +84,27 @@ while true; do
   sleep 5
 done
 
-echo "$(date): Namespaces created 8/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Namespaces created 7/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
-echo "$(date): Permissive network policies created 9/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Permissive network policies created 8/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
 ## Wait for all pods to deploy
-echo "$(date): Waiting for all extensions to deploy 10/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for all extensions to deploy 9/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "Waiting for all extensions to complete the deployment..."
 while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
   echo "Some pods are still not ready. Checking again in 5 seconds..."
   sleep 5
 done
-echo "$(date): All extensions deployed 11/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): All extensions deployed 10/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 
-echo "$(date): Configuring environment 12/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Configuring environment 11/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 ## Add k3s binary to path
 sed 's|PATH="|PATH="'$K3S_BIN_PATH':|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
 source /etc/environment
 export KUBECONFIG
 
 # All pods deployed - write to log
-echo "$(date): The cluster installation is complete 13/13" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): The cluster installation is complete 12/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 echo "$(date): The cluster installation is complete!"
 
 # Print banner
