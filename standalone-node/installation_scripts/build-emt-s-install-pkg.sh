@@ -153,17 +153,8 @@ download-charts-and-images(){
 
 echo "Downloading K8 charts and images,please wait!!!"
 pushd ../cluster_installers > /dev/null || return 1
-chmod +x download_charts_and_images.sh 
 chmod +x build_package.sh 
 
-
-if ! bash download_charts_and_images.sh > /dev/null; then
-    echo "Downloding K8 charts and images failed,please check!!!"
-    popd || return 1
-    exit 1
-else
-    echo "Downloding K8 charts and images successful"
-fi
 # Build packages
 
 if ! bash build_package.sh > /dev/null; then
