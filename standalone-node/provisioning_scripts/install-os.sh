@@ -351,8 +351,12 @@ update_ssh_settings() {
 
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
-    # update the rke2 path
+    # Update the rke2 path
     sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/rke2/bin"|' /mnt/etc/environment
+    
+    # Get the lvm_size_ingb from config-file for creating the LVM
+    lvm_size=$(grep '^lvm_size_ingb=' "$CONFIG_FILE" | cut -d '=' -f2)
+    lvm_size=$(echo "$lvm_size" | tr -d '"')
 
     # SSH Configure
     if grep -q '^ssh_key=' "$CONFIG_FILE"; then
@@ -465,7 +469,7 @@ enable_dm_verity() {
     echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC} [7/9]"
     dm_verity_script=/etc/scripts/enable-dmv.sh
 
-    if bash $dm_verity_script; then
+    if bash $dm_verity_script $lvm_size; then
         success "DM Verity and Partitions successful on $os_disk"
     else
         failure "DM Verity and Partitions failed on $os_disk,Please check!!"
