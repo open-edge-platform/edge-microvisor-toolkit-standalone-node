@@ -362,7 +362,7 @@ Install a WordPress application as a test application using `helm`.
 > **Note:** Edge AI applications from the Edge software catalog can be installed
 using `helm` and evaluated using similar steps.
 
-## Step 7: Access Grafana
+## Step 7: Access Grafana Dashboard
 
 1. Retrieve Grafana credentials:
 
@@ -377,7 +377,7 @@ using `helm` and evaluated using similar steps.
    http://<EN IP>:32000
    ```
 
-## Step 8: Add Prometheus metrics to Grafana
+## Step 8: Add Prometheus metrics to Grafana dashboard
 
 1. Get Prometheus credentials:
 
