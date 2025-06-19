@@ -38,7 +38,7 @@ check_success "Creating temporary directory"
 # TO DO: Improvement scripts to use getopts to parse command line arguments.
 if [ "$1" == "-u" ]; then
     # Check if the correct number of arguments is provided for URL mode
-    # Example usage: ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
+    # Example usage: ./os-update.sh -u https://<BASE_URL_RS_DOMAIN_NAME>/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
     if [ "$#" -ne 6 ]; then
         error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> -r <release> -v <build_version>"
     fi
@@ -51,10 +51,8 @@ if [ "$1" == "-u" ]; then
     # Determine the domain and construct the IMAGE_URL accordingly
     if [[ "$IMAGE_BASE_URL" == *"files-rs.edgeorchestration.intel.com"* ]]; then
         IMAGE_URL="${IMAGE_BASE_URL}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
-    elif [[ "$IMAGE_BASE_URL" == *"af01p-png.devtools.intel.com"* ]]; then
-        IMAGE_URL="${IMAGE_BASE_URL}/${IMG_VER}/${IMAGE_BUILD}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
     else
-        error_exit "Unsupported domain in URL: $IMAGE_BASE_URL"
+        IMAGE_URL="${IMAGE_BASE_URL}/${IMG_VER}/${IMAGE_BUILD}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
     fi
 
     echo "Constructed IMAGE URL: $IMAGE_URL"
