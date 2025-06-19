@@ -161,7 +161,7 @@ os_file_chsum=$(printf "%s\n" usb_files/update_images/*.raw.gz.sha256sum  2>/dev
 copy_to_partition "$OS_UPDATE_PART" "$os_filename" "/mnt"
 copy_to_partition "$OS_UPDATE_PART" "$os_file_chsum" "/mnt"
 
-#if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
+#if copy_to_partition "$K8_PART" "usb_files/sen-rke2-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
 #    echo "USB bootable device is ready!"
 #else
 #    echo "USB Installation failed,please re-run the script again!!!"

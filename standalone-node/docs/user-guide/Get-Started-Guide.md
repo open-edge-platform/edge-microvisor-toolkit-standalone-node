@@ -114,7 +114,7 @@ cd edge-microvisor-toolkit-standalone-node
   The standalone edge node will automatically reboot into Microvisor.
 
 - First Boot Configuration
-  During the first boot, cloud-init will install the k3s Kubernetes cluster.
+  During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
 #### 2.1  Login to the Edge Node After Installation complete
 
@@ -146,7 +146,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ```bash
    mkdir ~/.kube
    export EN_IP=<EN_IP>
-   scp user@${EN_IP}:/etc/rancher/k3s/k3s.yaml ~/.kube/config
+   scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
    ```
 
 3. Update the Edge Node IP in the kubeconfig file and export the path as KUBECONFIG:

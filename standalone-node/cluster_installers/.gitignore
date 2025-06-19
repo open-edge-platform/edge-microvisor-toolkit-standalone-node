@@ -1,7 +1,0 @@
-charts/
-images/
-install.sh
-k3s
-k3s-airgap-images-amd64.tar.zst
-sen-k3s-package.tar.gz
-sha256sum-amd64.txt

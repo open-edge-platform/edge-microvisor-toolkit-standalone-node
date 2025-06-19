@@ -9,8 +9,10 @@
 
 > Note: Script uses podman to download artifacts
 
-- Download all extension charts into `./charts` directory and convert them to base64 encoding 
+- Download RKE2 artifacts to current directory
+- Download all base extension charts into `./charts` directory and convert them to base64 encoding 
 - Download all the images used by the extensions into `./images` directory and package them as `tar.zst`
+- Download K8s dashboard as an extensions (manifest + images)
 - Create helmchart addon definitions based on extension templates and base64 encoded helmcharts downloaded
 
 ```shell
@@ -38,13 +40,13 @@ spec:
 
 There is two options to build a package
 
-- Build full package with installation script, extensions charts and container images.
+- Build full package with RKE2 images/binaries, installation script, base extensions chart and container images, K8s dashboard manifest and images.
 
 ```shell
 ./build_package.sh
 ```
 
-- Build package with k3s images/binaries, installation script, extension charts and manifests. The container images are not archived as part of this package and they are expected to be pulled from internet during k3s cluster bootstrap on the Edge Node.
+- Build package with RKE2 images/binaries, installation script, base extensions chart and K8s dashboard manifest. The container image are not archived as part of this package and they are expected to be pulled from internet during RKE2 cluster bootstrap on the Edge Node.
 ```shell
 ./build_package.sh --no-ext-image
 ```
@@ -53,43 +55,48 @@ There is two options to build a package
 
 To install Microvisor on the Standalone Node
 
-1. Copy the package to a writable directory ie. `/tmp/k3s-artifacts` 
+1. Copy the package to a writable directory ie. `/tmp/rke2-artifacts` 
 
 ```shell
-mkdir /tmp/k3s-artifacts
-cp sen-k3s-package.tar.gz /tmp/k3s-artifacts
+mkdir /tmp/rke2-artifacts
+cp sen-rke2-package.tar.gz /tmp/rke2-artifacts
 ```
 
 2. Unpack the package
 
 ```shell
-cd /tmp/k3s-artifacts
-tar xf sen-k3s-package.tar.gz
+cd /tmp/rke2-artifacts
+tar xf sen-rke2-package.tar.gz
 ```
 
 3. Run installer
 
-- By default installer is expecting the packages in `/tmp/k3s-artifacts`
+- By default installer is expecting the packages in `/tmp/rke2-artifacts`
 
 ```shell
-./sen-k3s-installer.sh
+./sen-rke2-installer.sh
 ```
 
 - If different path is selected to download the artifacts to then the installer can be pointed to it by providing the path as an argument
-- The installer will set a CIDR of ``10.42.0.0/16``. This may need to be set in your NO_PROXY and no_proxy environemnt variables before install.
 
 ```shell
-./sen-k3s-installer.sh /some/other/directory
+./sen-rke2-installer.sh /some/other/directory
 ```
 
 1. Wait for install to finish and then all pods to come up running
 
 ```shell
-sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/bin/k3s kubectl get pods -A
+sudo -E KUBECONFIG=/etc/rancher/rke2/rke2.yaml /var/lib/rancher/rke2/bin/kubectl get pods -A
 ```
-TODO: move to /usr/local/bin/ when binaries are available.
 
-The k3s binary provides a wrapper of kubectl through the `k3s kubectl` command.
+## Uninstalling
+
+To uninstall RKE2 with SEN
+
+```shell
+cd /tmp/rke2-artifacts
+./sen-uninstall-rke2.sh
+```
 
 ## Next steps
 

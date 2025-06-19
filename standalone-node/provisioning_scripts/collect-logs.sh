@@ -17,7 +17,7 @@ fi
 sudo journalctl -k | sudo tee $LOG_DIR/dmesg
 
 # Collect the cluster logs
-sudo journalctl -u k3s* | sudo tee $LOG_DIR/k3s-logs
+sudo journalctl -u rke2* | sudo tee $LOG_DIR/rke2-logs
 
 # Collect pods info
 
