@@ -130,36 +130,7 @@ cd edge-microvisor-toolkit-standalone-node
      ```
 
      > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
-     >
-#### 1.6:  Install GPU plugin - Node Feature Discovery (NFD)
-
-- Start NFD. If your cluster does not have NFD installed, use the following command: 
-
-	```sh
-	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.32.0'
-	```
-
-- Create NodeFeatureRules for detecting GPUs on nodes
-
-	```sh
-	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.32.0'
-	```
-	
-- Create GPU plugin daemonset
-
-	```sh
-	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/nfd_labeled_nodes?ref=v0.32.0'
-	```
-	
-- Check if the plugin is visible
-
-	```sh
-	kubectl get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{'\n'}{' i915: '}{.status.allocatable.gpu\.intel\.com/i915}{'\n'}"
-	```
-	
-- Output
-
-	https://github.com/intel-innersource/os.linux.tiberos.tiberlinuxos.bronzetest/blob/krishna-sen/SEN/Usecase.md#output
+     
 
 ## Step 2: Deploy on Standalone Node
 
@@ -264,7 +235,37 @@ commands.
 
 5. Login using the previously generated access token.
 
-## Step 5: Install Sample Application
+## Step 5: Install GPU plugin - Node Feature Discovery (NFD)
+
+- Start NFD. If your cluster does not have NFD installed, use the following command: 
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.32.0'
+	```
+
+- Create NodeFeatureRules for detecting GPUs on nodes
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.32.0'
+	```
+	
+- Create GPU plugin daemonset
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/nfd_labeled_nodes?ref=v0.32.0'
+	```
+	
+- Check if the plugin is visible
+
+	```sh
+	kubectl get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{'\n'}{' i915: '}{.status.allocatable.gpu\.intel\.com/i915}{'\n'}"
+	```
+	
+- Output
+
+	![output](../output_image.png)
+
+## Step 6: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
@@ -361,7 +362,7 @@ Install a WordPress application as a test application using `helm`.
 > **Note:** Edge AI applications from the Edge software catalog can be installed
 using `helm` and evaluated using similar steps.
 
-## Step 6: Access Grafana
+## Step 7: Access Grafana
 
 1. Retrieve Grafana credentials:
 
@@ -376,7 +377,7 @@ using `helm` and evaluated using similar steps.
    http://<EN IP>:32000
    ```
 
-## Step 7: Add Prometheus metrics to Grafana
+## Step 8: Add Prometheus metrics to Grafana
 
 1. Get Prometheus credentials:
 
@@ -403,7 +404,7 @@ Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
-## Step 8: Query Metrics
+## Step 9: Query Metrics
 
 1. Create a dashboard using prometheus data source:
 
