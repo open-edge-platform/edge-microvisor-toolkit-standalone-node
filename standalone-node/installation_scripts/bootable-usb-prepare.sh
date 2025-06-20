@@ -96,6 +96,11 @@ if [ -z "$user_name" ] || [ -z "$passwd" ]; then
     exit 1
 fi
 
+if [ -z "$host_type" ] || { [ "$host_type" != "kubernetes" ] && [ "$host_type" != "container" ]; }; then
+    echo "Invalid host_type => $host_type provided, Please check!. It should not be empty or host_type=kubernetes/container"
+    exit 1
+fi
+
 # --- Progress Bar Function ---
 show_progress_bar() {
     progress=$1 
