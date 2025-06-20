@@ -68,11 +68,9 @@ sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label nod
 
 ## First wait for all namespaces to be created
 namespaces=(
-  "calico-system"
 	"kube-node-lease"
 	"kube-public"
-	"kube-system"
-	"tigera-operator")
+	"kube-system")
 echo "$(date): Waiting for namespaces to be created 6/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 while true; do
   all_exist=true
