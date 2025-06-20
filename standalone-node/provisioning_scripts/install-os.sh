@@ -143,9 +143,20 @@ get_block_device_details() {
 
     # Clear the disk partitions
     for disk_name in ${blk_devices}; do
-        dd if=/dev/zero of="/dev/$disk_name" bs=500M count=20
+        dd if=/dev/zero of="/dev/$disk_name" bs=100M count=20
+	wipefs --all "/dev/$disk_name"
     done
-    echo "success to find the disk"
+    # Remove previous LVM's data if exist
+    vgname="lvmvg"
+    vgremove -f "$vgname"
+    rm -rf  /dev/$vgname/
+    rm -rf  /dev/mapper/lvmvg-pv*
+    dmsetup remove_all
+    # Remove previous Physical volumes if exist
+    for pv_disk in $(pvscan 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i ~ /^\/dev\//) print $i}'); do
+        echo "Removing LVM metadata from $pv_disk"
+        pvremove -ff -y "$pv_disk"
+    done
     return 0
 }
 
@@ -481,7 +492,7 @@ enable_dm_verity() {
 
 copy_os_update_script() {
 
-    echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" | tee /dev/tty0
+    echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" 
 
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
@@ -543,7 +554,7 @@ show_progress_bar() {
     red_bar=$(printf "%0.s-" $(seq 1 $red_chars))
     progress_line=$(printf "\r\033[K${YELLOW}%s${NC} [${GREEN}%s${YELLOW}%s${NC}] %3d%%" \
         "$padded_status_message" "$green_bar" "$red_bar" "$percentage")
-    printf "%b" "$progress_line" | tee /dev/tty0
+    printf "%b" "$progress_line" | tee /dev/tty1
 }
 
 # Main function
@@ -554,7 +565,7 @@ main() {
     PROVISION_STEP=0
     show_progress_bar "$PROVISION_STEP" "System Readiness Check"
     if ! system_readiness_check  >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:System not in ready state for Provision,Please check $LOG_FILE for more details,.Aborting.${NC}" | tee /dev/tty0
+        echo -e "${RED}\nERROR:System not in ready state for Provision,Please check $LOG_FILE for more details,.Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
     PROVISION_STEP=1
@@ -564,7 +575,7 @@ main() {
     PROVISION_STEP=2
     show_progress_bar "$PROVISION_STEP" "OS Setup "
     if ! install_os_on_disk >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more deatisl,Aborting.${NC}" | tee /dev/tty0
+        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more deatisl,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -572,7 +583,7 @@ main() {
     PROVISION_STEP=3
     show_progress_bar "$PROVISION_STEP" "Platform Configuration Manager"
     if ! platform_config_manager  >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:Platform Configuration failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty0
+        echo -e "${RED}\nERROR:Platform Configuration failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -580,7 +591,7 @@ main() {
     PROVISION_STEP=4
     show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
     if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty0
+        echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
         exit 1
     fi
 
@@ -588,7 +599,7 @@ main() {
     PROVISION_STEP=5
     show_progress_bar "$PROVISION_STEP" "K8S cluster Config"
     if ! install_k8_script >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:Copying K8S scripts to disk Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty0
+        echo -e "${RED}\nERROR:Copying K8S scripts to disk Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -596,7 +607,7 @@ main() {
     PROVISION_STEP=6
     show_progress_bar "$PROVISION_STEP" "Post Install Setup"
     if ! system_finalizer  >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:Post install Setup Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty0
+        echo -e "${RED}\nERROR:Post install Setup Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -605,11 +616,11 @@ main() {
     sync
 
     # Final bar completion and message
-    show_progress_bar "$TOTAL_PROVISION_STEPS" "Complete!" | tee /dev/tty0
+    show_progress_bar "$TOTAL_PROVISION_STEPS" "Complete!" | tee /dev/tty1
 
 }
 ##### Main Execution #####
-echo -e "${BLUE}Started the OS Provisioning, it will take a few minutes. Please wait!!!${NC}" | tee /dev/tty0
+echo -e "${BLUE}Started the OS Provisioning, it will take a few minutes. Please wait!!!${NC}" | tee /dev/tty1
 sleep 5
 main
 success "\nOS Provisioning Done!!!"
