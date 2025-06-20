@@ -3,50 +3,11 @@
 
 # Standalone Edge Node installer
 
-## Preparing installer
-
-1. Run the `download_charts_and_images.sh` script - it will:
-
-> Note: Script uses podman to download artifacts
-
-- Download all extension charts into `./charts` directory and convert them to base64 encoding 
-- Download all the images used by the extensions into `./images` directory and package them as `tar.zst`
-- Create helmchart addon definitions based on extension templates and base64 encoded helmcharts downloaded
-
-```shell
-./download_charts_and_images.sh
-```
-
-> Note Base64 outputs in `./charts` directory need to be used as input into the helmchart definitions into each extension.
-> Correctly prepared manifests are already committed with the base64 encoded charts included.
-
-```yaml
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: <extensions>
-  namespace: kube-system
-spec:
-  chartContent: <base64 encoded chart>
-  targetNamespace: <extension namespace>
-  createNamespace: true
-  valuesContent: |-
-    <values>
-```
-
-2. Build a tar package that includes the artifacts and installer/uninstall script
-
-There is two options to build a package
-
-- Build full package with installation script, extensions charts and container images.
+## Build
+To build the install script package simply run
 
 ```shell
 ./build_package.sh
-```
-
-- Build package with k3s images/binaries, installation script, extension charts and manifests. The container images are not archived as part of this package and they are expected to be pulled from internet during k3s cluster bootstrap on the Edge Node.
-```shell
-./build_package.sh --no-ext-image
 ```
 
 ## Installing
@@ -74,7 +35,7 @@ tar xf sen-k3s-package.tar.gz
 ```shell
 ./sen-k3s-installer.sh
 ```
-
+- the installer assumes that all necessary images and manifests already exist on the filesystem
 - If different path is selected to download the artifacts to then the installer can be pointed to it by providing the path as an argument
 - The installer will set a CIDR of ``10.42.0.0/16``. This may need to be set in your NO_PROXY and no_proxy environemnt variables before install.
 
