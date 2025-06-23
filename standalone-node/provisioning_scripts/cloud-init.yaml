@@ -24,9 +24,6 @@ runcmd:
     usermod -aG sudo "$user_name"
 
     iptables -A INPUT -p tcp -j ACCEPT
-    # Install k3s
-    chmod +x k3s-configure.sh
-    bash k3s-configure.sh
 
     # Verify system boot status
     bootctl_output=$(sudo bootctl list)

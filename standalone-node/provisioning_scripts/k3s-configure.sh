@@ -1,4 +1,9 @@
-# Start the K8* scripts only once
+#!/bin/bash
+
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Start the cluster install scripts only once
 if [ ! -f "/var/lib/rancher/k3s_status" ]; then
     mkdir -p /tmp/k3s-artifacts/
     tar -xf /opt/sen-k3s-package.tar.gz -C /tmp/k3s-artifacts/
