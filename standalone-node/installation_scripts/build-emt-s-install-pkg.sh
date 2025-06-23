@@ -75,7 +75,7 @@ cp ../emt_uos/initramfs-x86_64 out/
         set gfxmode=text
 
         menuentry "Alpine Linux" {
-	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quiet loglevel=7 usbcore.delay_ms=2000 usbcore.autosuspend=-1 modloop=none root=tmpfs rootflags=size=1G,mode=0755 rd.skipfsck noresume text
+	linux /boot/vmlinuz console=tty0 console=ttyS0 ro quiet loglevel=3 usbcore.delay_ms=2000 usbcore.autosuspend=-1 modloop=none root=tmpfs rootflags=size=1G,mode=0755 rd.skipfsck noresume text
         initrd /boot/initrd
 }
 EOF
@@ -102,6 +102,7 @@ cp bootable-usb-prepare.sh out/
 cp write-image-to-usb.sh out/
 cp config-file out/
 cp edgenode-logs-collection.sh out/
+cp standalone-vm-setup.sh out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null || return 1
@@ -121,7 +122,7 @@ fi
 tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null
 
 if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null; then
-    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh; then
         echo ""
         echo ""
         echo ""
