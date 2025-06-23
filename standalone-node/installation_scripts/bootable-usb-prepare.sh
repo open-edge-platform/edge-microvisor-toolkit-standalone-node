@@ -5,7 +5,7 @@
 
 #set -x
 # shellcheck source=installation_scripts/config-file
-source config-file
+source config-file > /dev/null 2>&1 
 
 #### Global variables
 # Color codes ####### 
@@ -56,7 +56,7 @@ USB_FILES="$2"
 CONFIG_FILE="$3"
 
 # Validate USB device
-if ! [[ "$USB_DEVICE" =~ ^/dev/(sd[a-z]+|nvme[0-9]+n[0-9]+|vd[a-z]+)$ ]]; then
+if ! [[ "$USB_DEVICE" =~ ^/dev/(sd[a-z]+|nvme[0-9]+n[0-9]+|vd[a-z]+|nbd[0-9]+)$ ]]; then
     echo "Error: '$USB_DEVICE' is NOT a valid USB/block device!"
     exit 1
 fi
@@ -199,6 +199,9 @@ create_partition() {
     local part_num
     part_num=$(sudo parted "$USB_DEVICE" -ms print 2>/dev/null | tail -n 1 | awk -F: '{print $1}')
 
+    if [[ $USB_DEVICE == /dev/nbd* ]]; then
+        part_num="p$part_num"
+    fi
     wait_for_partition "${USB_DEVICE}${part_num}"
     sleep 2
 
@@ -235,6 +238,9 @@ copy_to_partition() {
     local retries=2
     local attempt=0
 
+    if [[ $USB_DEVICE == /dev/nbd* ]]; then
+        part="p$part"
+    fi
     while [ $attempt -lt $retries ]; do
         if sudo mount "${USB_DEVICE}${part}" /mnt && sudo cp "$src" "$dest"; then
             if sudo umount /mnt; then

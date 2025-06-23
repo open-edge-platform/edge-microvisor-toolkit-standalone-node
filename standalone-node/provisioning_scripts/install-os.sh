@@ -16,6 +16,7 @@ os_part=5
 k8_part=6
 os_rootfs_part=2
 os_data_part=3
+deploy_mode="real"
 LOG_FILE="/var/log/os-installer.log"
 #########################
 
@@ -370,6 +371,10 @@ update_ssh_settings() {
     lvm_size=$(grep '^lvm_size_ingb=' "$CONFIG_FILE" | cut -d '=' -f2)
     lvm_size=$(echo "$lvm_size" | tr -d '"')
 
+    # Check the deployment mode, is it for VM or Real hardware
+    deploy_mode=$(grep '^deploy_envmt=' "$CONFIG_FILE" | cut -d '=' -f2)
+    deploy_mode=$(echo "$deploy_mode" | tr -d '"')
+
     # SSH Configure
     if grep -q '^ssh_key=' "$CONFIG_FILE"; then
         ssh_key=$(sed -n 's/^ssh_key="\?\(.*\)\?"$/\1/p' "$CONFIG_FILE")
@@ -490,6 +495,29 @@ enable_dm_verity() {
     return 0
 }
 
+# Create OS Partitions for virtual edge node
+create_os-partition() {
+    echo -e "${BLUE}Creating the OS Partitions on disk $os_disk!!${NC} [7/9]"
+    os_partition_script=/etc/scripts/os-partition.sh
+
+    if bash $os_partition_script; then
+        success "OS Partitions successful on $os_disk"
+    else
+        failure "OS Partitions failed on $os_disk,Please check!!"
+        return 1
+    fi
+    # Enable the Selinux policies
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
+
+    chroot /mnt /bin/bash <<EOT
+    # Set the SE linux policy to the files we touched during the provisioning
+    setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /
+EOT
+    return 0
+
+}
+
 copy_os_update_script() {
 
     echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" 
@@ -587,12 +615,23 @@ main() {
         exit 1
     fi
 
-    # Step 4: Enable DM Verity on the platfoem 
-    PROVISION_STEP=4
-    show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
-    if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
-        exit 1
+    # Case the deployment for Virtual edgenode or Real hardware
+    if [ "$deploy_mode" == "ven" ]; then
+        # Step 4: Enable OS-Partitions on the platfoem 
+        PROVISION_STEP=4
+        show_progress_bar "$PROVISION_STEP" "Enable OS-Partitions on Platform"
+        if ! create_os-partition  >> "$LOG_FILE" 2>&1; then
+            echo -e "${RED}\nERROR:OS-Partitions Creatation Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+            exit 1
+        fi
+    else
+        # Step 4: Enable DM Verity on the platfoem
+        PROVISION_STEP=4
+        show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
+        if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
+            echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+           exit 1
+        fi
     fi
 
     # Step 5: K8S Cluster files copy to Disk
