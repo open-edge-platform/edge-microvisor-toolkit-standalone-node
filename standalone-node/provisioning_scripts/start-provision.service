@@ -10,7 +10,6 @@ After=getty.target
 ExecStartPre=/bin/sleep 15
 WorkingDirectory=/etc/scripts/
 ExecStart=/etc/scripts/install-os.sh
-TTYPath=/dev/tty0 
 
 [Install]
 WantedBy=multi-user.target
