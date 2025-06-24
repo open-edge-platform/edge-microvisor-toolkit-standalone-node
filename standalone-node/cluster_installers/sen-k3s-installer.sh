@@ -102,9 +102,9 @@ source /etc/environment
 export KUBECONFIG
 
 # Add alias for k to ~/.bashrc if not already present
-if ! grep -q "alias k=" ~/.bashrc; then
-  echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl'" >> ~/.bashrc
-  echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> ~/.bashrc
+if ! grep -q "alias k=" /home/$user_name/.bashrc; then
+  echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl'" >> /home/$user_name/.bashrc
+  echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
 fi
 
 # All pods deployed - write to log
@@ -145,7 +145,7 @@ IP address of the Node:
 	addresses 
 
 To access and view the cluster's pods run:
-  source ~/.bashrc
+  source /home/$user_name/.bashrc
   k get pods -A
 
 KUBECONFIG available at:
