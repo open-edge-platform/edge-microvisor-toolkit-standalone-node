@@ -1,6 +1,7 @@
 # Get Started
 
-The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can build your own bootable USB from source code, or use the downloadable ISO
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
+build your own bootable USB from source code, or use the downloadable ISO
 image that can be flashed to a USB device and installed on edge nodes. It
 installs the microvisor and Kubernetes to the edge node with the essential
 functionality to run a single node cluster. The edge node will serve as both the
@@ -20,16 +21,21 @@ Kubernetes web dashboard.
 
 There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
 
-### Creating a bootable USB from downloadable ISO image 
+### Creating a bootable USB from downloadable ISO image
 
-You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the [Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node). Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the [Deployment](#standalone-node-deployment) section.
+You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
+[Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
+Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
+[Deployment](#standalone-node-deployment) section.
 
 ### Creating a bootable USB from Source Code
 
-On Linux based operating systems you can also create a bootable USB drive from source code. This section provides step-by-step instructions to set up the environment required
+On Linux based operating systems you can also create a bootable USB drive from source code.
+This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
 
-Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+Source code for the Edge Microvisor Toolkit Standalone Node is available at
+[Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 #### Prerequisites
 
@@ -165,8 +171,9 @@ cd edge-microvisor-toolkit-standalone-node
      - User credentials: Set the username and password for the edge node
      ```
 
-     > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
-  
+     > **Note:**  Providing proxy settings is optional if the edge node does not require them
+       to access internet services.
+
   - Unplug the attached bootable USB drive from developer system before proceeding with deployment.
 
 ## Standalone Node Deployment
