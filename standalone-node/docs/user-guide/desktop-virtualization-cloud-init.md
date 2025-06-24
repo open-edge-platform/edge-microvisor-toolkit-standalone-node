@@ -1,14 +1,16 @@
 
-# Reference cloud-init for EMT image with Desktop Virtualization features
+# cloud-init Configuration for Desktop Virtualization Features
 
 Author(s): Krishna, Shankar
 
 Last updated: 25/06/2025
 
-## Abstract
+## Overview
 
-This document provides a reference `cloud-init` configuration for customers using the Edge Microvisor Toolkit image
-with Desktop Virtualization features.
+This document provides a `cloud-init` configuration for the microvisor image
+with desktop virtualization features.
+
+**Use and customize the following configuration script:**
 
 ```yaml
 #cloud-config
@@ -27,7 +29,7 @@ services:
 # === Create custom configuration files ===
 # To create a file, specify its path,permission and content.
 # Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file
-# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages 
+# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages
 #        will be present under /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   write_files:
@@ -61,8 +63,8 @@ write_files:
 
 # === Custom run commands ===
 # List commands or scripts to run at boot.
-# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present 
-#        under /var/log/cloud-init-output.log file on EMT image. 
+# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present
+#        under /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   runcmd:
 #     - systemctl restart myservice

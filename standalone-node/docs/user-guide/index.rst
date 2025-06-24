@@ -2,7 +2,7 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. toctree::
-   Get-Started-Guide
+   get-started-guide
    desktop-virtualization-image-guide
    pre-loading-user-apps
    emt-update-guide

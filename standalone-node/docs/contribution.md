@@ -8,22 +8,22 @@ community to support adding new features, optimizing, and improving security.
 The current release of the Edge Microvisor Toolkit Standalone Node supports the creation of bootable USB drives
 on Linux-based operating systems. This capability opens up several avenues for contribution:
 
-- USB-Based Provisioning: Improve and optimize the process for creating bootable USB drives and
-develop tools and scripts that streamline the provisioning of the Standalone Node
+- **USB-Based Provisioning:** Improve and optimize the process for creating bootable USB drives and
+  develop tools and scripts that streamline the provisioning of the Standalone Node
 
-- Feature Development: Innovate by adding new features or enhancing existing microvisor image to support
-more complex use cases. Kubernetes k3s clusters along with cluster extensions to enhance
-scalability, manageability, and orchestration capabilities
+- **Feature Development:** Innovate by adding new features or enhancing existing microvisor image to support
+  more complex use cases. Kubernetes K3s clusters along with cluster extensions to enhance
+  scalability, manageability, and orchestration capabilities.
 
-- Empowerment for Enterprise Customers and Developers: Provides the tools and infrastructure needed to explore and
-implement Edge AI solutions, empowering users
-to leverage Intel's architecture for advanced edge computing applications.
+- **Empowerment for Enterprise Customers and Developers:** Provides the tools and infrastructure needed to explore and
+  implement Edge AI solutions, empowering users
+  to leverage Intel's architecture for advanced edge computing applications.
 
 ## New Features
 
 New feature requests should always be made by opening an Architecture Decision Record (ADR)
 GitHub issue, regardless of whether you want to contribute directly or just file a request.
-To do so, use the [Design Proposal](TO DO :link to design proposal for SN) template
+To do so, use the [Design Proposal](./design-proposals/) template
 and provide as much information as possible. This helps maintainers and stakeholders to
 review, better understand, and prioritize the request.
 

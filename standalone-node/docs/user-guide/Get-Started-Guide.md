@@ -1,71 +1,54 @@
 # Get Started
 
-The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
-build your own bootable USB from source code, or use the downloadable ISO
-image that can be flashed to a USB device and installed on edge nodes. It
-installs the microvisor and Kubernetes to the edge node with the essential
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. It is published
+in two versions: Non-RT and
+[RT (with real time extensions)](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/emt-architecture-overview.md#edge-microvisor-toolkit-real-time). You can build your own bootable USB from source code,
+or use the downloadable ISO image that can be flashed to a USB device and installed on edge
+nodes. It installs the microvisor and Kubernetes to the edge node with the essential
 functionality to run a single node cluster. The edge node will serve as both the
 control and worker node. Additional worker nodes can be added to the cluster
 through Kubernetes.
 
-Future releases will enable standalone edge nodes to join an existing Edge
-Management Framework backend, deployed on-prem or in the cloud to support scale
-out and management of larger infrastructures. The Standalone Edge Node enables
-you to quickly get an edge node up and running without deploying backend
+The Standalone Edge Node can be included in
+[Edge Manageability Framework](https://github.com/open-edge-platform/edge-manageability-framework),
+deployed on-prem or in the cloud to support scale out and management of larger infrastructures.
+It enables you to quickly get an edge node up and running without deploying backend
 services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
 Kubernetes web dashboard.
 
-> **Note**: The standalone edge node does not currently support the real-time version.
+## Create Bootable USB from Source Code
 
-## Standalone Node Provisioning
-
-There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
-
-### Creating a bootable USB from downloadable ISO image
-
-You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
-[Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
-Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
-[Deployment](standalone-node-deployment) section.
-
-### Creating a bootable USB from Source Code
-
-On Linux based operating systems you can also create a bootable USB drive from source code.
+On Linux based operating systems, you can also create a bootable USB drive from source code.
 This section provides step-by-step instructions to set up the environment required
-for USB-based provisioning for the standalone node.
+for USB-based provisioning of the standalone node.
 
-Source code for the Edge Microvisor Toolkit Standalone Node is available at
-[Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+To meet specific needs of edge deployment, Edge Microvisor Toolkit Standalone Node can be
+built as one of available OS image versions:
 
-Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
-Following EMT images are supported to meet specific needs of edge deployment:
+- Edge Microvisor Toolkit Non-RT (default)
+- Edge Microvisor Toolkit RT (real-time)
+- Edge Microvisor Toolkit Desktop Virtualization
 
-- Edge Microvisor Toolkit Non Realtime image
-- Edge Microvisor Toolkit Realtime image
-- Edge Microvisor Toolkit desktop virtualization image
+You can create a bootable USB drive with a selected image. For most use cases, the default
+non-RT one is recommended.
 
-By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
-
-Users can download the EMT image of their choice
-and replace the default EMT image in the installer
-directory before creating the bootable USB.
-
-The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
+The diagram below illustrates the steps involved in the USB-based provisioning of the
+standalone node.
 
 ```mermaid
 flowchart TD
-   A[Download the Standalone Node Installer from GitHub]
+   A[Clone the edge-microvisor-standalone-node repository from GitHub]
    A --> B{Choose your Edge Microvisor Toolkit image}
-   B -- "Non Realtime (default and already in the installer, applicable for most Edge AI apps)" --> C[Update the config-file with your settings]
-   C --> D[Create a bootable USB drive using the installer]
-   D --> E[Plug the USB into the edge node and install]
+   B -- "Non-RT (default and applicable for most Edge AI apps)" --> C[Update the
+   config-file with your settings]
+   C --> D[Create a bootable USB drive]
+   D --> E[Plug the USB drive into the edge node and install]
    E --> F[Start using your edge node for AI apps or other use cases]
 
-   B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
-   G --> H[Replace the default raw image in the installer directory]
-   H --> I[Update the config-file with your settings. User the refrence cloud-init config-file section provided in the document directory for the image you downloaded]
-   I --> J[Create a bootable USB drive using the installer]
-   J --> K[Plug the USB into the edge node and install]
+   B -- "RT or Desktop Virtualization" --> I[Refer to the cloud-init
+   configuration article and update the config-file with your settings]
+   I --> J[Create a bootable USB drive]
+   J --> K[Plug the USB drive into the edge node and install]
    K --> L[Start using your edge node for your specific use case]
 ```
 
@@ -75,8 +58,9 @@ flowchart TD
 
 #### 1.1: Repository Setup
 
-Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
-is crucial for accessing the tools required for standalone node
+Begin by cloning the repository. It contains all necessary scripts and
+configurations for deployment. This step is vital for accessing the tools
+required for standalone node.
 
 ```bash
 git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
@@ -87,14 +71,13 @@ cd edge-microvisor-toolkit-standalone-node
 
 - To create the standalone installation tar file with
 all required files for preparing a bootable USB device,
-run the following command
+run the following command:
 
    ```bash
    sudo make build
-
    ```
 
-> **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
+> **Note:** This command will generate the `standalone-installation-files.tar.gz` file.
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
 #### 1.3:  Prepare the USB Drive
@@ -113,15 +96,15 @@ run the following command
    > **Note:** Ensure the correct USB drive is selected
    to avoid data loss.
 
-- Use the wipefs command to remove any existing filesystem
-signatures from the USB drive.
-  This ensures a clean slate for formatting
+- Use the `wipefs` command to remove any existing filesystem
+  signatures from the USB drive.
+  This ensures a clean slate for formatting.
 
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
 
-- Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
+- Format the USB drive with a FAT32 filesystem using the `mkfs.vfat` command:
 
    ```bash
    sudo mkfs.vfat /dev/sdX
@@ -141,15 +124,15 @@ signatures from the USB drive.
     sudo umount /dev/sdX
     ```
 
-- Copy standalone installation tar file to developer system to prepare the Bootable USB
+- Copy the standalone installation tar file to developer system to prepare the bootable USB drive.
 
-  Extract the contents of sen-installation-files.tar.gz
+  Extract the contents of `standalone-installation-files.tar.gz`:
 
   ```bash
-   tar -xzf sen-installation-files.tar.gz
+   tar -xzf standalone-installation-files.tar.gz
   ```
 
-- Extracted files will include
+- Extracted files will include:
 
   ```text
   usb-bootable-files.tar.gz
@@ -168,7 +151,7 @@ signatures from the USB drive.
    sudo ./download_images.sh NON-RT
    ```
 
-- Run the preparation script to create the bootable USB
+- Run the preparation script to create the bootable USB:
 
    ```bash
    sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
@@ -200,13 +183,13 @@ signatures from the USB drive.
 - Set the BIOS boot manager to boot from the USB pen drive
 
 - Reboot the Standalone Node
-  This will start the HookOS boot followed by Microvisor installations.
+  This will start the Bootkit OS, followed by Microvisor installations.
 
 - Automatic Reboot
   The standalone edge node will automatically reboot into Microvisor.
 
 - First Boot Configuration
-  During the first boot, cloud-init will install the k3s Kubernetes cluster.
+  During the first boot, cloud-init will install the K3s Kubernetes cluster.
 
 ### 2.1  Login to the Edge Node After Installation complete
 
@@ -372,14 +355,18 @@ similar steps.
 
 ## Troubleshooting
 
-1. Creation of USB pendrive failed
-The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
+1. Creation of a bootable USB drive failed.
 
-2. If any issues while provisioning the microvisor from Hook OS, automatically logs will be collected
- from /var/log/os-installer.log file on Hook OS what caused the OS provisioning failed.
+   The possible reason could be USB device is mounted. Make sure to unmount it and retry
+   creating the bootable USB drive.
 
-3. After sucessful installation A banner is printed at the end, summarizing the installation status and
- providing useful commands/logs path for further management.
+2. To track what caused the failure in provisioning of the microvisor, check the
+`/var/log/os-installer.log` file on Bootkit OS.
+
+3. After the successful installation, a summary is printed into terminal output.
+
+   It shows the status of installation and provides useful commands/ paths to logs
+   for further analysis and management.
 
 ### Edge Node Logs from Developer's System
 

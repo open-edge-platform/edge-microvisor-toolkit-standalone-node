@@ -1,9 +1,9 @@
-# Pre-loading User Application artifacts as part of USB installer
+# Pre-loading User Application Artifacts as Part of USB installer
 
 Edge Microvisor Toolkit (EMT) Standalone Node enables users to quickly deploy a single-node
-cluster based on lightweight Kubernetes. In scenarios such as OEM (Original Equipment Manufacturer)
-use cases, users may need to pre-load applications onto the edge node before testing and shipping
-it to its final installation site.This capability is especially useful for those who want their
+cluster based on lightweight Kubernetes. In use cases such as OEM (Original Equipment Manufacturer),
+users may need to pre-load applications onto the edge node before testing and shipping
+it to its final installation site. This capability is especially useful for those who want their
 applications to be available and ready for use immediately after installation.
 
 To support these requirements, EMT Standalone Node allows users to include their application artifacts
@@ -14,9 +14,9 @@ the directory where installer is extracted. Users can place their application fi
 images, helm charts, VM images in the `user-apps` folder. The artifacts will be automatically copied
 to persistent volume on the Edge node at `/opt/user-apps`. User can use the custom `cloud-init` section
 available in the configuration file `config-file` to launch the application after the kubernetes cluster has come up.
-User has flexibility to manage the artifacts and what they do using the artifacts and the custom
-cloud-init configuration. 5G of USB disk space is used for the installer artifacts. Rest of the USB disk
-space is available for the user to store the application artifacts.
+Users can benefit from flexibility to manage and use the artifacts freely custom
+cloud-init configuration. 5 GB of USB disk space is used for the installer artifacts. Remaining disk
+space is available for storing the application artifacts.
 
 ## User App Folder
 
