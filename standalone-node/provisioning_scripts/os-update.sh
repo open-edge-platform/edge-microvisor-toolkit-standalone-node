@@ -150,31 +150,38 @@ check_success "Writing OS image"
 check_success "Applying OS image"
 
 # Check if installer.cfg exists and update it if necessary
-INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
 if [ -f "$INSTALLER_CFG" ]; then
-    if ! grep -q "os-update-tool.sh -e" "$INSTALLER_CFG"; then
+    if ! grep -q "os-update-tool.sh -c" "$INSTALLER_CFG"; then
         echo "Updating installer.cfg with commit script..."
-        cat << 'EOF' >> "$INSTALLER_CFG"
-runcmd:
-  - |
-    # Verify system boot status
-    bootctl_output=$(sudo bootctl list)
-    if echo "$bootctl_output" | grep -q "(linux-2.efi) (selected)"; then
-        echo "linux-2.efi is selected. Performing commit."
-        if os-update-tool.sh -c; then
-            echo "Commit update successful."
-        else
-            echo "Failed to commit update."
-            exit 1
-        fi
+
+        # Use awk to find the end of the runcmd block and append new content
+        awk '
+        /^runcmd:/ { in_runcmd = 1 }
+        in_runcmd && /^  - \|/ { in_block = 1 }
+        in_block && !/^    / { in_block = 0 }
+        { print }
+        END {
+            if (in_runcmd) {
+                print "    # Verify system boot status"
+                print "    bootctl_output=$(sudo bootctl list)"
+                print "    if echo \"$bootctl_output\" | grep -q \"(linux-2.efi) (selected)\"; then"
+                print "        echo \"linux-2.efi is selected. Performing commit.\""
+                print "        if os-update-tool.sh -c; then"
+                print "            echo \"Commit update successful.\""
+                print "        else"
+                print "            echo \"Failed to commit update.\""
+                print "            exit 1"
+                print "        fi"
+                print "    else"
+                print "        echo \"linux-2.efi is not selected. Skipping commit.\""
+                print "    fi"
+                print "    IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)"
+                print "    echo \"IMAGE_BUILD_DATE: $IMAGE_BUILD_DATE\""
+            }
+        }
+        ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" && mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG"
     else
-        echo "linux-2.efi is not selected. Skipping commit."
-    fi
-    IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
-    echo "IMAGE_BUILD_DATE: $IMAGE_BUILD_DATE"
-EOF
-    else
-        echo "Commit script already present in installer.cfg."
+        echo "Commit script already present in installer.cfg"
     fi
 else
     error_exit "installer.cfg not found."
