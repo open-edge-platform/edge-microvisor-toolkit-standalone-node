@@ -149,6 +149,8 @@ check_success "Writing OS image"
 /usr/bin/os-update-tool.sh -a
 check_success "Applying OS image"
 
+INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
+
 # Check if installer.cfg exists and update it if necessary
 if [ -f "$INSTALLER_CFG" ]; then
     if ! grep -q "os-update-tool.sh -c" "$INSTALLER_CFG"; then
