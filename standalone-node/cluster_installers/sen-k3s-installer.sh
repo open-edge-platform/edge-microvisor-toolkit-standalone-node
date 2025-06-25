@@ -31,6 +31,9 @@ kubelet-arg:
   - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
   - "volume-plugin-dir=/var/lib/kubelet/volumeplugins"
 protect-kernel-defaults: true
+disable:
+  - traefik
+  - servicelb
 EOF'
 
 
@@ -48,7 +51,7 @@ mirrors:
 EOF'
 
 echo "$(date): Installing k3s 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
-sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy --disable traefik --disable servicelb" sh /opt/install.sh
+sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true sh /opt/install.sh
 
 sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.service
 
