@@ -57,9 +57,15 @@ actual update procedure.
   `os-update-tool.sh -w -u <file_path_to_EMT_image> -s <check_sum_value>`
 - Execute the update tool with the apply command to set the newly written image to be used for the next boot:  
   `os-update-tool.sh -a`
-- Reboot: Restart the system to boot from the newly applied EMT image.
 
-**Step 4:** Upon successful boot, verify that the system is running correctly with the new image:
+**Step 4:**  The `os-update.sh` script creartes a default user after the EMT image update, which is accomplished by modifying the
+cloud configuration file.
+
+> **Note:** In this release, we configure cloud-init to create **only** default user.
+
+**Step 5:** Reboot - Restart the system to boot from the newly applied EMT image.
+
+**Step 6:** Upon successful boot, verify that the system is running correctly with the new image:
 
 - `sudo bootctl list`
   `sudo cat /etc/lsb-release`
@@ -67,7 +73,7 @@ actual update procedure.
 - Make the new image persistent for future boots using the following command:  
   `os-update-tool.sh -c`
 
-> **Note:** Step 4 is the only step that can be integrated into the cloud-init script.
+> **Note:** Step 6 is the only step that can be integrated into the cloud-init script.
 
 ![Immutable EMT Update flow](./images/A_B-Update.png)
 
