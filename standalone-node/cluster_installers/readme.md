@@ -3,15 +3,27 @@
 
 # README
 
-This directory contains scripts, artifacts and documentation necessary to:
-- download k3s artifacts for Standalone Edge Node installer
-- build the k3s Standalone Edge Node installer
-- run the installer and install the k3s stack and the extension on a Microvisor Edge Node
-- perform operations on the Standalone Edge Node k3s stack - view dashboard, pods and install applications
+This directory provides the necessary resources to:
 
-**Note** Upgrades from 3.0 to 3.1 are not supported as the distribution changed from RKE2 to k3s.
+- Download k3s artifacts for the Standalone Edge Node installer.
+- Build the Standalone Edge Node installer for k3s.
+- Execute the installer to deploy the k3s stack and extensions on a Microvisor Edge Node.
+- Manage the Standalone Edge Node k3s stack, including viewing dashboards, managing pods, and installing applications.
 
-For detailed instructions follow:
+**Note:** Upgrades from version 3.0 to 3.1 are not supported due to the transition from RKE2 to k3s.
 
-- [Standalone Edge Node installer](./docs/standalone-edge-node-installer.md)
-- [Using SEN from development machine](./development-machine-usage.md)
+For detailed instructions, refer to:
+
+- [Standalone Edge Node Installer Guide](./docs/standalone-edge-node-installer.md)
+- [Development Machine Usage Guide](./development-machine-usage.md)
+
+## Disabling the Default CNI
+
+By default, k3s uses flannel as its CNI. To use Multus or another CNI, disable flannel by creating a file at `/etc/rancher/k3s/config.yaml.d/00-disable-flannel.yaml` with the following content:
+
+```yaml
+flannel-backend: none
+disable-network-policy: true
+```
+
+You can automate this process by using a custom cloud-init configuration in your `config-file` when running the `bootable-usb-prepare` script.
