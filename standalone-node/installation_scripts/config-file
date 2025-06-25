@@ -44,18 +44,6 @@ passwd=""
 # Default value is kubernetes.
 host_type="kubernetes"
 
-# ------------------ Edge Data Collection ------------------------
-# Creates files /etc/edge-node/metrics/<group_id,endpoint,token,disabled>
-# reporting_group_id containing Group ID (as exchanged between Partner and Intel)
-# reporting_endpoint containing URI to cloud backend API
-# reporting_token containing access token to send data to cloud backend
-# reporting_disabled which adds opt-out option (false if absent)
-
-reporting_group_id=""
-reporting_endpoint=""
-reporting_token=""
-reporting_disabled=""
-
 
 # ------------------ LVM partition size ------------------------
 # Set the LVM partition size in GB. This will be used for creating
@@ -69,7 +57,7 @@ lvm_size_ingb="0"
 # ------------------ Configuration to be set on Host OS--------------- 
 # User can specify the required configuration that should be set on the Host OS
 # Example:
-# configuration="sriov,k3s"
+# configuration="sriov,gfx"
 # Note : Based on the User requirement its required to provide the input, if nothing is given host OS 
 #        will come up with base configuration.
 
@@ -111,4 +99,4 @@ write_files: []
 #   runcmd:
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
-runcmd: []
+runcmd: 

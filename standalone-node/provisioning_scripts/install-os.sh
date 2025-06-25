@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-#set -x
+set -x
 
 ### Global Variables ###
 usb_disk=""
@@ -31,6 +31,11 @@ BAR_WIDTH=50
 TOTAL_PROVISION_STEPS=8
 PROVISION_STEP=0
 MAX_STATUS_MESSAGE_LENGTH=25
+
+# Dynamically updating the cloud-init file.
+TMP_YAML=$(mktemp)
+CONFIG_FILE=""
+CLOUD_INIT_FILE=""
 
 : >"$LOG_FILE"
 
@@ -244,6 +249,12 @@ install_cloud_init_file() {
     # Copy the cloud init file from Hook OS to target OS
     echo -e "${BLUE}Installing the Cloud-init file!!${NC} [4/9]" 
 
+
+    CLOUD_INIT_FILE="/etc/scripts/cloud-init.yaml"
+
+    # Update the Cloud-init file based on host type and custom configurations"
+    custom_cloud_init_updates 
+    sync
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     if cp /etc/scripts/cloud-init.yaml /mnt/etc/cloud/cloud.cfg.d/installer.cfg && chmod +x /mnt/etc/cloud/cloud.cfg.d/installer.cfg; then
@@ -267,6 +278,7 @@ EOT
     # Copy Edge node logs collection script
     cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-setup-post-reboot.sh /mnt/etc/cloud/
+    cp /etc/scripts/k3s-configure.sh /mnt/etc/cloud/
 
     umount /mnt
     return 0
@@ -494,6 +506,176 @@ enable_dm_verity() {
     fi
     return 0
 }
+
+# Dynamically update the cloud-init file based on User configuration and host type
+custom_cloud_init_updates() {
+    echo -e "${BLUE}Updating the cloud-init file !${NC}"
+
+    # Get the custom details from config-file
+    check_mnt_mount_exist
+    mount -o ro "${usb_disk}${k8_part}" /mnt
+
+    config_file="/mnt/config-file"
+
+    cp $config_file /etc/scripts
+    CONFIG_FILE="/etc/scripts/config-file"
+
+    umount /mnt
+
+    # Check the host type and update cloud-init accordingly
+    host_type=$(grep '^host_type=' "$CONFIG_FILE" | cut -d '=' -f2)
+    host_type=$(echo "$host_type" | tr -d '"')
+
+    if [ "$host_type" == "kubernetes" ]; then
+        # Update cloud-init file to start k3s stack installations
+        awk '
+          BEGIN {
+            line1 = "chmod +x /etc/cloud/k3s-configure.sh"
+            line2 = "bash /etc/cloud/k3s-configure.sh"
+            runcmd = 0
+            in_block = 0
+         }
+
+         /^runcmd:/ { runcmd = 1 }
+
+         runcmd && /^  - \|/ { in_block = 1 }
+         {
+             print
+             next_line = $0
+         }
+
+         in_block && $0 !~ /^  / {
+              print "    " line1
+              print "    " line2
+              in_block = 0
+              runcmd = 0
+          }
+
+         END {
+             if (in_block) {
+                  print "    " line1
+                  print "    " line2
+             }
+         }
+         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+    elif [ "$host_type" == "container" ]; then 
+         # TODO: will be expand in future
+	 echo "host type is container , docker services will start"
+    fi
+
+    # Check for the custom cloud-init changes provided by User
+    # Since the config-file is mix of bash and yaml,extract yaml text to tmp yaml file
+    awk '/^[[:space:]]*(services|write_files|runcmd):/ { in_yaml = 1 }
+       in_yaml { print }' "$CONFIG_FILE" > "$TMP_YAML"
+
+    parse_custom_cloud_init_section
+}
+# Parse the custom cloud-init section and add the commands to cloud-init section if present
+parse_custom_cloud_init_section () {
+   
+    # Parse the services && runcmd sections and get the new additions	
+    additions="$(build_runcmd_lines)"
+
+    awk -v additions="$additions" '
+    BEGIN {
+      split(additions, extra, "\n")
+      added = 0
+    }
+
+    /^runcmd:/ { print; next }
+
+    /^  - \|/ {
+      print
+      in_block = 1
+      next
+    }
+
+    {
+      if (in_block && $0 !~ /^    / && !added) {
+        for (i in extra) if (length(extra[i]) > 0) print extra[i]
+        added = 1
+        in_block = 0
+      }
+      print
+    }
+
+    END {
+      if (in_block && !added) {
+        for (i in extra) if (length(extra[i]) > 0) print extra[i]
+      }
+    }
+  ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+  echo "Custom section updated Successfully"
+
+  # Check if any new files are added by User, If yes add them in required path
+  write_custom_files_to_disk
+
+}
+
+# Adding custom files to disk from custom cloud-init file given by User
+write_custom_files_to_disk () {
+    count=$(yq e '.write_files | length' "$TMP_YAML" 2>/dev/null || echo 0)
+    [ "$count" -eq 0 ] && echo "No custom write_files found" && return
+
+    # Enable the Selinux policies
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
+
+    echo "custom write files found..."
+    for i in $(seq 0 $((count - 1))); do
+    path=$(yq e ".write_files[$i].path" "$TMP_YAML")
+    perms=$(yq e ".write_files[$i].permissions // \"0644\"" "$TMP_YAML")
+    content=$(yq e -r ".write_files[$i].content" "$TMP_YAML")
+
+    if [ "$path" = "null" ] || [ -z "$content" ]; then
+      echo "Skipping file $i: missing path/content"
+      continue
+    fi
+    echo "Writing $path with permissions $perms"
+    echo "$content" > "/mnt/$path"
+    chmod "$perms" "/mnt/$path"
+  done
+  echo "All custome files written successfully to disk"
+  umount /mnt
+}
+
+
+# Add custom cloud-init services based on user inputs
+build_runcmd_lines () {
+    
+    # Apend the content to lines for adding to cloud-init file
+    lines=""
+
+    # Enable custom services if provided
+    enable=$(yq e '.services.enable[]' "$TMP_YAML" 2>/dev/null || true)
+    for svc in $enable; do
+        lines="$lines\n    systemctl enable $svc"
+    done
+
+    # Disable custom services if provided
+    disable=$(yq e '.services.disable[]' "$TMP_YAML" 2>/dev/null || true)
+    for svc in $disable; do
+        lines="$lines\n    systemctl disable $svc"
+    done
+
+    # Get the commands from runcmd section and append it to cloud-init file
+    user_cmds=$(awk '
+    /^[[:space:]]*runcmd:/ { in_block = 1; next }
+    in_block {
+      if (/^[^[:space:]]/ && $0 !~ /^-/) exit
+      if ($0 ~ /^#|^[[:space:]]*$/) next
+      gsub(/^[[:space:]]*-[[:space:]]*/, "")
+      print "    " $0
+    }
+    ' "$CONFIG_FILE")
+
+  # Append the custom services at the end of the cloud-init file section
+  if [ -n "$user_cmds" ]; then
+    lines="$lines\n$user_cmds"
+  fi
+  echo -e "$lines" | sed '/^[[:space:]]*$/d'
+}
+
 
 # Create OS Partitions for virtual edge node
 create_os-partition() {
