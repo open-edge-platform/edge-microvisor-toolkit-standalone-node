@@ -84,7 +84,7 @@ fi
 # Copy the new image if its provided
 if [ ! -z "$new_img" ]; then
     mount /dev/nbd0p5 /mnt
-    rm /mnt/*
+    rm -rf /mnt/*
     cp $new_img /mnt
     umount /mnt
     sync

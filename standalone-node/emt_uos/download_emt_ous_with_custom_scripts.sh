@@ -16,7 +16,7 @@
 
 # TO DO: Use no-auth file server registry to download the Edge Microvisor Toolkit image
 FILE_RS_URL="https://af01p-png.devtools.intel.com/artifactory/edge_system-png-local/images"
-EMT_BUILD_DATE=20250529
+EMT_BUILD_DATE=20250625.0555
 EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
