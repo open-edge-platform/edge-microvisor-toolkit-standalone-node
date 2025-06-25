@@ -66,22 +66,23 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.5:  Prepare the USB Drive
 
+> **Note:**
+>
+> - Ensure **the correct USB drive is selected** to avoid data loss.
+> - **Replace /dev/sdX** with the actual device name of your USB drive.
+
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
    ```bash
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
 
-   > **Note:** Ensure the correct USB drive is selected to avoid data loss.
-
-- Use the wipefs command to remove any existing filesystem signatures from
-  the USB drive. This ensures a clean slate for formatting
+- Use the wipefs command to remove any existing filesystem signatures from the USB drive.
+  This ensures a clean slate for formatting
 
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
-
-   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
 
@@ -89,7 +90,19 @@ cd edge-microvisor-toolkit-standalone-node
    sudo mkfs.vfat /dev/sdX
    ```
 
-   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+- Unmount the USB drive to ensure the creation of bootable USB.
+
+  - Check what is currently mounted:
+
+    ```bash
+    df -hT
+    ```
+
+  - Unmount the drive:
+
+    ```bash
+    sudo umount /dev/sdX
+    ```
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
