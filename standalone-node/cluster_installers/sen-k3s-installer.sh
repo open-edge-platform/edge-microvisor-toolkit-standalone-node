@@ -9,7 +9,7 @@ K3S_BIN_PATH="${1:-/usr/bin}"
 sudo rm -rf /var/log/cluster-init.log
 
 #Configure k3s
-echo "$(date): Configuring k3s 1/12" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Configuring k3s 1/12" | sudo tee /var/log/cluster-init.log | sudo tee /dev/tty1
 sudo mkdir -p /etc/rancher/k3s
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
@@ -57,12 +57,12 @@ sudo sed -i '14i EnvironmentFile=-/etc/environment' /etc/systemd/system/k3s.serv
 
 
 # Start k3s
-echo "$(date): Starting k3s 3/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Starting k3s 3/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 sudo systemctl enable --now k3s
 
-echo "$(date): Waiting for k3s to start 4/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for k3s to start 4/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 until sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl version &>/dev/null; do echo "Waiting for Kubernetes API..."; sleep 5; done;
-echo "$(date): k3s started 5/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): k3s started 5/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 # Label node as a worker
 hostname=$(hostname | tr '[:upper:]' '[:lower:]')
 sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl label node $hostname node-role.kubernetes.io/worker=true
@@ -74,7 +74,7 @@ namespaces=(
 	"kube-node-lease"
 	"kube-public"
 	"kube-system")
-echo "$(date): Waiting for namespaces to be created 6/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for namespaces to be created 6/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 while true; do
   all_exist=true
   for ns in "${namespaces[@]}"; do
@@ -85,27 +85,27 @@ while true; do
   sleep 5
 done
 
-echo "$(date): Namespaces created 7/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Namespaces created 7/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 
-echo "$(date): Permissive network policies created 8/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Permissive network policies created 8/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 
 ## Wait for all pods to deploy
-echo "$(date): Waiting for all extensions to deploy 9/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Waiting for all extensions to deploy 9/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 echo "Waiting for all extensions to complete the deployment..."
 while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
   echo "Some pods are still not ready. Checking again in 5 seconds..."
   sleep 5
 done
-echo "$(date): All extensions deployed 10/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): All extensions deployed 10/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 
-echo "$(date): Configuring environment 11/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): Configuring environment 11/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 ## Add k3s binary to path
 sed 's|PATH="|PATH="'$K3S_BIN_PATH':|' /etc/environment > /tmp/environment.tmp && sudo cp /tmp/environment.tmp /etc/environment && rm /tmp/environment.tmp
 source /etc/environment
 export KUBECONFIG
 
 # All pods deployed - write to log
-echo "$(date): The cluster installation is complete 12/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
+echo "$(date): The cluster installation is complete 12/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 echo "$(date): The cluster installation is complete!"
 
 # Print banner
@@ -152,4 +152,4 @@ KUBECONFIG available at:
 "
 
 # Print the banner
-echo "$banner" | sudo tee /dev/tty0
+echo "$banner" | sudo tee /dev/tty1
