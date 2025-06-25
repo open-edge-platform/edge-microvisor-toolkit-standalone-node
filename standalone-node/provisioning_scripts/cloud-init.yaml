@@ -14,34 +14,4 @@ ntp:
 runcmd:
   - |
     source /etc/environment
-    # Add user
-    CONFIG_FILE="/etc/cloud/config-file"
-    user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
-    user_name=${user_name//\"/}
-    passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
-    passwd=${passwd//\"/}
-    useradd -m -s /bin/bash $user_name && echo "$user_name:$passwd" | chpasswd && echo '$user_name ALL=(ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/$user_name
-    usermod -aG sudo "$user_name"
-
-    iptables -A INPUT -p tcp -j ACCEPT
-
-    # Verify system boot status
-    bootctl_output=$(sudo bootctl list)
-
-    # Check if linux-2.efi is selected
-    # Make the updated image persistent for future boots
-    if echo "$bootctl_output" | grep -q "(linux-2.efi) (selected)"; then
-        echo "linux-2.efi is selected. Performing commit."
-        if os-update-tool.sh -c; then
-            echo "Commit update successful."
-        else
-            echo "Failed to commit update."
-            exit 1
-        fi
-    else
-        echo "linux-2.efi is not selected. Skipping commit."
-    fi
-
-    # Fetch and echo IMAGE_BUILD_DATE from /etc/image-id
-    IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
-    echo "IMAGE_BUILD_DATE: $IMAGE_BUILD_DATE"
+    
