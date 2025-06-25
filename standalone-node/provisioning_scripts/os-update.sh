@@ -149,6 +149,37 @@ check_success "Writing OS image"
 /usr/bin/os-update-tool.sh -a
 check_success "Applying OS image"
 
+# Check if installer.cfg exists and update it if necessary
+INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
+if [ -f "$INSTALLER_CFG" ]; then
+    if ! grep -q "os-update-tool.sh -e" "$INSTALLER_CFG"; then
+        echo "Updating installer.cfg with commit script..."
+        cat << 'EOF' >> "$INSTALLER_CFG"
+runcmd:
+  - |
+    # Verify system boot status
+    bootctl_output=$(sudo bootctl list)
+    if echo "$bootctl_output" | grep -q "(linux-2.efi) (selected)"; then
+        echo "linux-2.efi is selected. Performing commit."
+        if os-update-tool.sh -c; then
+            echo "Commit update successful."
+        else
+            echo "Failed to commit update."
+            exit 1
+        fi
+    else
+        echo "linux-2.efi is not selected. Skipping commit."
+    fi
+    IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
+    echo "IMAGE_BUILD_DATE: $IMAGE_BUILD_DATE"
+EOF
+    else
+        echo "Commit script already present in installer.cfg."
+    fi
+else
+    error_exit "installer.cfg not found."
+fi
+
 # Reboot the system
 echo "Rebooting the system..."
 reboot
