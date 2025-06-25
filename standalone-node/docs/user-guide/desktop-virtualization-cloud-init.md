@@ -7,7 +7,8 @@ Last updated: 25/06/2025
 
 ## Abstract
 
-This document provides a reference `cloud-init` configuration for customers using the Edge Microvisor Toolkit image with Desktop Virtualization features.
+This document provides a reference `cloud-init` configuration for customers using the Edge Microvisor Toolkit image
+with Desktop Virtualization features.
 
 ```yaml
 #cloud-config
@@ -25,7 +26,7 @@ services:
 
 # === Create custom configuration files ===
 # To create a file, specify its path,permission and content.
-# Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file 
+# Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file
 # Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages 
 #        will be present under /var/log/cloud-init-output.log file on EMT image.
 # Example:

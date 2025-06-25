@@ -1,16 +1,45 @@
-# Standalone Node USB based provisioning
+# Get Started
 
-## Get Started
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
+build your own bootable USB from source code, or use the downloadable ISO
+image that can be flashed to a USB device and installed on edge nodes. It
+installs the microvisor and Kubernetes to the edge node with the essential
+functionality to run a single node cluster. The edge node will serve as both the
+control and worker node. Additional worker nodes can be added to the cluster
+through Kubernetes.
 
-The current release of the Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
-on Linux based operating systems. This section provides step-by-step instructions to set up the environment required
+Future releases will enable standalone edge nodes to join an existing Edge
+Management Framework backend, deployed on-prem or in the cloud to support scale
+out and management of larger infrastructures. The Standalone Edge Node enables
+you to quickly get an edge node up and running without deploying backend
+services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
+Kubernetes web dashboard.
+
+> **Note**: The standalone edge node does not currently support the real-time version.
+
+## Standalone Node Provisioning
+
+There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
+
+### Creating a bootable USB from downloadable ISO image
+
+You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
+[Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
+Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
+[Deployment](#standalone-node-deployment) section.
+
+### Creating a bootable USB from Source Code
+
+On Linux based operating systems you can also create a bootable USB drive from source code.
+This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
 
-Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+Source code for the Edge Microvisor Toolkit Standalone Node is available at
+[Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
-### Step 1: Prerequisites
+#### Prerequisites
 
-#### 1.1: Docker and docker proxy Setup
+##### 1. Docker and docker proxy Setup
 
 Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.
 Refer to the links below for Docker installation and proxy setup:
@@ -20,7 +49,7 @@ Refer to the links below for Docker installation and proxy setup:
 
 > **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
 
-#### 1.2: Repository Setup
+##### 2. Repository Setup
 
 Begin by cloning the repository that contains all necessary scripts and
 configurations for deployment. This step is crucial for accessing the tools
@@ -31,7 +60,7 @@ git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalo
 cd edge-microvisor-toolkit-standalone-node
 ```
 
-#### 1.3: Proxy settings
+##### 3. Proxy settings
 
 > **Note:** If the development system is behind a firewall, ensure to add
   the proxy configuration in the standalone-node/hook_os/config file
@@ -51,7 +80,7 @@ cd edge-microvisor-toolkit-standalone-node
 
    ```
 
-#### 1.4: Create the Standalone Installation Tar File
+##### 4. Create the Standalone Installation Tar File
 
 - To create the standalone installation tar file with all required files
   for preparing a bootable USB device, run the following command
@@ -64,7 +93,7 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.5:  Prepare the USB Drive
+##### 5. Prepare the USB Drive
 
 > **Note:**
 >
@@ -142,15 +171,16 @@ cd edge-microvisor-toolkit-standalone-node
      - User credentials: Set the username and password for the edge node
      ```
 
-     > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
+     > **Note:**  Providing proxy settings is optional if the edge node does not require them
+       to access internet services.
 
-## Step 2: Deploy on Standalone Node
+  - Unplug the attached bootable USB drive from developer system before proceeding with deployment.
 
-- Unplug the attached bootable USB from developer system
+## Standalone Node Deployment
 
-- Plug the created bootable USB pen drive into the standalone node
+- Plug the created bootable USB drive into the standalone node machine.
 
-- Set the BIOS boot manager to boot from the USB pen drive
+- Set the BIOS boot manager to boot from the USB drive.
 
 - Reboot the Standalone Node
   This will start the HookOS boot followed by Microvisor installations.
@@ -161,13 +191,13 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
 
-### 2.1  Login to the Edge Node After Installation complete
+### Login to the Edge Node After Installation complete
 
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
 
-## Step 3: Set up tools on Developer's System
+## Set up the tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
@@ -218,7 +248,7 @@ commands.
    ./get_helm.sh
    ```
 
-## Step 4: Set Up Kubernetes Dashboard Access
+## Set Up Kubernetes Dashboard Access
 
 1. View the Kubernetes dashboard pods:
 
@@ -247,7 +277,7 @@ commands.
 
 5. Login using the previously generated access token.
 
-## Step 5: Install Sample Application
+## Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
@@ -344,7 +374,7 @@ Install a WordPress application as a test application using `helm`.
 > **Note:** Edge AI applications from the Edge software catalog can be installed
 using `helm` and evaluated using similar steps.
 
-## Step 6: Accessing Grafana
+## Access Grafana
 
 1. Retrieve Grafana credentials:
 
@@ -359,7 +389,7 @@ using `helm` and evaluated using similar steps.
    http://<EN IP>:32000
    ```
 
-## Step 7: Adding Prometheus metrics to Grafana
+## Add Prometheus metrics to Grafana
 
 1. Get Prometheus credentials:
 
@@ -386,7 +416,7 @@ Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
-## Step 8: Querying Metrics
+## Query Metrics
 
 1. Create a dashboard using prometheus data source:
 
