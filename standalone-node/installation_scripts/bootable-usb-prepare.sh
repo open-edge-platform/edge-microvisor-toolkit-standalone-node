@@ -20,11 +20,13 @@ YELLOW='\033[0;33m'
 
 ISO="usb_files/emt-uos.iso"
 OS_IMG_PARTITION_SIZE="3000"
-K8S_PARTITION_SIZE="8000"
+K8S_PARTITION_SIZE="6000"
+GUEST_VM_SIZE="100%"
 OS_PART=5
 K8_PART=6
+USER_APPS_PART=7
 BAR_WIDTH=50        
-TOTAL_USB_PREPARATION_STEPS=7 
+TOTAL_USB_PREPARATION_STEPS=8 
 USB_PREPARE_STEP=0
 LOG_FILE="bootable_usb_setup_log.txt"
 MAX_STATUS_MESSAGE_LENGTH=28
@@ -38,6 +40,13 @@ usage() {
     echo "Usage: $0 <usb> <usb-bootable-files.tar.gz> <config-file>"
     echo "Example: $0 /dev/sda usb-bootable-files.tar.gz config-file"
     exit 1
+}
+
+check_mnt_mount_exist() {
+    mounted=$(lsblk -o MOUNTPOINT | grep "/mnt")
+    if [ -n "$mounted" ]; then
+        umount -l /mnt
+    fi
 }
 
 # Ensure the script is run as root
@@ -98,6 +107,50 @@ fi
 
 if [ -z "$host_type" ] || { [ "$host_type" != "kubernetes" ] && [ "$host_type" != "container" ]; }; then
     echo "Invalid host_type => $host_type provided, Please check!. It should not be empty or host_type=kubernetes/container"
+    exit 1
+fi
+
+# Validate the custom-cloud-init section
+if ! dpkg -s python3 > /dev/null 2>&1; then
+    apt install -y python3 > /dev/null 2>&1
+    if [ "$?" -ne 0 ]; then
+        echo "Pyhon installation failed,please check!!"
+    fi
+fi
+CONFIG_FILE="config-file"
+START_MARKER="^services:"
+
+# Extract YAML content from custome cloud-init-section
+# if any error,throw the erros  
+YAML_CONTENT=$(awk "/$START_MARKER/ {found=1} found" "$CONFIG_FILE")
+
+# Validate using Python
+echo "$YAML_CONTENT" | python3 -c '
+import sys, yaml
+
+try:
+    data = yaml.safe_load(sys.stdin.read())
+    # Validate runcmd
+    if "runcmd" in data:
+        runcmd = data["runcmd"]
+        if runcmd is None:
+            print("")
+        elif not isinstance(runcmd, list):
+            sys.exit(1)
+        else:
+            for item in runcmd:
+                if not isinstance(item, str) and not isinstance(item, list):
+                    print(f"Invalid runcmd item: {item!r}")
+                    sys.exit(1)
+    else:
+	    print("")
+except yaml.YAMLError as e:
+    print("Custom cloud-init YAML is invalid:\n", e)
+    sys.exit(1)
+'
+# Catch the Error
+if [ "$?" -ne 0 ]; then
+    echo "Custome cloud-init file is not valiad,Please check!!"
     exit 1
 fi
 
@@ -165,6 +218,7 @@ prepare_usb_setup() {
 # Wipeoff the USB before install 
 wipe_disk() {
     echo "Wipe of the disk"
+    check_mnt_mount_exist
     sudo wipefs --all "$USB_DEVICE" || return 1
 }
 
@@ -227,6 +281,7 @@ partitions_setup() {
     END_MB=$(echo "$START_MB + $OS_IMG_PARTITION_SIZE" | bc)
     create_partition "${START_MB}MB" "${END_MB}MB" "OS image storage" || return 1
     create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${K8S_PARTITION_SIZE}" "K8 storage" || return 1
+    create_partition "$(sudo parted "$USB_DEVICE" -ms print | tail -n 1 | awk -F: '{print $3}' | tr -d 'MB')MB" "${GUEST_VM_SIZE}" "Guest VM storage" || return 1
 
 }
 
@@ -242,6 +297,7 @@ copy_to_partition() {
         part="p$part"
     fi
     while [ $attempt -lt $retries ]; do
+	check_mnt_mount_exist
         if sudo mount "${USB_DEVICE}${part}" /mnt && sudo cp "$src" "$dest"; then
             if sudo umount /mnt; then
                 echo "Successfully copied $src to $dest on partition ${USB_DEVICE}${part}."
@@ -267,12 +323,42 @@ copy_files() {
     os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
     copy_to_partition "$OS_PART" "$os_filename" "/mnt"
     echo ""
-    echo "K8-Cluster scripts copying!!!"
+    echo "K3-Cluster scripts copying!!!"
 
     if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
-        echo "USB bootable device is ready!"
-else
-        echo "USB Installation failed,please re-run the script again!!!"
+        echo "K3-Cluster scripts done!"
+    fi
+}
+copy_user_apps() {
+    echo "Copying user-apps to USB device..."
+    if find user-apps -mindepth 1 ! -name 'readme.md' | grep -q .; then
+
+        if [[ $USB_DEVICE == /dev/nbd* ]]; then
+            USER_APPS_PART="p$USER_APPS_PART"
+        fi
+	check_mnt_mount_exist
+        mount ${USB_DEVICE}${USER_APPS_PART} /mnt
+        # Use rsync for fater copr
+	if dpkg -s rsync; then 
+	    rsync -ah --inplace user-apps /mnt/
+	    if [ "$?" -eq 0 ]; then 
+	        echo "user-apps data copied successfully"
+	    else
+		echo "user-apps data failes to copy please check!!"
+		umount /mnt
+		exit 1
+	    fi
+	else 
+	    cp -r user-apps /mnt
+	    if [ "$?" -eq 0 ]; then
+                echo "user-apps data copied successfully"
+            else
+                echo "user-apps data failes to copy please check!!"
+                umount /mnt
+                exit 1
+            fi
+	fi
+	umount /mnt
     fi
 }
 
@@ -312,13 +398,20 @@ main() {
 
     # Step 5: Copy the OS && K8S files to USB 
     USB_PREPARE_STEP=5
-    show_progress_bar "$USB_PREPARE_STEP" "Copying OS && K8S files to USB"
+    show_progress_bar "$USB_PREPARE_STEP" "Copying OS,K3S files to USB"
     if ! copy_files  >> "$LOG_FILE" 2>&1; then 
         echo -e "${RED}\nWARNING: Copying files to USB failed, but main process completed.${NC}"
     fi
 
-    # Step 6: sync the USB device 
+    # Step 5: Copy user-apps to USB
     USB_PREPARE_STEP=6
+    show_progress_bar "$USB_PREPARE_STEP" "Copying user-apps to USB"
+    if ! copy_user_apps  >> "$LOG_FILE" 2>&1; then
+        echo -e "${RED}\nWARNING: Copying user-apps to USB failed, but main process completed.${NC}"
+    fi
+
+    # Step 6: sync the USB device 
+    USB_PREPARE_STEP=7
     show_progress_bar "$USB_PREPARE_STEP" ""
     sync
 
