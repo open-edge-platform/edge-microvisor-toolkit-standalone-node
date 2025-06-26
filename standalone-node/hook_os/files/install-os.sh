@@ -425,6 +425,24 @@ enable_dm_verity() {
     fi
 }
 
+copy_os_update_script() {
+
+    echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" | tee /dev/tty0
+
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
+
+    if cp /etc/scripts/os-update.sh /mnt/opt/os-update.sh; then
+        success "Successfully copied os-update.sh to /opt of the OS disk"
+    else
+        failure "Failed to copy os-update.sh to the OS disk, please check!!"
+        umount /mnt
+        exit 1
+    fi
+
+    umount /mnt
+}
+
 # Main function
 main() {
     get_usb_details
@@ -436,6 +454,8 @@ main() {
     install_cloud_init_file
 
     create_user
+
+    copy_os_update_script
 
     update_proxy_and_ssh_settings
 
