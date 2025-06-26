@@ -250,6 +250,8 @@ commands.
 
 ## Step 5: Install GPU plugin - Node Feature Discovery (NFD)
 
+For information on NFD, see [here](https://intel.github.io/kubernetes-docs/device-plugins/index.html#device-management-in-kubernetes)
+
 - Start NFD. If your cluster does not have NFD installed, use the following command: 
 
 	```sh
