@@ -8,6 +8,38 @@ for USB-based provisioning for the standalone node.
 
 Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
+Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
+Following EMT images are supported to meet specific needs of edge deployment:
+
+- Edge Microvisor Toolkit Non Realtime image
+- Edge Microvisor Toolkit Realtime image
+- Edge Microvisor Toolkit desktop virtualization image
+
+By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
+
+Users can download the EMT image of their choice and replace the default EMT image in the installer directory before creating the bootable USB.
+
+The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
+
+```mermaid
+flowchart TD
+   A[Download the Standalone Node Installer from GitHub]
+   A --> B{Choose your Edge Microvisor Toolkit image}
+   B -- "Non Realtime (default and already in the installer, applicable for most Edge AI apps)" --> C[Update the config-file with your settings]
+   C --> D[Create a bootable USB drive using the installer]
+   D --> E[Plug the USB into the edge node and install]
+   E --> F[Start using your edge node for AI apps or other use cases]
+
+   B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
+   G --> H[Replace the default raw image in the installer directory]
+   H --> I[Update the config-file with your settings. User the refrence cloud-init config-file section provided in the document directory for the image you downloaded]
+   I --> J[Create a bootable USB drive using the installer]
+   J --> K[Plug the USB into the edge node and install]
+   K --> L[Start using your edge node for your specific use case]
+```
+
+> **Tip:** For most users, the default Non Realtime image is recommended. Advanced users can swap in other images as needed.
+
 ### Step 1: Prerequisites
 
 > **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
@@ -49,6 +81,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
@@ -56,6 +89,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo mkfs.vfat /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
