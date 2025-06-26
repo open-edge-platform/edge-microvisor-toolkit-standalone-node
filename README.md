@@ -72,7 +72,7 @@ If you encounter bugs, have feature requests, or need assistance,
 
 Before submitting a new report, check the existing issues to see if a similar one has not
 been filed already. If no matching issue is found, feel free to file the issue as described
-in the [contribution guide](./contribution.md).
+in the [contribution guide](./standalone-node/docs/contribution.md).
 
 For security-related concerns, please refer to [SECURITY.md](./SECURITY.md).
 
