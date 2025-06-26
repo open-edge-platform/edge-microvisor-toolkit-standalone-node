@@ -58,8 +58,8 @@ actual update procedure.
 - Execute the update tool with the apply command to set the newly written image to be used for the next boot:  
   `os-update-tool.sh -a`
 
-**Step 4:**  The `os-update.sh` script creartes a default user after the EMT image update, which is accomplished by modifying the
-cloud configuration file.
+**Step 4:**  The `os-update.sh` script creartes a default user after the EMT image update, which is accomplished by
+modifying the cloud configuration file.
 
 > **Note:** In this release, we configure cloud-init to create **only** default user.
 
