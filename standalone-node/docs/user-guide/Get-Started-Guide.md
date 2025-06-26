@@ -207,36 +207,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
-## Step 4: Set Up Kubernetes Dashboard Access
-
-1. View the Kubernetes dashboard pods:
-
-   ```bash
-   kubectl get pods -n kubernetes-dashboard
-   ```
-
-2. Start kube proxy:
-
-   ```bash
-   kubectl proxy &
-   ```
-
-3. Generate an access token:
-
-   ```bash
-   kubectl -n kubernetes-dashboard create token admin-user
-   ```
-
-4. Access the dashboard in a browser:
-   - Open a web browser on your Ubuntu desktop and navigate to the following URL
-
-     `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
-
-     > **Note:**  This URL accesses the Kubernetes Dashboard through the proxy you started earlier.
-
-5. Login using the previously generated access token.
-
-## Step 5: Install Sample Application
+## Step 4: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
@@ -328,60 +299,6 @@ Install a WordPress application as a test application using `helm`.
 7. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
-
-## Step 6: Accessing Grafana
-
-1. Retrieve Grafana credentials:
-
-   ```shell
-   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | base64 --decode)
-   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-password}" | base64 --decode)
-   ```
-
-2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
-
-   ```bash
-   http://<EN IP>:32000
-   ```
-
-## Step 7: Adding Prometheus metrics to Grafana
-
-1. Get Prometheus credentials:
-
-   ```shell
-   key=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}" | base64 --decode)
-   cert=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}" | base64 --decode)
-   ca=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}" | base64 --decode)
-   printf "%s\n" "$key"
-   printf "%s\n" "$cert"
-   printf "%s\n" "$ca"
-   ```
-
-2. In Grafana navigate to ``connections/Data sources`` :
-
-   ![Prometheus data source](../../images//obs-grafana-datasource.png "Prometheus data source")
-
-3. Add a new Prometheus data source:
-
-   ![Prometheus new](../../images/obs-grafana-add-prometheus.png "Prometheus new")
-
-4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
-
-   ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
-
-## Step 8: Querying Metrics
-
-1. Create a dashboard using prometheus data source:
-
-   ![Prometheus dashboard](../../images/obs-grafana-dashboard.png "Prometheus dashboard")
-
-2. Select the data source:
-
-   ![Prometheus source](../../images/obs-grafana-prometheus.png "Prometheus datasource")
-
-3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
-
-   ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
 
