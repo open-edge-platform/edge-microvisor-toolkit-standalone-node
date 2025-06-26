@@ -407,7 +407,8 @@ EOF
         chmod 600 ~/.ssh/authorized_keys
         # export the /etc/enviroment values to .bashrc
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
-        echo "export KUBECONFIG" >> /home/$user_name/.bashrc
+        echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
