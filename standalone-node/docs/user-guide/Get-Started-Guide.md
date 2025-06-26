@@ -121,7 +121,10 @@ cd edge-microvisor-toolkit-standalone-node
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
-
+**Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k`` which is defined in the .bashrc of the user defined in your config.
+```
+k get pods -A
+```
 ## Step 3: Set up tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
