@@ -1,27 +1,26 @@
 # Get Started
 
-The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
-build your own bootable USB from source code, or use the downloadable ISO
-image that can be flashed to a USB device and installed on edge nodes. It
-installs the microvisor and Kubernetes to the edge node with the essential
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. It is published
+in two versions: NON-RT and
+[RT (with real time extensions)](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/emt-architecture-overview.md#edge-microvisor-toolkit-real-time). You can build your own bootable USB from source code,
+or use the downloadable ISO image that can be flashed to a USB device and installed on edge
+nodes. It installs the microvisor and Kubernetes to the edge node with the essential
 functionality to run a single node cluster. The edge node will serve as both the
 control and worker node. Additional worker nodes can be added to the cluster
 through Kubernetes.
 
-Future releases will enable standalone edge nodes to join an existing Edge
-Management Framework backend, deployed on-prem or in the cloud to support scale
-out and management of larger infrastructures. The Standalone Edge Node enables
-you to quickly get an edge node up and running without deploying backend
+The Standalone Edge Node can be included in
+[Edge Manageability Framework](https://github.com/open-edge-platform/edge-manageability-framework),
+deployed on-prem or in the cloud to support scale out and management of larger infrastructures.
+It enables you to quickly get an edge node up and running without deploying backend
 services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
 Kubernetes web dashboard.
-
-> **Note**: The standalone edge node does not currently support the real-time version.
 
 ## Standalone Node Provisioning
 
 There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
 
-### Creating a bootable USB from downloadable ISO image
+### Creating a bootable USB from a downloadable ISO image
 
 You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
 [Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
@@ -30,70 +29,39 @@ Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the s
 
 ### Creating a bootable USB from Source Code
 
-On Linux based operating systems you can also create a bootable USB drive from source code.
+On Linux based operating systems, you can also create a bootable USB drive from source code.
 This section provides step-by-step instructions to set up the environment required
-for USB-based provisioning for the standalone node.
+for USB-based provisioning of the standalone node.
 
-Source code for the Edge Microvisor Toolkit Standalone Node is available at
-[Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+The source code for Edge Microvisor Toolkit Standalone Node is available at
+[Open Edge Platform on GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 #### Prerequisites
 
-##### 1. Docker and docker proxy Setup
+##### 1. Repository Setup
 
-Ensure that Docker is installed and all necessary settings (such as proxy configurations) are properly configured.
-Refer to the links below for Docker installation and proxy setup:
-
-- [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
-- [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
-
-> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
-
-##### 2. Repository Setup
-
-Begin by cloning the repository that contains all necessary scripts and
+Begin by cloning the repository. It contains all the necessary scripts and
 configurations for deployment. This step is crucial for accessing the tools
-required for standalone node
+required for standalone node.
 
 ```bash
 git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
 cd edge-microvisor-toolkit-standalone-node
 ```
 
-##### 3. Proxy settings
-
-> **Note:** If the development system is behind a firewall, ensure to add
-  the proxy configuration in the standalone-node/hook_os/config file
-
-- Update the config file
-
-   ```bash
-   vi config
-
-   # Proxy configuration
-   # Uncomment and set the following variables if you need to use a proxy
-   # Replace <proxy_url> with your actual proxy URL and port
-   # http_proxy="<proxy_url>"
-   # https_proxy="<proxy_url>"
-   # ftp_proxy="<proxy_url>"
-   # no_proxy="127.0.0.1,localhost,10.0.0.0/8"
-
-   ```
-
-##### 4. Create the Standalone Installation Tar File
+##### 1.2 Create the Standalone Installation Tar File
 
 - To create the standalone installation tar file with all required files
-  for preparing a bootable USB device, run the following command
+  for preparing a bootable USB device, run the following command:
 
    ```bash
    sudo make build
-
    ```
 
-> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.
-  The file will be located in the `$(pwd)/installation-scripts/out` directory.
+> **Note:** This command will build the Edge Microvisor Toolkit Micro (µOS) and generate the
+  `standalone-installation-files.tar.gz` file.
 
-##### 5. Prepare the USB Drive
+##### 1.3 Prepare the USB Drive
 
 > **Note:**
 >
@@ -106,14 +74,14 @@ cd edge-microvisor-toolkit-standalone-node
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
 
-- Use the wipefs command to remove any existing filesystem signatures from the USB drive.
+- Use the `wipefs` command to remove any existing filesystem signatures from the USB drive.
   This ensures a clean slate for formatting
 
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
 
-- Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
+- Format the USB drive with a FAT32 filesystem using the `mkfs.vfat` command:
 
    ```bash
    sudo mkfs.vfat /dev/sdX
@@ -133,15 +101,15 @@ cd edge-microvisor-toolkit-standalone-node
     sudo umount /dev/sdX
     ```
 
-- Copy standalone installation tar file to developer system to prepare the Bootable USB
+- Copy the standalone installation tar file to developer system to prepare the bootable USB drive.
 
-  Extract the contents of sen-installation-files.tar.gz
+  Extract the contents of `standalone-installation-files.tar.gz`:
 
   ```bash
-   tar -xzf sen-installation-files.tar.gz
+   tar -xzf standalone-installation-files.tar.gz
   ```
 
-- Extracted files will include
+- Extracted files will include:
 
    ```bash
    usb-bootable-files.tar.gz
@@ -150,7 +118,7 @@ cd edge-microvisor-toolkit-standalone-node
    edgenode-logs-collection.sh
    ```
 
-- Run the preparation script to create the bootable USB
+- Run the preparation script to create the bootable USB:
 
    ```bash
    sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
@@ -183,13 +151,13 @@ cd edge-microvisor-toolkit-standalone-node
 - Set the BIOS boot manager to boot from the USB drive.
 
 - Reboot the Standalone Node
-  This will start the HookOS boot followed by Microvisor installations.
+  This will start the µOS boot followed by Microvisor installations.
 
 - Automatic Reboot
   The standalone edge node will automatically reboot into Microvisor.
 
 - First Boot Configuration
-  During the first boot, cloud-init will install the RKE2 Kubernetes cluster.
+  During the first boot, cloud-init will install the K3s Kubernetes cluster.
 
 ### Login to the Edge Node After Installation complete
 
@@ -224,7 +192,7 @@ commands.
    ```bash
    mkdir ~/.kube
    export EN_IP=<EN_IP>
-   scp user@${EN_IP}:/etc/rancher/rke2/rke2.yaml ~/.kube/config
+   scp user@${EN_IP}:/etc/rancher/k3s/k3s.yaml ~/.kube/config
    ```
 
 3. Update the Edge Node IP in the kubeconfig file and export the path as KUBECONFIG:
@@ -434,16 +402,17 @@ the `Save dashboard` button:
 
 ## Troubleshooting
 
-1. Creation of USB pendrive failed
-The possible reason could be USB device is mounted. Please unmount the USB drive
-and retry creating the bootable USB drive.
+1. Creation of bootable USB drive failed.
 
-2. If any issues while provisioning the microvisor from Hook OS, automatically
-logs will be collected from `/var/log/os-installer.log` file on Hook OS what caused
-the OS provisioning failed.
+   The possible reason could be that the USB drive is mounted. Make sure to unmount it
+   drive and retry creation of the bootable device.
 
-3. After sucessful installation A banner is printed at the end, summarizing the installation status and
- providing useful commands/logs path for further management.
+2. To track what caused the failure in provisioning of the microvisor from µOS, check the
+`/var/log/os-installer.log` file on µOS.
+
+3. After the successful installation, a summary is printed into terminal output. It shows
+the status of installation and provides useful commands/ paths to logs for further analysis
+and management.
 
 ### Edge Node Logs from Developer's System
 
