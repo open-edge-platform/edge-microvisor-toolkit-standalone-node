@@ -161,7 +161,7 @@ if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
     cat << 'EOF' > "$COMMIT_UPDATE_SCRIPT"
 #!/bin/bash
 
-bootctl_output=$(sudo bootctl list)
+bootctl_output=$(bootctl list)
 # Check if linux-2.efi is selected
 # Make the updated image persistent for future boots
 if echo "$bootctl_output" | grep -q "(linux-2.efi) (selected)"; then
