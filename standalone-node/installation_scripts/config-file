@@ -54,14 +54,6 @@ host_type="kubernetes"
 # Note: If the Edge Node has only a single hard disk, update the lvm_size_ingb value; otherwise, skip it.
 lvm_size_ingb="0"
 
-# ------------------ Configuration to be set on Host OS--------------- 
-# User can specify the required configuration that should be set on the Host OS
-# Example:
-# configuration="sriov,gfx"
-# Note : Based on the User requirement its required to provide the input, if nothing is given host OS 
-#        will come up with base configuration.
-
-configuration=""
 
 # -------------------Custom cloud-init Config file---------------------
 # This section is to customize the cloud-init config file as per User Wish
