@@ -191,7 +191,7 @@ if [ -f "$INSTALLER_CFG" ]; then
         # Use awk to find the end of the runcmd block and append new content
         awk -v script="$COMMIT_UPDATE_SCRIPT" '
         BEGIN {
-            line = "bash " script "\n    rm -f " script
+            line = "bash " script
             runcmd = 0
             in_block = 0
         }
