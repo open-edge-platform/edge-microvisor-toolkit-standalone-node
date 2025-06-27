@@ -186,34 +186,39 @@ fi
 
 # Check if installer.cfg exists and update it if necessary
 if [ -f "$INSTALLER_CFG" ]; then
-    # Use awk to find the end of the runcmd block and append new content
-    awk -v script="$COMMIT_UPDATE_SCRIPT" '
-    BEGIN {
-        line = "bash " script
-        runcmd = 0
-        in_block = 0
-    }
-
-    /^runcmd:/ { runcmd = 1 }
-
-    runcmd && /^  - \|/ { in_block = 1 }
-    {
-        print
-        next_line = $0
-    }
-
-    in_block && $0 !~ /^  / {
-        print "    " line
-        in_block = 0
-        runcmd = 0
-    }
-
-    END {
-        if (in_block) {
-            print "    " line
+    # Check if the commit_update.sh entry is already present
+    if ! grep -q "bash $COMMIT_UPDATE_SCRIPT" "$INSTALLER_CFG"; then
+        # Use awk to find the end of the runcmd block and append new content
+        awk -v script="$COMMIT_UPDATE_SCRIPT" '
+        BEGIN {
+            line = "bash " script "\n    rm -f " script
+            runcmd = 0
+            in_block = 0
         }
-    }
-    ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" && mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG"
+
+        /^runcmd:/ { runcmd = 1 }
+
+        runcmd && /^  - \|/ { in_block = 1 }
+        {
+            print
+            next_line = $0
+        }
+
+        in_block && $0 !~ /^  / {
+            print "    " line
+            in_block = 0
+            runcmd = 0
+        }
+
+        END {
+            if (in_block) {
+                print "    " line
+            }
+        }
+        ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" && mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG"
+    else
+        echo "Entry for commit_update.sh already exists in installer.cfg."
+    fi
 else
     echo "Error: installer.cfg not found."
     exit 1
