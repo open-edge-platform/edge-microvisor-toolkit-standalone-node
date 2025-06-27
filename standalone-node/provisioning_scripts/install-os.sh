@@ -14,9 +14,11 @@ blk_devices=""
 os_disk=""
 os_part=5
 k8_part=6
+g_vms_part=7
 os_rootfs_part=2
 os_data_part=3
 deploy_mode="real"
+user_apps_data="false"
 LOG_FILE="/var/log/os-installer.log"
 #########################
 
@@ -28,7 +30,7 @@ NC='\033[0m'
 YELLOW='\033[0;33m'
 
 BAR_WIDTH=50
-TOTAL_PROVISION_STEPS=8
+TOTAL_PROVISION_STEPS=9
 PROVISION_STEP=0
 MAX_STATUS_MESSAGE_LENGTH=25
 
@@ -72,7 +74,7 @@ detect_usb() {
         usb_devices=$(lsblk -dn -o NAME,TYPE,SIZE,RM | awk '$2 == "disk" && $4 == 1 && $3 != "0B" {print $1}')
         for disk_name in $usb_devices; do
             # Bootable USB has 6 partitions,ignore other disks
-            if [ "$(lsblk -l "/dev/$disk_name" | grep -c "^$(basename "/dev/$disk_name")[0-9]")" -eq 6 ]; then
+            if [ "$(lsblk -l "/dev/$disk_name" | grep -c "^$(basename "/dev/$disk_name")[0-9]")" -eq 7 ]; then
                 usb_disk="/dev/$disk_name"
                 echo "$usb_disk"
                 return
@@ -84,7 +86,7 @@ detect_usb() {
 
 # Get the USB disk where the OS image and K8* scripts are copied
 get_usb_details() {
-    echo -e "${BLUE}Get the USB details!!${NC} [1/9]" 
+    echo -e "${BLUE}Get the USB details!!${NC}" 
     # Check if the USB is detected at Hook OS
     usb_disk=$(detect_usb)
 
@@ -119,13 +121,18 @@ get_usb_details() {
         fi
         umount /mnt
     fi
-
+    #check_mnt_mount_exist
+    mount -o ro "${usb_disk}${g_vms_part}" /mnt
+    if [ -d "/mnt/user-apps" ]; then
+        user_apps_data="true"
+    fi
+    umount /mnt
     return 0
 }
 
 # Get the list of block devices on the device and choose the best disk for installation
 get_block_device_details() {
-    echo -e "${BLUE}Get the block device for OS installation${NC} [2/9]" 
+    echo -e "${BLUE}Get the block device for OS installation${NC}" 
 
     # List of block devices attached to the system, ignore USB and loopback devices
     blk_devices=$(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0) {print $1}}')
@@ -178,7 +185,7 @@ install_os_on_disk() {
 
     if [ -n "$os_file" ]; then
         # Install the OS image on the Disk
-        echo -e "${BLUE}Installing $os_file on disk $os_disk!!${NC} [3/9]"
+        echo -e "${BLUE}Installing $os_file on disk $os_disk!!${NC}"
         dd if=/dev/zero of="$os_disk" bs=1M count=500
 
         # Check if the OS image flash was successful
@@ -221,7 +228,7 @@ create_user() {
     user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
     passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
 
-    echo -e "${BLUE}Creating the User Account!!${NC} [5/9]" 
+    echo -e "${BLUE}Creating the User Account!!${NC}" 
     # Mount all required partitions and do chroot to OS
     chroot /mnt /bin/bash <<EOT
 set -e
@@ -247,7 +254,7 @@ EOT
 install_cloud_init_file() {
 
     # Copy the cloud init file from Hook OS to target OS
-    echo -e "${BLUE}Installing the Cloud-init file!!${NC} [4/9]" 
+    echo -e "${BLUE}Installing the Cloud-init file!!${NC}" 
 
 
     CLOUD_INIT_FILE="/etc/scripts/cloud-init.yaml"
@@ -286,7 +293,7 @@ EOT
 
 # Install K8* script to OS disk under /opt
 install_k8_script() {
-    echo -e "${BLUE}Copying the K8 Cluster Scripts!!${NC} [8/9]" 
+    echo -e "${BLUE}Copying the K8 Cluster Scripts!!${NC}" 
     # Copy the scripts from USB disk to /opt on the disk
     mkdir -p /mnt2
     mount -o ro "${usb_disk}${k8_part}" /mnt2
@@ -308,7 +315,7 @@ install_k8_script() {
 
 # Update the Proxy settings under /etc/environment
 setup_proxy_settings() {
-    echo -e "${BLUE}Set the Proxy Settings!!${NC} [6/9]"
+    echo -e "${BLUE}Set the Proxy Settings!!${NC}"
 
     mount -o ro "${usb_disk}${k8_part}" /tmp
 
@@ -367,7 +374,7 @@ setup_proxy_settings() {
 
 # Update  SSH config settings
 update_ssh_settings() {
-    echo -e "${BLUE}Updating the SSH Settings!!${NC} [6/9]" 
+    echo -e "${BLUE}Updating the SSH Settings!!${NC}" 
 
     setup_proxy_settings
     # Mount the OS disk
@@ -427,7 +434,7 @@ EOT
 
 # Change the boot order to disk
 boot_order_chage_to_disk() {
-    echo -e "${BLUE}Changing the Boot order to disk!!${NC} [9/9]" 
+    echo -e "${BLUE}Changing the Boot order to disk!!${NC}" 
 
     boot_order=$(efibootmgr -D)
     echo "$boot_order"
@@ -496,7 +503,7 @@ update_mac_under_dhcp_systemd() {
 
 # Enable dm-verity on Microvisor image
 enable_dm_verity() {
-    echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC} [7/9]"
+    echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC}"
     dm_verity_script=/etc/scripts/enable-dmv.sh
 
     if bash $dm_verity_script $lvm_size; then
@@ -680,7 +687,7 @@ build_runcmd_lines () {
 
 # Create OS Partitions for virtual edge node
 create_os-partition() {
-    echo -e "${BLUE}Creating the OS Partitions on disk $os_disk!!${NC} [7/9]"
+    echo -e "${BLUE}Creating the OS Partitions on disk $os_disk!!${NC}"
     os_partition_script=/etc/scripts/os-partition.sh
 
     if bash $os_partition_script; then
@@ -699,6 +706,28 @@ create_os-partition() {
 EOT
     return 0
 
+}
+
+# Copy user-apps to OS disk under /opt
+copy_user_apps() {
+    echo -e "${BLUE}Copying user-apps!!${NC}"
+
+    mkdir -p /mnt2
+    mount -o ro "${usb_disk}${g_vms_part}" /mnt2
+
+    # Mount the OS disk
+    check_mnt_mount_exist
+
+    if mount "$os_disk$os_data_part" /mnt && cp -r /mnt2/user-apps/ /mnt/; then
+        success "Successfuly copied the user-apps on the disk"
+    else
+        failure "Fail to copy user-apps on the disk,please check!!!"
+        return 1
+    fi
+    umount /mnt2
+    umount /mnt
+    rm -rf /mnt2
+    return 0
 }
 
 copy_os_update_script() {
@@ -819,21 +848,30 @@ main() {
 
     # Step 5: K8S Cluster files copy to Disk
     PROVISION_STEP=5
-    show_progress_bar "$PROVISION_STEP" "K8S cluster Config"
+    show_progress_bar "$PROVISION_STEP" "K3S cluster Config"
     if ! install_k8_script >> "$LOG_FILE" 2>&1; then
         echo -e "${RED}\nERROR:Copying K8S scripts to disk Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
+    # Step 6: Copy user-apps data to Disk
+    PROVISION_STEP=6
+    show_progress_bar "$PROVISION_STEP" "Copying user-apps"
+    if [ "$user_apps_data" == "true" ]; then
+        if ! copy_user_apps >> "$LOG_FILE" 2>&1; then
+            echo -e "${RED}\nERROR:Copying user-apps to disk Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
+        exit 1
+        fi
+    fi
 
     # Step 6: Boot order change and reboot 
-    PROVISION_STEP=6
+    PROVISION_STEP=7
     show_progress_bar "$PROVISION_STEP" "Post Install Setup"
     if ! system_finalizer  >> "$LOG_FILE" 2>&1; then
         echo -e "${RED}\nERROR:Post install Setup Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
-    PROVISION_STEP=7
+    PROVISION_STEP=8
     show_progress_bar "$PROVISION_STEP" ""
     sync
 
