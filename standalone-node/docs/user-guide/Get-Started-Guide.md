@@ -8,6 +8,38 @@ for USB-based provisioning for the standalone node.
 
 Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
+Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
+Following EMT images are supported to meet specific needs of edge deployment:
+
+- Edge Microvisor Toolkit Non Realtime image
+- Edge Microvisor Toolkit Realtime image
+- Edge Microvisor Toolkit desktop virtualization image
+
+By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
+
+Users can download the EMT image of their choice and replace the default EMT image in the installer directory before creating the bootable USB.
+
+The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
+
+```mermaid
+flowchart TD
+   A[Download the Standalone Node Installer from GitHub]
+   A --> B{Choose your Edge Microvisor Toolkit image}
+   B -- "Non Realtime (default and already in the installer, applicable for most Edge AI apps)" --> C[Update the config-file with your settings]
+   C --> D[Create a bootable USB drive using the installer]
+   D --> E[Plug the USB into the edge node and install]
+   E --> F[Start using your edge node for AI apps or other use cases]
+
+   B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
+   G --> H[Replace the default raw image in the installer directory]
+   H --> I[Update the config-file with your settings. User the refrence cloud-init config-file section provided in the document directory for the image you downloaded]
+   I --> J[Create a bootable USB drive using the installer]
+   J --> K[Plug the USB into the edge node and install]
+   K --> L[Start using your edge node for your specific use case]
+```
+
+> **Tip:** For most users, the default Non Realtime image is recommended. Advanced users can swap in other images as needed.
+
 ### Step 1: Prerequisites
 
 > **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
@@ -49,6 +81,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
@@ -56,6 +89,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo mkfs.vfat /dev/sdX
    ```
+
    > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
@@ -121,7 +155,10 @@ cd edge-microvisor-toolkit-standalone-node
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
-
+**Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k`` which is defined in the .bashrc of the user defined in your config.
+```
+k get pods -A
+```
 ## Step 3: Set up tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
@@ -170,36 +207,7 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
-## Step 4: Set Up Kubernetes Dashboard Access
-
-1. View the Kubernetes dashboard pods:
-
-   ```bash
-   kubectl get pods -n kubernetes-dashboard
-   ```
-
-2. Start kube proxy:
-
-   ```bash
-   kubectl proxy &
-   ```
-
-3. Generate an access token:
-
-   ```bash
-   kubectl -n kubernetes-dashboard create token admin-user
-   ```
-
-4. Access the dashboard in a browser:
-   - Open a web browser on your Ubuntu desktop and navigate to the following URL
-
-     `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login`
-
-     > **Note:**  This URL accesses the Kubernetes Dashboard through the proxy you started earlier.
-
-5. Login using the previously generated access token.
-
-## Step 5: Install Sample Application
+## Step 4: Install Sample Application
 
 Install a WordPress application as a test application using `helm`.
 
@@ -291,60 +299,6 @@ Install a WordPress application as a test application using `helm`.
 7. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
-
-## Step 6: Accessing Grafana
-
-1. Retrieve Grafana credentials:
-
-   ```shell
-   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-user}" | base64 --decode)
-   echo $(kubectl get secret grafana -n observability -o jsonpath="{.data.admin-password}" | base64 --decode)
-   ```
-
-2. Access Grafana from browser at Edge Node IP and port `32000` and login using credentials
-
-   ```bash
-   http://<EN IP>:32000
-   ```
-
-## Step 7: Adding Prometheus metrics to Grafana
-
-1. Get Prometheus credentials:
-
-   ```shell
-   key=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.key']}" | base64 --decode)
-   cert=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['tls\.crt']}" | base64 --decode)
-   ca=$(kubectl get secret -n observability prometheus-tls -o jsonpath="{['data']['ca\.crt']}" | base64 --decode)
-   printf "%s\n" "$key"
-   printf "%s\n" "$cert"
-   printf "%s\n" "$ca"
-   ```
-
-2. In Grafana navigate to ``connections/Data sources`` :
-
-   ![Prometheus data source](../../images//obs-grafana-datasource.png "Prometheus data source")
-
-3. Add a new Prometheus data source:
-
-   ![Prometheus new](../../images/obs-grafana-add-prometheus.png "Prometheus new")
-
-4. Configure the data source, filling in the `ca`, `cert` and `key` gathered earlier. Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local:9090``, `server name` as `prometheus` and save.
-
-   ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
-
-## Step 8: Querying Metrics
-
-1. Create a dashboard using prometheus data source:
-
-   ![Prometheus dashboard](../../images/obs-grafana-dashboard.png "Prometheus dashboard")
-
-2. Select the data source:
-
-   ![Prometheus source](../../images/obs-grafana-prometheus.png "Prometheus datasource")
-
-3. Select metrics to query, use metric explorer to view available metrics. Use `Run query` button to run queries. Build the required dashboard and save using the `Save dashboard` button:
-
-   ![Prometheus source](../../images/obs-grafana-build-dashboard.png "Prometheus datasource")
 
 ## Troubleshooting
 
