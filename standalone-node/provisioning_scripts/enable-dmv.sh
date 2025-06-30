@@ -46,7 +46,7 @@ tep_size=14336
 reserved_size=5120
 boot_size=5120600
 bare_min_rootfs_size=25
-rootfs_size=3584
+rootfs_size=8192
 rootfs_hashmap_size=100
 rootfs_roothash_size=50
 
@@ -249,22 +249,43 @@ make_partition() {
 
     if $COMPLETE_DMVERITY;
     then
-	#this cmd only resizes parition. if there is an error this should handle it.
+	# Backup emt_persistent data
+	dd if=${DEST_DISK}${suffix}${emt_persistent_partition} of=/mnt/backup_3.img bs=4M status=progress
+
+	echo "fdisk -l ${DEST_DISK} output before resize a partition"
+	fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${emt_persistent_partition}"
+
+	rootfs_start_size=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print $2}')
+	size_in_bytes=$((rootfs_size * 1024 * 1024))
+	size_in_sectors=$((rootfs_start_size-1+size_in_bytes / 512))
+
+	# 1) Remove emt_persistent partition 2) resizes rootfs_partition
 	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
-	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
+	       rm ${emt_persistent_partition} \
+               resizepart $rootfs_partition ${size_in_sectors}s
 
-	check_return_value $? "Failed to resize emt persistent paritions"
+	check_return_value $? "Failed to resize rootfs_a parition"
 
+        echo "fdisk -l ${DEST_DISK} output after resize a partition"
+	fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}"
+	
+	rootfs_end_size=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print $3}')
+	
+	# Calculate the new start position for emt_persistent_partition
+	new_start_position=$((rootfs_end_size + 1))
 	#this cmd only creates new partitions.
 	parted -s ${DEST_DISK} \
+	       mkpart edge_persistent ext4 ${new_start_position}s "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s \
 	       mkpart hashmap_a ext4  "$(convert_mb_to_sectors "${root_hashmap_a_start}" 0)"s "$(convert_mb_to_sectors "${root_hashmap_b_start}" 1)"s \
 	       mkpart hashmap_b ext4  "$(convert_mb_to_sectors "${root_hashmap_b_start}" 0)"s "$(convert_mb_to_sectors "${rootfs_b_start}" 1)"s \
 	       mkpart rootfs_b ext4   "$(convert_mb_to_sectors "${rootfs_b_start}" 0)"s       "$(convert_mb_to_sectors "${roothash_start}" 1)"s \
 	       mkpart roothash ext4   "$(convert_mb_to_sectors "${roothash_start}" 0)"s       "$(convert_mb_to_sectors "${swap_start}" 1)"s \
 	       mkpart swap linux-swap "$(convert_mb_to_sectors "${swap_start}" 0)"s           "$(convert_mb_to_sectors "${total_size_disk}" 1)"s 
 
+	#printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
+	#	resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	check_return_value $? "Failed to create paritions"
+	#check_return_value $? "Failed to create paritions"
     else
 	parted -s ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
@@ -297,6 +318,9 @@ make_partition() {
 	# rootfs for a/B updated
 	mkfs -t ext4 -L root_b -F "${DEST_DISK}${suffix}${rootfs_b_partition}"
 	check_return_value $? "Failed to mkfs rootfs part"
+
+	mkfs -t ext4 -L edge_persistent -F "${DEST_DISK}${suffix}${emt_persistent_partition}"
+	dd if=/mnt/backup_3.img of=${DEST_DISK}${suffix}${emt_persistent_partition} bs=4M status=progress
     fi
 }
 
