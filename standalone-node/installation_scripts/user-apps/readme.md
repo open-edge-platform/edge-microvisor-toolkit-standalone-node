@@ -25,7 +25,7 @@ To copy,configure, or launch your applications, use the custom `cloud-init` sect
 
 # Exit on error, unset variable, or failed pipe
 set -euo pipefail
-
+trap 'echo "Error at line $LINENO"; exit 1' ERR
 # Check if the script is run as root
 br_check_root() {
     if [[ $(id -u) -ne 0 ]]; then
@@ -173,7 +173,9 @@ br_add_bridge() {
     if ! ip link show "$bridge_name" > /dev/null 2>&1; then
         echo "Creating bridge $bridge_name..."
         ip link add name "$bridge_name" type bridge
-        ip link set "$secondary_interfaces" master "$bridge_name"
+        if ! bridge link show | grep -q "$secondary_interfaces"; then
+          ip link set "$secondary_interfaces" master "$bridge_name"
+        fi
         ip addr add "$BR_GATEWAY"/"$BR_NETMASK" dev "$bridge_name"
         ip link set dev "$bridge_name" up
         ip link set dev "$secondary_interfaces" up
@@ -186,7 +188,7 @@ br_add_bridge() {
 br_apply_sysctl_config() {
     local bridge_name="$1"
     echo "Configuring sysctl for bridge $bridge_name..."
-    echo "net.bridge.bridge-nf-call-iptables = 0" >> /etc/sysctl.conf
+    grep -q '^net.bridge.bridge-nf-call-iptables' /etc/sysctl.conf || echo "net.bridge.bridge-nf-call-iptables = 0" >> /etc/sysctl.conf
     echo "net.bridge.bridge-nf-call-ip6tables = 0" >> /etc/sysctl.conf
     echo "net.ipv4.conf.all.proxy_arp = 1" >> /etc/sysctl.conf
     sysctl -p
@@ -380,7 +382,12 @@ main() {
         BR_START_RANGE=""
         BR_END_RANGE=""
 
-        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+if [[ -f /etc/rancher/k3s/k3s.yaml ]]; then
+  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+else
+  echo "KUBECONFIG not found at /etc/rancher/k3s/k3s.yaml"
+  exit 1
+fi
 
         br_check_root
         br_check_custom_network_config "$CONF_FILE"
@@ -389,7 +396,16 @@ main() {
 
         #add a while loop to check if k3s installed and re-try with sleep 1
         # Wait for K3s (or /usr/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
-        until check_k3s_installed && check_nad_crd; do
+        retries=0
+max_retries=120  # e.g., 2 minutes
+until check_k3s_installed && check_nad_crd; do
+  ((retries++))
+  if ((retries > max_retries)); then
+    echo "Timeout waiting for K3s or CRD."
+    exit 1
+  fi
+  sleep 1
+done
             echo "Waiting for K3s and NetworkAttachmentDefinition CRD to be available..."
             sleep 1
         done

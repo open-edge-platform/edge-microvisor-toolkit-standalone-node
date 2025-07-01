@@ -91,6 +91,6 @@ runcmd:
   - systemctl --user enable idv-init.service
   - udevadm control --reload-rules
   - bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf
-  - bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log &
+bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &
 
 ```
