@@ -15,6 +15,5 @@ images, helm charts, VM images in the `user-apps` folder. The artifacts will be 
 to persistent volume on the Edge node at `/opt/user-apps`. User can use the custom `cloud-init` section
 available in the configuration file `config-file` to launch the application after the kubernetes cluster has come up.
 User has flexibility to manage the artifacts and what they do using the artifacts and the custom
-cloud-init configuration.
-
-User should take 
+cloud-init configuration. 5G of USB disk space is used for the installer artifacts. Rest of the USB disk
+space is available for the user to store the application artifacts.
