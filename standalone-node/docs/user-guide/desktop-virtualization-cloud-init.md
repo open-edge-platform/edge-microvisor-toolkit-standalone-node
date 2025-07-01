@@ -21,7 +21,7 @@ with Desktop Virtualization features.
 #     enable: [docker, ssh]
 #     disable: [apache2]
 services:
-    enable: [idv-init]
+    enable: []
     disable: []
 
 # === Create custom configuration files ===
@@ -37,6 +37,37 @@ services:
 #         #!/bin/sh
 #         echo "This is Example"
 write_files:
+  - path: /etc/environment
+    append: true
+    content: |
+      export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
+      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')
+
+  - path: /etc/systemd/system/hugepages.service
+    permissions: '0644'
+    content: |
+      [Unit]
+      Description=Configure Hugepages
+      Before=k3s.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c 'echo $(( 6 * 2048 * 2 )) | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages'
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sudoers.d/idv_scripts
+    permissions: '0644'
+    content: |
+      guest ALL=(ALL) NOPASSWD: /usr/bin/X, \
+      /usr/bin/idv/init/setup_sriov_vfs.sh, \
+      /usr/bin/idv/init/setup_display.sh, \
+      /usr/bin/idv/launcher/start_vm.sh, \
+      /usr/bin/idv/launcher/start_all_vms.sh, \
+      /usr/bin/idv/launcher/stop_vm.sh, \
+      /usr/bin/idv/launcher/stop_all_vms.sh
+
   - path: /usr/share/X11/xorg.conf.d/10-serverflags.conf
     permissions: '0644'
     content: |
@@ -68,8 +99,10 @@ write_files:
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
 runcmd:
-  - echo $(( 6 * 1024 * 4 )) | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-  - systemctl --user enable idv-init.service
+  - source /etc/environment
   - udevadm control --reload-rules
+  - systemctl start hugepages.service
+  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
+  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
 
 ```
