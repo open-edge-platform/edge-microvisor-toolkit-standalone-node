@@ -67,7 +67,7 @@ write_files:
       # Set the CIDR, gateway, netmask, IP range, and DNS server for your environment.
 
       BR_NAME="br0"                    # Bridge interface name
-      BR_CIDR="199.168.1.1/24"         # Bridge interface IP address and subnet (CIDR notation)
+      BR_CIDR="199.168.1.0/24"         # Bridge interface IP address and subnet (CIDR notation)
       BR_GATEWAY="199.168.1.1"         # Default gateway for the bridge network
       BR_NETMASK="24"                  # Netmask for the bridge network (as a number, e.g., 24)
       BR_START_RANGE="199.168.1.2"     # Start of the DHCP/static IP range for clients
