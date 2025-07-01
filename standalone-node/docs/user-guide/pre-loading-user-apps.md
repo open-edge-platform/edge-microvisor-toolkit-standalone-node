@@ -9,10 +9,12 @@ applications to be available and ready for use immediately after installation.
 To support these requirements, EMT Standalone Node allows users to include their application artifacts
 within the USB installer.
 
-After extracting the USB installer, users can find `user-apps` placeholder apps placed in the root of
+After extracting the standalone node installer, users can find `user-apps` placeholder apps placed in the root of
 the directory where installer is extracted. Users can place their application files like container
 images, helm charts, VM images in the `user-apps` folder. The artifacts will be automatically copied
 to persistent volume on the Edge node at `/opt/user-apps`. User can use the custom `cloud-init` section
-available in the configuration file `config-file` in the root of the  directory where installer is
-extracted to launch the application after the kubernetes cluster has come up. User has flexibility to
-manage the artifacts and what they do using the artifacts and the custom cloud-init configuration.
+available in the configuration file `config-file` to launch the application after the kubernetes cluster has come up.
+User has flexibility to manage the artifacts and what they do using the artifacts and the custom
+cloud-init configuration.
+
+User should take 
