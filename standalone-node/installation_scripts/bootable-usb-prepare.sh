@@ -100,8 +100,8 @@ if [ -z "$ssh_key" ]; then
     [[ "$ANSWER" != "y" && "$ANSWER" != "Y" ]] && exit 1
 fi
 
-if [ -z "$user_name" ] || [ -z "$passwd" ]; then
-    echo "User_name/Password credentials not provided,please provide valid User_name and Password under config-file"
+if [ -z "$user_name" ]; then
+    echo "User_name not provided,please provide valid User_name config-file"
     exit 1
 fi
 
@@ -109,6 +109,17 @@ if [ -z "$host_type" ] || { [ "$host_type" != "kubernetes" ] && [ "$host_type" !
     echo "Invalid host_type => $host_type provided, Please check!. It should not be empty or host_type=kubernetes/container"
     exit 1
 fi
+
+# Ask the password from cmd line 
+echo -n "Please Set the Password for $user_name: "
+stty -echo
+read password
+stty echo
+echo 
+
+# Store the password in hidden file and delete onces it copied to USB
+echo "passwd=$password" > "$(pwd)/.psswd"
+chmod 600 "$(pwd)/.psswd"
 
 # Validate the custom-cloud-init section
 if ! dpkg -s python3 > /dev/null 2>&1; then
@@ -325,9 +336,11 @@ copy_files() {
     echo ""
     echo "K3-Cluster scripts copying!!!"
 
-    if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt"; then
+    if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt" && copy_to_partition "$K8_PART" "$(pwd)/.psswd" "/mnt";then
         echo "K3-Cluster scripts done!"
     fi
+    # Remove the hidden password file
+    rm -rf $(pwd)/.psswd
 }
 copy_user_apps() {
     echo "Copying user-apps to USB device..."

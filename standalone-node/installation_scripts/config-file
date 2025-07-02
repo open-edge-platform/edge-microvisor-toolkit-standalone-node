@@ -32,11 +32,11 @@ NO_PROXY=""
 ssh_key=""
 
 # ------------------ User Credentials ------------------------
-# Choose credentials as you wish. Ensure the password is strong.
-# Example: user_name="user", passwd="user@1234!"
+# Choose Linux user as you wish to create. This is mandatory
+# Pswword will be taken from cmd line as input for security purpose
+# Example: user_name="user"
 
 user_name=""
-passwd=""
 
 # ------------------ Host type ------------------------
 # Choose the type of host to deploy: container or kubernetes.
