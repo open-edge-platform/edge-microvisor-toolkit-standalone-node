@@ -15,7 +15,7 @@ you to quickly get an edge node up and running without deploying backend
 services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
 Kubernetes web dashboard.
 
-> **Note**: The standalone edge node does not currently support the real-time version.
+ **Note**: The standalone edge node does not currently support the real-time version.
 
 ## Standalone Node Provisioning
 
@@ -47,7 +47,7 @@ Refer to the links below for Docker installation and proxy setup:
 - [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
 - [Docker Proxy Setup](https://docs.docker.com/engine/daemon/proxy/)
 
-> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
+ **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
 
 ##### 2. Repository Setup
 
@@ -62,7 +62,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 ##### 3. Proxy settings
 
-> **Note:** If the development system is behind a firewall, ensure to add
+ **Note:** If the development system is behind a firewall, ensure to add
   the proxy configuration in the standalone-node/hook_os/config file
 
 - Update the config file
@@ -171,8 +171,9 @@ cd edge-microvisor-toolkit-standalone-node
      - User credentials: Set the username and password for the edge node
      ```
 
-     > **Note:**  Providing proxy settings is optional if the edge node does not require them
-       to access internet services.
+
+     > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
+     
 
   - Unplug the attached bootable USB drive from developer system before proceeding with deployment.
 
@@ -240,7 +241,7 @@ commands.
    kubectl get pods -A
    ```
 
-5. Install `helm`:
+5. Install Helm*:
 
    ```bash
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -249,6 +250,7 @@ commands.
    ```
 
 ## Set Up Kubernetes Dashboard Access
+
 
 1. View the Kubernetes dashboard pods:
 
@@ -277,7 +279,41 @@ commands.
 
 5. Login using the previously generated access token.
 
+
+## Install GPU plugin - Node Feature Discovery (NFD)
+
+For information on NFD, see [here](https://intel.github.io/kubernetes-docs/device-plugins/index.html#device-management-in-kubernetes)
+
+- Start NFD. If your cluster does not have NFD installed, use the following command: 
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.32.0'
+	```
+
+- Create NodeFeatureRules for detecting GPUs on nodes
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.32.0'
+	```
+	
+- Create GPU plugin daemonset
+
+	```sh
+	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/nfd_labeled_nodes?ref=v0.32.0'
+	```
+	
+- Check if the plugin is visible
+
+	```sh
+	kubectl get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{'\n'}{' i915: '}{.status.allocatable.gpu\.intel\.com/i915}{'\n'}"
+	```
+	
+- Output
+
+	![output](../output_image.png)
+
 ## Install Sample Application
+
 
 Install a WordPress application as a test application using `helm`.
 
@@ -374,7 +410,8 @@ Install a WordPress application as a test application using `helm`.
 > **Note:** Edge AI applications from the Edge software catalog can be installed
 using `helm` and evaluated using similar steps.
 
-## Access Grafana
+
+## Access Grafana Dashboard
 
 1. Retrieve Grafana credentials:
 
@@ -389,7 +426,9 @@ using `helm` and evaluated using similar steps.
    http://<EN IP>:32000
    ```
 
-## Add Prometheus metrics to Grafana
+
+## Add Prometheus metrics to Grafana dashboard
+
 
 1. Get Prometheus credentials:
 
@@ -416,7 +455,9 @@ Set the `url` as ``https://prometheus-prometheus.observability.svc.cluster.local
 
    ![Prometheus save](../../images/obs-grafana-set.png "Prometheus save")
 
+
 ## Query Metrics
+
 
 1. Create a dashboard using prometheus data source:
 
