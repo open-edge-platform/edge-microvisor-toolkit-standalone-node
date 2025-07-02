@@ -65,6 +65,7 @@ write_files:
       # custom_network.conf
       # Update this file to specify custom network settings for the bridge configuration script.
       # Set the CIDR, gateway, netmask, IP range, and DNS server for your environment.
+      # If EdgeNode cannot reach Internet. DNS update needed.
 
       BR_NAME="br0"                    # Bridge interface name
       BR_CIDR="199.168.1.0/24"         # Bridge interface IP address and subnet (CIDR notation)
@@ -72,7 +73,7 @@ write_files:
       BR_NETMASK="24"                  # Netmask for the bridge network (as a number, e.g., 24)
       BR_START_RANGE="199.168.1.2"     # Start of the DHCP/static IP range for clients
       BR_END_RANGE="199.168.1.20"      # End of the DHCP/static IP range for clients
-      BR_DNS_NAMESERVER="8.8.8.8"      # DNS server to use for the bridge network
+      BR_DNS_NAMESERVER="8.8.8.8"      # DNS server to use for the bridge network.
 
 # === Custom run commands ===
 # List commands or scripts to run at boot.
@@ -82,7 +83,7 @@ write_files:
 #   runcmd:
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
-# If custom scripts in user-apps are getting invoked. please make sure to add the scripts in "user-apps" folder
+# If custom scripts in user-apps are getting not getting invoked. please make sure to add the scripts in "user-apps" folder
 # Example:
 #   runcmd:
 #     - bash /opt/user-apps/network-config.sh /etc/cloud/custom_network.conf
@@ -90,7 +91,7 @@ runcmd:
   - echo $(( 6 * 1024 * 4 )) | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
   - systemctl --user enable idv-init.service
   - udevadm control --reload-rules
-  - bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf
-bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &
+  - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
+  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 & || echo "apply_bridge_nad.sh is missing"
 
 ```
