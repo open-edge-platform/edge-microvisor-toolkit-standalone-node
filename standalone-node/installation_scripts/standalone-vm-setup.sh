@@ -103,7 +103,8 @@ echo ""
 echo "Please see the installation status on VNC viewer.Enter $host_ip:1 on vnc viewer"
 sudo -E qemu-system-x86_64  \
   -m 4G   -enable-kvm  \
-  -cpu host \
+  -cpu host,+vmx \         # nested VM support
+  -machine q35,accel=kvm \
   -bios /usr/share/qemu/OVMF.fd  \
   -vnc :1 \
   -drive file=emt-disk.img,format=qcow2 \
