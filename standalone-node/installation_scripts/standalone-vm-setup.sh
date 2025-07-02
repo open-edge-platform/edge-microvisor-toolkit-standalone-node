@@ -101,9 +101,10 @@ qemu-img create -f qcow2 emt-disk.img 64G > /dev/null 2>&1 || { echo "creating e
 echo "Starting the Installation"
 echo ""
 echo "Please see the installation status on VNC viewer.Enter $host_ip:1 on vnc viewer"
+# Added -cpu host,+vms It will support nested VM configuration as well
 sudo -E qemu-system-x86_64  \
   -m 4G   -enable-kvm  \
-  -cpu host,+vmx \         # nested VM support
+  -cpu host,+vmx \
   -machine q35,accel=kvm \
   -bios /usr/share/qemu/OVMF.fd  \
   -vnc :1 \
