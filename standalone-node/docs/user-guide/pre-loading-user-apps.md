@@ -414,22 +414,16 @@ main() {
         BR_START_RANGE=""
         BR_END_RANGE=""
 
-        if [[ -f /etc/rancher/k3s/k3s.yaml ]]; then
-          export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-        else
-          echo "KUBECONFIG not found at /etc/rancher/k3s/k3s.yaml"
-          exit 1
-        fi
+        # setting kubeconfig default location
+        export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
         br_check_root
         br_check_custom_network_config "$CONF_FILE"
         parse_custom_network_config "$CONF_FILE"
 
-
-        #add a while loop to check if k3s installed and re-try with sleep 1
         # Wait for K3s (or /usr/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
         retries=0
-        max_retries=120  # e.g., 2 minutes
+        max_retries=300  # e.g., 5 minutes
         until check_k3s_installed && check_nad_crd; do
           ((retries++))
           if ((retries > max_retries)); then
