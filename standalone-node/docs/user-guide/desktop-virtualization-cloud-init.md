@@ -1,7 +1,7 @@
 # Reference cloud-init for EMT image with Desktop Virtualization features
 
 - NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
-  To use a different user, replace all occurrences of `guest` with your intended username.
+  To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the `User Credentials` sections of the `config-file`.
   For example, if your user is 'myuser', replace `guest` with `myuser` in:
    - /etc/sudoers.d/idv_scripts
    - /etc/systemd/system/getty@tty1.service.d/autologin.conf
