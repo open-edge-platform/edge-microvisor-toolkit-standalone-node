@@ -1,5 +1,12 @@
-
 # Reference cloud-init for EMT image with Desktop Virtualization features
+
+# NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
+# To use a different user, replace all occurrences of `guest` with your intended username.
+# For example, if your user is 'myuser', replace `guest` with `myuser` in:
+#   - /etc/sudoers.d/idv_scripts
+#   - /etc/systemd/system/getty@tty1.service.d/autologin.conf
+#   - runcmd section (sudo -u ...)
+#   - Any other relevant locations in this file.
 
 Author(s): Krishna, Shankar
 
@@ -42,6 +49,23 @@ write_files:
     content: |
       export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
       export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')
+  
+  # hugepages.service pre-allocates enough 2MB hugepages for 2 VMs with 6GB RAM each.
+  # Formula: 6 (memory per VM in GB) * 2048 (2MB pages per GB) * 2 (Number of VMs) = total hugepages needed. 
+  # Adjust the 'memory per VM in GB' and 'number of VMs' as needed.
+  - path: /usr/bin/allocate_hugepages.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      HUGEPAGES=$(( 6 * 2048 * 2 ))
+      HUGEPAGES_KB=$((HUGEPAGES * 2048))
+      MEM_TOTAL_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+      MEM_FREE_KB=$(awk '/MemFree/ {print $2}' /proc/meminfo)
+      if [ "$MEM_TOTAL_KB" -le "$HUGEPAGES_KB" ] || [ "$MEM_FREE_KB" -le "$HUGEPAGES_KB" ]; then
+        echo "ERROR: Not enough memory for hugepages allocation: need $HUGEPAGES_KB kB, total $MEM_TOTAL_KB kB, free $MEM_FREE_KB kB" >&2
+        exit 1
+      fi
+      echo $HUGEPAGES > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
 
   - path: /etc/systemd/system/hugepages.service
     permissions: '0644'
@@ -52,11 +76,22 @@ write_files:
 
       [Service]
       Type=oneshot
-      ExecStart=/bin/sh -c 'echo $(( 6 * 2048 * 2 )) | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages'
+      ExecStart=/usr/bin/allocate_hugepages.sh
 
       [Install]
       WantedBy=multi-user.target
 
+  # autologin.conf configures automatic login for the specified user on tty1.
+  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
+  - path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment="AUTOLOGIN_USER=guest"
+      ExecStart=
+      ExecStart=-/sbin/agetty -o '-f -- \\u' --autologin $AUTOLOGIN_USER --noclear %I $TERM
+
+  # Change `guest` to your intended username if not using 'guest' user.
   - path: /etc/sudoers.d/idv_scripts
     permissions: '0644'
     content: |
@@ -99,9 +134,12 @@ write_files:
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
 runcmd:
+  # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
   - udevadm control --reload-rules
+  - systemctl enable hugepages.service
   - systemctl start hugepages.service
+  # Change `guest` to your intended username if not using 'guest' user.
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
 
