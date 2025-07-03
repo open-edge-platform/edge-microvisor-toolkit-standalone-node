@@ -3,14 +3,10 @@
 - NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
   To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the `User Credentials` section of the `config-file`.
   For example, if your user is 'myuser', replace `guest` with `myuser` in:
-   - /etc/sudoers.d/idv_scripts
-   - /etc/systemd/system/getty@tty1.service.d/autologin.conf
-   - runcmd section (sudo -u ...)
-   - Any other relevant locations in this file.
-
-Author(s): Krishna, Shankar
-
-Last updated: 25/06/2025
+  - /etc/sudoers.d/idv_scripts
+  - /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  - runcmd section (sudo -u ...)
+  - Any other relevant locations in this file.
 
 ## Abstract
 
@@ -48,38 +44,7 @@ write_files:
     append: true
     content: |
       export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
-      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')
-  
-  # hugepages.service pre-allocates enough 2MB hugepages for 2 VMs with 6GB RAM each.
-  # Formula: 6 (memory per VM in GB) * 2048 (2MB pages per GB) * 2 (Number of VMs) = total hugepages needed. 
-  # Adjust the 'memory per VM in GB' and 'number of VMs' as needed.
-  - path: /usr/bin/allocate_hugepages.sh
-    permissions: '0755'
-    content: |
-      #!/bin/bash
-      HUGEPAGES=$(( 6 * 2048 * 2 ))
-      HUGEPAGES_KB=$((HUGEPAGES * 2048))
-      MEM_TOTAL_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
-      MEM_FREE_KB=$(awk '/MemFree/ {print $2}' /proc/meminfo)
-      if [ "$MEM_TOTAL_KB" -le "$HUGEPAGES_KB" ] || [ "$MEM_FREE_KB" -le "$HUGEPAGES_KB" ]; then
-        echo "ERROR: Not enough memory for hugepages allocation: need $HUGEPAGES_KB kB, total $MEM_TOTAL_KB kB, free $MEM_FREE_KB kB" >&2
-        exit 1
-      fi
-      echo $HUGEPAGES > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-
-  - path: /etc/systemd/system/hugepages.service
-    permissions: '0644'
-    content: |
-      [Unit]
-      Description=Configure Hugepages
-      Before=k3s.service
-
-      [Service]
-      Type=oneshot
-      ExecStart=/usr/bin/allocate_hugepages.sh
-
-      [Install]
-      WantedBy=multi-user.target
+      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')  
 
   # autologin.conf configures automatic login for the specified user on tty1.
   # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
@@ -156,15 +121,10 @@ write_files:
 runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
-  - udevadm control --reload-rules
-  - systemctl enable hugepages.service
-  - systemctl start hugepages.service
+  - udevadm control --reload-rules  
   # Change `guest` to your intended username if not using 'guest' user.
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &
-  - sudo systemctl restart k3s.service && while [ "$(systemctl is-active k3s.service)" != "active" ]; do echo "Waiting for k3s.service"; sleep 5; done; echo "k3s started"
-  - k wait --for=condition=ready pod --all --timeout=300s
-
+  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 & || echo "apply_bridge_nad.sh is missing"  
 ```
