@@ -752,6 +752,34 @@ copy_user_apps() {
     return 0
 }
 
+# Huge page confiuration for guest VM's
+huge_page_cofig () {
+    
+    # Mount the OS disk
+    check_mnt_mount_exist
+    mount "$os_disk$os_data_part" /mnt 
+
+    CONFIG_FILE="/mnt/etc/cloud/config-file"
+    huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
+
+    if [ -n "$huge_page_size" ]; then
+	 chroot /mnt /bin/bash <<EOT
+         set -e
+         echo $(( huge_page_size )) | tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+EOT
+        if [ "$?" -ne 0 ];
+	    failure "Fail to config huge pages,please check!!!"
+	    umount /mnt
+	    return 1
+	else
+	    success "Huge page config updated successfully"
+	    umount /mnt
+	fi
+    fi
+    umount /mnt
+    return 0
+}
+
 copy_os_update_script() {
 
     echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" 
@@ -796,6 +824,8 @@ platform_config_manager() {
 
 # Post installation tasks
 system_finalizer() {
+
+    huge_page_cofig || return 1
 
     dump_logs_to_usb || return 1
 }

@@ -54,6 +54,17 @@ host_type="kubernetes"
 # Note: If the Edge Node has only a single hard disk, update the lvm_size_ingb value; otherwise, skip it.
 lvm_size_ingb="0"
 
+# -------------------- Huge Page Size Configuration --------------------
+# Configure the huge page size for guest VMs (optional).
+# Set this value based on the requirements of your guest VMs.
+# Leave it empty if huge pages are not needed.
+#
+# Example:
+#   huge_page_config="12 * 1024"
+# This sets up 24GB of huge pages, huge page size of 2MB (2048).
+# Calculation: 12 * 1024 * 2048 bytes = 24GB
+
+huge_page_config=""
 
 # -------------------Custom cloud-init Config file---------------------
 # This section is to customize the cloud-init config file as per User Wish
