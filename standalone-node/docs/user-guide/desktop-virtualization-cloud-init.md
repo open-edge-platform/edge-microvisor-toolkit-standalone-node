@@ -90,6 +90,20 @@ write_files:
     content: |
       SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
 
+    # Change `guest` to your intended username if not using 'guest' user.
+  - path: /home/guest/.config/openbox/rc.xml
+    permissions: '0644'
+    content: |
+      <openbox_config xmlns="http://openbox.org/3.6/rc">
+        <keyboard>
+          <keybind key="A-C-t">
+            <action name="Execute">
+              <command>xterm</command>
+            </action>
+          </keybind>
+        </keyboard>
+      </openbox_config>
+
   - path: /etc/cloud/custom_network.conf
     permissions: '0644'
     content: |
