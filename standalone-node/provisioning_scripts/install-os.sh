@@ -555,39 +555,51 @@ custom_cloud_init_updates() {
     # Check the host type and update cloud-init accordingly
     host_type=$(grep '^host_type=' "$CONFIG_FILE" | cut -d '=' -f2)
     host_type=$(echo "$host_type" | tr -d '"')
+    huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
 
+    # Update cloud-init file to start k3s stack installations for hosty type kubernetes
     if [ "$host_type" == "kubernetes" ]; then
-        # Update cloud-init file to start k3s stack installations
-        awk '
-          BEGIN {
-            line1 = "chmod +x /etc/cloud/k3s-configure.sh"
-            line2 = "bash /etc/cloud/k3s-configure.sh"
+
+	# If huge page value set make this line as start of cloud-init file
+        if [ -n "$huge_page_size" ]; then
+            line0="echo $(( huge_page_size )) | tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
+        else
+            line0=""
+        fi
+	# K3 configuration
+        line1="chmod +x /etc/cloud/k3s-configure.sh"
+        line2="bash /etc/cloud/k3s-configure.sh"
+
+        awk -v line0="$line0" -v line1="$line1" -v line2="$line2" '
+        BEGIN {
             runcmd = 0
             in_block = 0
-         }
+        }
 
-         /^runcmd:/ { runcmd = 1 }
+        /^runcmd:/ { runcmd = 1 }
 
-         runcmd && /^  - \|/ { in_block = 1 }
-         {
-             print
-             next_line = $0
-         }
+        runcmd && /^  - \|/ { in_block = 1 }
+        {
+            print
+        }
 
-         in_block && $0 !~ /^  / {
-              print "    " line1
-              print "    " line2
-              in_block = 0
-              runcmd = 0
-          }
+        in_block && $0 !~ /^  / {
+            if (line0 != "") print "    " line0
+            print "    " line1
+            print "    " line2
+            in_block = 0
+            runcmd = 0
+        }
 
-         END {
-             if (in_block) {
-                  print "    " line1
-                  print "    " line2
-             }
-         }
-         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+        END {
+            if (in_block) {
+                if (line0 != "") print "    " line0
+                     print "    " line1
+                     print "    " line2
+            }
+        }
+        ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+
     elif [ "$host_type" == "container" ]; then 
          # TODO: will be expand in future
 	 echo "host type is container , docker services will start"
@@ -752,34 +764,6 @@ copy_user_apps() {
     return 0
 }
 
-# Huge page confiuration for guest VM's
-huge_page_cofig () {
-    
-    # Mount the OS disk
-    check_mnt_mount_exist
-    mount "$os_disk$os_data_part" /mnt 
-
-    CONFIG_FILE="/mnt/etc/cloud/config-file"
-    huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
-
-    if [ -n "$huge_page_size" ]; then
-	 chroot /mnt /bin/bash <<EOT
-         set -e
-         echo $(( huge_page_size )) | tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-EOT
-        if [ "$?" -ne 0 ];
-	    failure "Fail to config huge pages,please check!!!"
-	    umount /mnt
-	    return 1
-	else
-	    success "Huge page config updated successfully"
-	    umount /mnt
-	fi
-    fi
-    umount /mnt
-    return 0
-}
-
 copy_os_update_script() {
 
     echo -e "${BLUE}Copying os-update.sh to the OS disk!!${NC}" 
@@ -824,8 +808,6 @@ platform_config_manager() {
 
 # Post installation tasks
 system_finalizer() {
-
-    huge_page_cofig || return 1
 
     dump_logs_to_usb || return 1
 }

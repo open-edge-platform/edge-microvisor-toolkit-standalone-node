@@ -59,6 +59,8 @@ lvm_size_ingb="0"
 # Set this value based on the requirements of your guest VMs.
 # Leave it empty if huge pages are not needed.
 #
+#  Default hugepage table size is 2048. 
+# If the hugepage table size is 2048, then the total memory allocated for hugepages is simply the product of these two values. For example, with a 2MB hugepage size, 2048 hugepages would consume 4GB of memory (2048 * 2MB = 4GB)
 # Example:
 #   huge_page_config="12 * 1024"
 # This sets up 24GB of huge pages, huge page size of 2MB (2048).
