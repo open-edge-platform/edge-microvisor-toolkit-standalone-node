@@ -213,20 +213,24 @@ create_user() {
 
     # Copy the config-file from usb device to disk
     mkdir -p /mnt1
-    mount -o ro "${usb_disk}${k8_part}" /mnt1
+    check_mnt_mount_exist
+    mount "${usb_disk}${k8_part}" /mnt1
 
     # Mount the OS disk
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     cp /mnt1/config-file /mnt/etc/cloud/
 
+    passwd=$(grep '^passwd=' "/mnt1/.psswd" | cut -d '=' -f2)
+   
+    # Remove the secret password file 
+    rm -rf /mnt1/.psswd
     umount /mnt1
     rm -rf /mnt1
 
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
     user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
-    passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
 
     echo -e "${BLUE}Creating the User Account!!${NC}" 
     # Mount all required partitions and do chroot to OS
