@@ -40,7 +40,7 @@ NEW k3s cluster IP $host_ip
           sudo systemctl restart k3s
 	  break
       else
-          echo "K3s service is still not active. Checking in 10 seconds...\n" | sudo tee /dev/tty0
+          echo "K3s service is still not active. Checking in 10 seconds..." | sudo tee /dev/tty0
           sleep 10
       fi
    done
@@ -73,9 +73,6 @@ Logs located at:
 
 For k3s logs run:
         sudo journalctl -fu k3s
-
-IP address of the Node:
-        $IP
 
 To access and view the cluster's pods run:
         source /etc/environment
