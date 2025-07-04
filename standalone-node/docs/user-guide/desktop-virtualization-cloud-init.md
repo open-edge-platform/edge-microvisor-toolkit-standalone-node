@@ -91,7 +91,7 @@ write_files:
       SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
 
     # Change `guest` to your intended username if not using 'guest' user.
-  - path: /var/rc.xml
+  - path: /etc/cloud/rc.xml
     permissions: '0644'
     owner: 'guest:guest'
     content: |
@@ -139,7 +139,7 @@ runcmd:
   - udevadm control --reload-rules
   # Change `guest` to your intended username if not using 'guest' user.
   - sudo -u guest mkdir -p /home/guest/.config/openbox/
-  - sudo -u guest mv /var/rc.xml /home/guest/.config/openbox/rc.xml  
+  - sudo -u guest mv /etc/cloud/rc.xml /home/guest/.config/openbox/rc.xml  
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
