@@ -91,10 +91,9 @@ write_files:
       SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
 
     # Change `guest` to your intended username if not using 'guest' user.
-  - path: /home/guest/.config/openbox/rc.xml
+  - path: /opt/rc.xml
     permissions: '0644'
     owner: 'guest:guest'
-    defer: true
     content: |
       <openbox_config xmlns="http://openbox.org/3.6/rc">
         <keyboard>
@@ -137,8 +136,10 @@ write_files:
 runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
-  - udevadm control --reload-rules  
+  - udevadm control --reload-rules
   # Change `guest` to your intended username if not using 'guest' user.
+  - sudo -u guest mkdir -p /home/guest/.config/openbox/
+  - sudo -u guest mv /opt/rc.xml /home/guest/.config/openbox/rc.xml  
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
