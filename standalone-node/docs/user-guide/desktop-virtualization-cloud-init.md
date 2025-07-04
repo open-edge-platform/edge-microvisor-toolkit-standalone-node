@@ -126,5 +126,5 @@ runcmd:
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 & || echo "apply_bridge_nad.sh is missing"  
+  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
 ```
