@@ -94,6 +94,7 @@ write_files:
   - path: /home/guest/.config/openbox/rc.xml
     permissions: '0644'
     owner: 'guest:guest'
+    defer: true
     content: |
       <openbox_config xmlns="http://openbox.org/3.6/rc">
         <keyboard>
