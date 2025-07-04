@@ -152,29 +152,42 @@ check_success "Applying OS image"
 INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
 
 # Define paths
-TMP_DIR="/tmp"
+TMP_DIR="/etc/cloud"
 COMMIT_UPDATE_SCRIPT="$TMP_DIR/commit_update.sh"
 INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
+
+cp /etc/passwd /etc/cloud/passwd_backup
+cp /etc/shadow /etc/cloud/shadow_backup
+cp /etc/group /etc/cloud/group_backup
 
 # Create commit_update.sh only if it doesn't already exist
 if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
     cat << 'EOF' > "$COMMIT_UPDATE_SCRIPT"
 #!/bin/bash
 
-bootctl_output=$(bootctl list)
-# Check if linux-2.efi is selected
-# Make the updated image persistent for future boots
-if echo "$bootctl_output" | grep -q "(linux-2.efi) (selected)"; then
-    echo "linux-2.efi is selected. Performing commit."
-    if os-update-tool.sh -c; then
-        echo "Commit update successful."
-    else
-        echo "Failed to commit update."
-        exit 1
-    fi
-else
-    echo "linux-2.efi is not selected. Skipping commit."
+if [ -e /etc/cloud/passwd_backup ] && [ -e /etc/cloud/shadow_backup ]; then
+  mv /etc/cloud/passwd_backup /etc/passwd
+  mv /etc/cloud/shadow_backup /etc/shadow
+  mv /etc/cloud/group_backup /etc/group
 fi
+
+# Add user
+CONFIG_FILE="/etc/cloud/config-file"
+user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
+user_name=${user_name//\"/}
+usermod -aG sudo "$user_name"
+
+bootctl_output=$(bootctl list)
+# Check if linux-2.efi or linux.efi is selected
+# Make the updated image persistent for future boots
+if os-update-tool.sh -c; then
+   echo "Commit update successful."
+else
+   echo "Failed to commit update."
+   exit 1
+fi
+
+
 # Fetch and echo IMAGE_BUILD_DATE from /etc/image-id
 IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
 echo "IMAGE_BUILD_DATE: $IMAGE_BUILD_DATE"
@@ -228,3 +241,4 @@ fi
 echo "Rebooting the system..."
 reboot
 check_success "Rebooting the system"
+
