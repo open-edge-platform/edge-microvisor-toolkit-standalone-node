@@ -93,6 +93,7 @@ write_files:
     # Change `guest` to your intended username if not using 'guest' user.
   - path: /home/guest/.config/openbox/rc.xml
     permissions: '0644'
+    owner: 'guest:guest'
     content: |
       <openbox_config xmlns="http://openbox.org/3.6/rc">
         <keyboard>
