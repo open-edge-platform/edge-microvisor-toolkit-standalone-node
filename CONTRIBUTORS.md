@@ -1,6 +1,6 @@
 # Contributors
 
-## Special thanks for all the people who had helped this project so far
+## Special thanks to all the people who have helped this project so far
 
 - [abjyoti](https://github.com/abjyoti)
 - [adorney99](https://github.com/adorney99)
