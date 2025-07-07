@@ -1,17 +1,58 @@
-# Reference cloud-init for EMT image with Desktop Virtualization features
+# Guideline for using Edge Microvisor Toolkit (EMT) to create a Desktop Virtualization
 
-- NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
+## Abstract
+
+This document introduces the use of the Edge Microvisor Toolkit (EMT) for creating an immutable Desktop
+Virtualization image. It also provides a reference cloud-init configuration for deploying EMT images with
+Desktop Virtualization features.
+
+The EMT Desktop Virtualization image supports the following features:
+
+- **SR-IOV**: Single Root I/O Virtualization for Intel integrated graphics.
+- **Display Virtualization**: Enables display virtualization for VMs using Intel integrated graphics.
+  This feature has been validated on both Windows 11 and Linux VMs.
+- **USB Passthrough**: Supports USB passthrough for VMs, including keyboard and mouse devices.
+- **Network Bridge**: Provides network bridge support, allowing VMs to connect to the network via the host's
+  network interface.
+- **Self-contained Image**: Includes a container runtime, lightweight Kubernetes, and additional Kubernetes
+  add-ons for networking and GPU resource allocation. As a result, the image is larger than the standard EMT
+  image.
+
+With this image, customers can automate the deployment of edge nodes using the EMT standalone project.
+
+```mermaid
+block-beta
+  columns 1
+    block:APP      
+      WinVM(["Windows 11 VM using GPU for Display Virtualization"])      
+      LinuxVM(["Linux VM using GPU for AI compute offload"])
+    end    
+    block:RESOURCES
+      blockArrowId1<["GPU SR-IOV resource"]>(up)      
+      blockArrowId2<["Hugepage resource"]>(up)
+      blockArrowId3<["Multiple network resource"]>(up)
+      blockArrowId4<["USB resource"]>(up)
+    end
+    block:KUBE      
+      K3S("k3s (Lightweight Kubernetes)")
+      SRIOV("Virtualization,Networking and SR-IOV GPU addons")
+    end
+    EMT["EMT Desktop Virtualization image with hypervisor and container runtime"]
+    block:HARDWARE
+      IntelCore["Intel Core-based Platform with integrated GPU"]
+    end
+    
+```
+
+## Reference cloud-init for EMT image with Desktop Virtualization and networking features
+
+- NOTE: The linux username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
   To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the `User Credentials` section of the `config-file`.
   For example, if your user is 'myuser', replace `guest` with `myuser` in:
   - /etc/sudoers.d/idv_scripts
   - /etc/systemd/system/getty@tty1.service.d/autologin.conf
   - runcmd section (sudo -u ...)
   - Any other relevant locations in this file.
-
-## Abstract
-
-This document provides a reference `cloud-init` configuration for customers using the Edge Microvisor Toolkit image
-with Desktop Virtualization features.
 
 ```yaml
 #cloud-config
