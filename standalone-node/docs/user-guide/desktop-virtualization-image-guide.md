@@ -24,8 +24,9 @@ With this image, customers can automate the deployment of edge nodes using the E
 block-beta
   columns 1
     block:APP      
-      WinVM(["Windows 11 VM using GPU for Display Virtualization"])      
-      LinuxVM(["Linux VM using GPU for AI compute offload"])
+      WinVM(["Customer App: Windows 11 VM using GPU for Display Virtualization"])      
+      LinuxVM(["Customer App: Linux VM using GPU for AI compute offload"])
+      AppPod[["Customer App: Containerized AI app"]]
     end    
     block:RESOURCES
       blockArrowId1<["GPU SR-IOV resource"]>(up)      
