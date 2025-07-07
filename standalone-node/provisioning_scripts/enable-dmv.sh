@@ -32,8 +32,8 @@ rootfs_b_partition=6
 roothash_partition=7
 
 swap_partition=8
-singlehdd_lvm_partition=9
-
+reserved_partition=9
+singlehdd_lvm_partition=10
 
 # DEST_DISK set from the template.yaml file as an environment variable.
 
@@ -46,7 +46,7 @@ tep_size=14336
 reserved_size=5120
 boot_size=5120600
 bare_min_rootfs_size=25
-rootfs_size=8192
+rootfs_size=4096
 rootfs_hashmap_size=100
 rootfs_roothash_size=50
 
@@ -189,22 +189,20 @@ make_partition() {
     swap_size=$(( swap_size * 1024 ))
 
     total_size_disk=$(fdisk -l ${DEST_DISK} | grep -i ${DEST_DISK} | head -1 |  awk '/GiB/{ print int($3)*1024} /TiB/{ print int($3)*1024*1024}')
+    echo "total_size_disk(detected) ${total_size_disk}"
 
-    # For single HDD Size should be total disk - lvm_size in GB provided as input by the User 
+    # For single HDD reduce the size to 100 and fit everything inside it
     if [ $single_hdd -eq 0 ];
     then
-	lvm_size=$(( lvm_disk_size*1024 ))
-        if [ "$lvm_size" -ge "$total_size_disk" ]; then
-            check_return_value 1 "$lvm_size is more than the disk size,please check"
-        else
-            total_size_disk=$(( total_size_disk - lvm_size ))
-        fi
+	total_size_disk=$(( 100 * 1024 ))
     fi
+    echo "total_size_disk(fixed) ${total_size_disk}"
 
     #####
     if $COMPLETE_DMVERITY;
     then
-	swap_start=$(( total_size_disk - swap_size ))
+	reserved_start=$(( total_size_disk - reserved_size ))
+	swap_start=$(( reserved_start - swap_size ))
 
 	roothash_start=$(( swap_start - rootfs_roothash_size ))
 	rootfs_b_start=$(( roothash_start - rootfs_size ))
@@ -230,62 +228,44 @@ make_partition() {
     #####
     # logging needed to understand the block splits
     echo "DEST_DISK ${DEST_DISK}"
-    echo "rootfs_partition     $rootfs_partition         rootfs_end           ${rootfs_end}MB"
-    echo "root_hashmap_a_start ${root_hashmap_a_start}MB root_hashmap_b_start ${root_hashmap_b_start}MB"
-    echo "root_hashmap_b_start ${root_hashmap_b_start}MB rootfs_b_start       ${rootfs_b_start}MB"
-    echo "rootfs_b_start       ${rootfs_b_start}MB       roothash_start       ${roothash_start}MB"
-    echo "roothash_start       ${roothash_start}MB       swap_start           ${swap_start}MB"
-    echo "swap_start          ${swap_start}MB            tep_start            ${total_size_disk}MB"
+    echo "rootfs_partition     $rootfs_partition          rootfs_end           ${rootfs_end}MB"
+    echo "root_hashmap_a_start ${root_hashmap_a_start}MB  root_hashmap_b_start ${root_hashmap_b_start}MB"
+    echo "root_hashmap_b_start ${root_hashmap_b_start}MB  rootfs_b_start       ${rootfs_b_start}MB"
+    echo "rootfs_b_start       ${rootfs_b_start}MB        roothash_start       ${roothash_start}MB"
+    echo "roothash_start       ${roothash_start}MB        swap_start           ${swap_start}MB"
+    echo "swap_start           ${swap_start}MB            swap_end             ${reserved_start}MB"
+    echo "reserved_start       ${reserved_start}MB        total_size_disk      ${total_size_disk}MB"
     #####
 
     echo "sizes in sectors"
-    echo "rootfs_partition     $rootfs_partition         rootfs_end             $(convert_mb_to_sectors ${rootfs_end} 1)"
+    echo "rootfs_partition     $rootfs_partition                                  rootfs_end           $(convert_mb_to_sectors ${rootfs_end} 1)"
     echo "root_hashmap_a_start $(convert_mb_to_sectors ${root_hashmap_a_start} 0) root_hashmap_b_start $(convert_mb_to_sectors ${root_hashmap_b_start} 1)"
     echo "root_hashmap_b_start $(convert_mb_to_sectors ${root_hashmap_b_start} 0) rootfs_b_start       $(convert_mb_to_sectors ${rootfs_b_start} 1)"
     echo "rootfs_b_start       $(convert_mb_to_sectors ${rootfs_b_start} 0)       roothash_start       $(convert_mb_to_sectors ${roothash_start} 1)"
     echo "roothash_start       $(convert_mb_to_sectors ${roothash_start} 0)       swap_start           $(convert_mb_to_sectors ${swap_start} 1)"
-    echo "swap_start          $(convert_mb_to_sectors ${swap_start} 0)            tep_start            $(convert_mb_to_sectors ${total_size_disk} 1)"
+    echo "swap_start           $(convert_mb_to_sectors ${swap_start} 0)           reserved_start       $(convert_mb_to_sectors ${reserved_start} 1)"
+    echo "reserved_start       $(convert_mb_to_sectors ${reserved_start} 0)       total_size_disk      $(convert_mb_to_sectors ${total_size_disk} 1)"
     #####
 
     if $COMPLETE_DMVERITY;
     then
-	# Backup emt_persistent data
-	dd if=${DEST_DISK}${suffix}${emt_persistent_partition} of=/mnt/backup_3.img bs=4M status=progress
-
-	echo "fdisk -l ${DEST_DISK} output before resize a partition"
-	fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${emt_persistent_partition}"
-
-	rootfs_start_size=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print $2}')
-	size_in_bytes=$((rootfs_size * 1024 * 1024))
-	size_in_sectors=$((rootfs_start_size-1+size_in_bytes / 512))
-
-	# 1) Remove emt_persistent partition 2) resizes rootfs_partition
+	#this cmd only resizes parition. if there is an error this should handle it.
 	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
-	       rm ${emt_persistent_partition} \
-               resizepart $rootfs_partition ${size_in_sectors}s
+	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	check_return_value $? "Failed to resize rootfs_a parition"
+	check_return_value $? "Failed to resize emt persistent paritions"
 
-        echo "fdisk -l ${DEST_DISK} output after resize a partition"
-	fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}"
-	
-	rootfs_end_size=$(fdisk -l ${DEST_DISK} | grep "${DEST_DISK}${suffix}${rootfs_partition}" | awk '{print $3}')
-	
-	# Calculate the new start position for emt_persistent_partition
-	new_start_position=$((rootfs_end_size + 1))
 	#this cmd only creates new partitions.
 	parted -s ${DEST_DISK} \
-	       mkpart edge_persistent ext4 ${new_start_position}s "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s \
 	       mkpart hashmap_a ext4  "$(convert_mb_to_sectors "${root_hashmap_a_start}" 0)"s "$(convert_mb_to_sectors "${root_hashmap_b_start}" 1)"s \
 	       mkpart hashmap_b ext4  "$(convert_mb_to_sectors "${root_hashmap_b_start}" 0)"s "$(convert_mb_to_sectors "${rootfs_b_start}" 1)"s \
 	       mkpart rootfs_b ext4   "$(convert_mb_to_sectors "${rootfs_b_start}" 0)"s       "$(convert_mb_to_sectors "${roothash_start}" 1)"s \
 	       mkpart roothash ext4   "$(convert_mb_to_sectors "${roothash_start}" 0)"s       "$(convert_mb_to_sectors "${swap_start}" 1)"s \
-	       mkpart swap linux-swap "$(convert_mb_to_sectors "${swap_start}" 0)"s           "$(convert_mb_to_sectors "${total_size_disk}" 1)"s 
+	       mkpart swap linux-swap "$(convert_mb_to_sectors "${swap_start}" 0)"s           "$(convert_mb_to_sectors "${reserved_start}" 1)"s \
+	       mkpart reserved ext4   "$(convert_mb_to_sectors "${reserved_start}" 0)"s       "$(convert_mb_to_sectors "${total_size_disk}" 1)"s
 
-	#printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
-	#	resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	#check_return_value $? "Failed to create paritions"
+	check_return_value $? "Failed to create paritions"
     else
 	parted -s ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
@@ -297,8 +277,8 @@ make_partition() {
 	check_return_value $? "Failed to create paritions"
     fi
 
-    # Create LVM for single_hdd only when user chooses
-    if [ $single_hdd -eq 0 ] && [ $lvm_disk_size -ge 1 ];
+
+    if [ $single_hdd -eq 0 ];
     then
 	parted -s ${DEST_DISK} \
 	       mkpart lvm ext4 "$(convert_mb_to_sectors "${total_size_disk}" 0)"s 100%
@@ -318,10 +298,36 @@ make_partition() {
 	# rootfs for a/B updated
 	mkfs -t ext4 -L root_b -F "${DEST_DISK}${suffix}${rootfs_b_partition}"
 	check_return_value $? "Failed to mkfs rootfs part"
-
-	mkfs -t ext4 -L edge_persistent -F "${DEST_DISK}${suffix}${emt_persistent_partition}"
-	dd if=/mnt/backup_3.img of=${DEST_DISK}${suffix}${emt_persistent_partition} bs=4M status=progress
     fi
+
+    # Save the emt persistent
+    # this is needed because we need to resize the rootfs a
+    ##############
+    #save using dd
+    dd if="${DEST_DISK}${suffix}${emt_persistent_partition}" of="${DEST_DISK}${suffix}${reserved_partition}" bs=4M status=progress conv=sparse count=$emt_persistent_dd_count
+    sync
+    ##############
+
+    # delete the complete emt persistent partition
+    parted -s ${DEST_DISK} \
+	   rm "${emt_persistent_partition}"
+
+    #resize rootfs a partition
+    rootfs_a_start=$(parted ${DEST_DISK} unit MB print | awk '/^ '$rootfs_partition'/ {gsub(/MB/, "", $2); print $2}')
+
+    #end size of rootfs a partition
+    rootfs_a_end=$(( rootfs_a_start + rootfs_size ))
+
+    # resize part a
+    parted -s ${DEST_DISK} \
+	   resizepart $rootfs_partition "$(convert_mb_to_sectors "${rootfs_a_end}" 1)"s \
+	   mkpart edge_persistent ext4 "$(convert_mb_to_sectors "${rootfs_a_end}" 0)"s "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
+
+    # restore the copied data from reserved
+    #backup using dd
+    dd if="${DEST_DISK}${suffix}${reserved_partition}" of="${DEST_DISK}${suffix}${emt_persistent_partition}" bs=4M status=progress conv=sparse count=$emt_persistent_dd_count
+    sync
+    ##############
 }
 
 #####################################################################################
