@@ -191,10 +191,15 @@ make_partition() {
     total_size_disk=$(fdisk -l ${DEST_DISK} | grep -i ${DEST_DISK} | head -1 |  awk '/GiB/{ print int($3)*1024} /TiB/{ print int($3)*1024*1024}')
     echo "total_size_disk(detected) ${total_size_disk}"
 
-    # For single HDD reduce the size to 100 and fit everything inside it
+    # For single HDD Size should be total disk - lvm_size in GB provided as input by the User 
     if [ $single_hdd -eq 0 ];
     then
-	total_size_disk=$(( 100 * 1024 ))
+	lvm_size=$(( lvm_disk_size*1024 ))
+        if [ "$lvm_size" -ge "$total_size_disk" ]; then
+            check_return_value 1 "$lvm_size is more than the disk size,please check"
+        else
+            total_size_disk=$(( total_size_disk - lvm_size ))
+        fi
     fi
     echo "total_size_disk(fixed) ${total_size_disk}"
 
@@ -277,8 +282,8 @@ make_partition() {
 	check_return_value $? "Failed to create paritions"
     fi
 
-
-    if [ $single_hdd -eq 0 ];
+    # Create LVM for single_hdd only when user chooses
+    if [ $single_hdd -eq 0 ] && [ $lvm_disk_size -ge 1 ];
     then
 	parted -s ${DEST_DISK} \
 	       mkpart lvm ext4 "$(convert_mb_to_sectors "${total_size_disk}" 0)"s 100%
