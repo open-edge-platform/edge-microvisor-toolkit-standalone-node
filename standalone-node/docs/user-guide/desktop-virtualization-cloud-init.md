@@ -1,9 +1,12 @@
-
 # Reference cloud-init for EMT image with Desktop Virtualization features
 
-Author(s): Krishna, Shankar
-
-Last updated: 25/06/2025
+- NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
+  To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the `User Credentials` section of the `config-file`.
+  For example, if your user is 'myuser', replace `guest` with `myuser` in:
+  - /etc/sudoers.d/idv_scripts
+  - /etc/systemd/system/getty@tty1.service.d/autologin.conf
+  - runcmd section (sudo -u ...)
+  - Any other relevant locations in this file.
 
 ## Abstract
 
@@ -21,7 +24,7 @@ with Desktop Virtualization features.
 #     enable: [docker, ssh]
 #     disable: [apache2]
 services:
-    enable: [idv-init]
+    enable: []
     disable: []
 
 # === Create custom configuration files ===
@@ -37,6 +40,34 @@ services:
 #         #!/bin/sh
 #         echo "This is Example"
 write_files:
+  - path: /etc/environment
+    append: true
+    content: |
+      export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
+      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')  
+
+  # autologin.conf configures automatic login for the specified user on tty1.
+  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
+  - path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment="AUTOLOGIN_USER=guest"
+      ExecStart=
+      ExecStart=-/sbin/agetty -o '-f -- \\u' --autologin $AUTOLOGIN_USER --noclear %I $TERM
+
+  # Change `guest` to your intended username if not using 'guest' user.
+  - path: /etc/sudoers.d/idv_scripts
+    permissions: '0644'
+    content: |
+      guest ALL=(ALL) NOPASSWD: /usr/bin/X, \
+      /usr/bin/idv/init/setup_sriov_vfs.sh, \
+      /usr/bin/idv/init/setup_display.sh, \
+      /usr/bin/idv/launcher/start_vm.sh, \
+      /usr/bin/idv/launcher/start_all_vms.sh, \
+      /usr/bin/idv/launcher/stop_vm.sh, \
+      /usr/bin/idv/launcher/stop_all_vms.sh
+
   - path: /usr/share/X11/xorg.conf.d/10-serverflags.conf
     permissions: '0644'
     content: |
@@ -58,6 +89,21 @@ write_files:
     permissions: '0644'
     content: |
       SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
+
+    # Change `guest` to your intended username if not using 'guest' user.
+  - path: /etc/cloud/rc.xml
+    permissions: '0644'
+    owner: 'guest:guest'
+    content: |
+      <openbox_config xmlns="http://openbox.org/3.6/rc">
+        <keyboard>
+          <keybind key="A-C-t">
+            <action name="Execute">
+              <command>xterm</command>
+            </action>
+          </keybind>
+        </keyboard>
+      </openbox_config>
 
   - path: /etc/cloud/custom_network.conf
     permissions: '0644'
@@ -88,10 +134,14 @@ write_files:
 #   runcmd:
 #     - bash /opt/user-apps/network-config.sh /etc/cloud/custom_network.conf
 runcmd:
-  - echo $(( 6 * 1024 * 4 )) | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-  - systemctl --user enable idv-init.service
+  # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
+  - source /etc/environment
   - udevadm control --reload-rules
+  # Change `guest` to your intended username if not using 'guest' user.
+  - sudo -u guest mkdir -p /home/guest/.config/openbox/
+  - sudo -u guest mv /etc/cloud/rc.xml /home/guest/.config/openbox/rc.xml  
+  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
+  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 & || echo "apply_bridge_nad.sh is missing"
-
+  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
 ```

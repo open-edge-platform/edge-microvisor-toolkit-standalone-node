@@ -213,20 +213,24 @@ create_user() {
 
     # Copy the config-file from usb device to disk
     mkdir -p /mnt1
-    mount -o ro "${usb_disk}${k8_part}" /mnt1
+    check_mnt_mount_exist
+    mount "${usb_disk}${k8_part}" /mnt1
 
     # Mount the OS disk
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     cp /mnt1/config-file /mnt/etc/cloud/
 
+    passwd=$(grep '^passwd=' "/mnt1/.psswd" | cut -d '=' -f2)
+   
+    # Remove the secret password file 
+    rm -rf /mnt1/.psswd
     umount /mnt1
     rm -rf /mnt1
 
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
     user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
-    passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
 
     echo -e "${BLUE}Creating the User Account!!${NC}" 
     # Mount all required partitions and do chroot to OS
@@ -437,50 +441,67 @@ EOT
 boot_order_chage_to_disk() {
     echo -e "${BLUE}Changing the Boot order to disk!!${NC}" 
 
+    boot_entry="Emt"
+    efiboot_part=1
+    EFI=""
+
+    # Delete the pile up Ubuntu/Emt partitions from BIOS bootMenu
+    for bootnumber in $(efibootmgr | grep -iE "emt|Ubuntu" | awk '{print $1}' | sed 's/Boot//;s/\*//'); do
+        efibootmgr -b "$bootnumber" -B
+    done
+    # Delete the duplicate boot entries from bootmenu
     boot_order=$(efibootmgr -D)
     echo "$boot_order"
+
+    # Get the rootfs 
+    rootfs=$(blkid | grep -Ei 'TYPE="ext4"' | grep -Ei 'LABEL="rootfs"' | awk -F: '{print $1}')
+
+    efiboot=$(blkid | grep -Ei 'TYPE="vfat"' | grep -Ei 'LABEL="esp|uefi"' |  awk -F: '{print $1}')
+
+    if echo "$efiboot" | grep -q "nvme"; then
+        osdisk=$(echo "$rootfs" | grep -oE 'nvme[0-9]+n[0-9]+' | head -n 1)
+    elif echo "$efiboot" | grep -q "sd"; then
+        osdisk=$(echo "$rootfs" | grep -oE 'sd[a-z]+' | head -n 1)
+    fi
+
+    check_mnt_mount_exist
+    mount "${rootfs}" /mnt
+    mount $efiboot /mnt/boot/efi
+
+    # Get the EFI boot from chroot
+    EFI=$(chroot /mnt sh -c 'basename $(find /boot/efi/EFI/Linux -type f -iname "*.efi" | head -n1)') || { echo "EFI binary not present,please check"; return 1; } 
+
+    # Unmount the file systems
+    umount /mnt/boot/efi
+    umount /mnt
+
+    # Create the boot entry
+    new_boot_number=$(efibootmgr -c -d "/dev/${osdisk}" -p $efiboot_part -L "$boot_entry" -l "\\EFI\\Linux\\$EFI") || { echo "Failed to create new boot entry"; return 1; } 
+
+    echo "Successfully created the boot entry $efiboot_part"
+
+    new_boot_number=$(efibootmgr | grep -i Emt | grep -oP 'Boot\d{4}' | head -n1 | sed 's/Boot//')
+
+    echo "New boot number is $new_boot_number"
+
+    # Update the bootorder
     usb_boot_number=$(efibootmgr | grep -i "Bootcurrent" | awk '{print $2}')
 
-    boot_order=$(efibootmgr | grep -i "Bootorder" | awk '{print $2}')
+    boot_order_cur=$(efibootmgr | grep -i "Bootorder" | awk '{print $2}')
 
-    # Convert boot_order to an array and remove , between the entries
-    IFS=',' read -ra boot_order_array <<<"$boot_order"
-
-    # Remove PXE boot entry from Array
-    final_boot_array=()
-    for element in "${boot_order_array[@]}"; do
-        if [[ "$element" != "$usb_boot_number" ]]; then
-            final_boot_array+=("$element")
-        fi
-    done
-
-    # Add the PXE  boot entry to the end of the boot order array
-    final_boot_array+=("$usb_boot_number")
-
-    # Join the elements of boot_order_array into a comma-separated string
-    final_boot_order=$(
-        IFS=,
-        echo "${final_boot_array[*]}"
-    )
-
-    #remove trail and leading , if preset
-    final_boot_order=$(echo "$final_boot_order" | sed -e 's/^,//;s/,$//')
-
-    echo "final_boot order--->" "$final_boot_order"
+    if [ -n "$boot_order_cur" ]; then
+        final_boot_order="$new_boot_number,$boot_order_cur" || { echo "Final boot order change failed"; return 1; } 
+    else
+        final_boot_order="$new_boot_number" || { echo "Final boot order change failed"; return 1; } 
+    fi
 
     # Update the boot order using efibootmgr
+    efibootmgr -o "$final_boot_order" || { echo "Updating the Boot order with new boot entry failed"; return 1; } 
 
-    if efibootmgr -o "$final_boot_order"; then
-        success "Made Disk as first boot and USB boot at end"
-        #Make UEFI boot as inactive
-        efibootmgr -b "$usb_boot_number" -A
-        boot_order=$(efibootmgr)
-        echo "$boot_order"
-    else
-        failure "Boot order change not successful,Please Manually Select the Disk boot option"
-        return 1 
-    fi
-    efibootmgr
+    #Make UEFI boot as inactive
+    efibootmgr -b "$usb_boot_number" -A
+
+    echo "Made Disk as first boot option"
     return 0
 }
 
@@ -534,39 +555,51 @@ custom_cloud_init_updates() {
     # Check the host type and update cloud-init accordingly
     host_type=$(grep '^host_type=' "$CONFIG_FILE" | cut -d '=' -f2)
     host_type=$(echo "$host_type" | tr -d '"')
+    huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
 
+    # Update cloud-init file to start k3s stack installations for hosty type kubernetes
     if [ "$host_type" == "kubernetes" ]; then
-        # Update cloud-init file to start k3s stack installations
-        awk '
-          BEGIN {
-            line1 = "chmod +x /etc/cloud/k3s-configure.sh"
-            line2 = "bash /etc/cloud/k3s-configure.sh"
+
+	# If huge page value set make this line as start of cloud-init file
+        if [ -n "$huge_page_size" ]; then
+            line0="echo $(( huge_page_size )) | tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
+        else
+            line0=""
+        fi
+	# K3 configuration
+        line1="chmod +x /etc/cloud/k3s-configure.sh"
+        line2="bash /etc/cloud/k3s-configure.sh"
+
+        awk -v line0="$line0" -v line1="$line1" -v line2="$line2" '
+        BEGIN {
             runcmd = 0
             in_block = 0
-         }
+        }
 
-         /^runcmd:/ { runcmd = 1 }
+        /^runcmd:/ { runcmd = 1 }
 
-         runcmd && /^  - \|/ { in_block = 1 }
-         {
-             print
-             next_line = $0
-         }
+        runcmd && /^  - \|/ { in_block = 1 }
+        {
+            print
+        }
 
-         in_block && $0 !~ /^  / {
-              print "    " line1
-              print "    " line2
-              in_block = 0
-              runcmd = 0
-          }
+        in_block && $0 !~ /^  / {
+            if (line0 != "") print "    " line0
+            print "    " line1
+            print "    " line2
+            in_block = 0
+            runcmd = 0
+        }
 
-         END {
-             if (in_block) {
-                  print "    " line1
-                  print "    " line2
-             }
-         }
-         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+        END {
+            if (in_block) {
+                if (line0 != "") print "    " line0
+                     print "    " line1
+                     print "    " line2
+            }
+        }
+        ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+
     elif [ "$host_type" == "container" ]; then 
          # TODO: will be expand in future
 	 echo "host type is container , docker services will start"
@@ -769,12 +802,12 @@ platform_config_manager() {
     update_ssh_settings || return 1
 
     update_mac_under_dhcp_systemd || return 1
+
+    boot_order_chage_to_disk || return 1
 }
 
 # Post installation tasks
 system_finalizer() {
-
-    boot_order_chage_to_disk || return 1
 
     dump_logs_to_usb || return 1
 }
