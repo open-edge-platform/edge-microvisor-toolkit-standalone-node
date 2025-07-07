@@ -90,6 +90,21 @@ write_files:
     content: |
       SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
 
+    # Change `guest` to your intended username if not using 'guest' user.
+  - path: /etc/cloud/rc.xml
+    permissions: '0644'
+    owner: 'guest:guest'
+    content: |
+      <openbox_config xmlns="http://openbox.org/3.6/rc">
+        <keyboard>
+          <keybind key="A-C-t">
+            <action name="Execute">
+              <command>xterm</command>
+            </action>
+          </keybind>
+        </keyboard>
+      </openbox_config>
+
   - path: /etc/cloud/custom_network.conf
     permissions: '0644'
     content: |
@@ -121,10 +136,12 @@ write_files:
 runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
-  - udevadm control --reload-rules  
+  - udevadm control --reload-rules
   # Change `guest` to your intended username if not using 'guest' user.
+  - sudo -u guest mkdir -p /home/guest/.config/openbox/
+  - sudo -u guest mv /etc/cloud/rc.xml /home/guest/.config/openbox/rc.xml  
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
   - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 & || echo "apply_bridge_nad.sh is missing"  
+  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
 ```
