@@ -1,4 +1,8 @@
-# Reference cloud-init for EMT image with Desktop Virtualization features
+# Guideline for using Edge Microvisor Toolkit (EMT) to create a Desktop Virtualization
+
+## Abstract
+
+## Reference cloud-init for EMT image with Desktop Virtualization features
 
 - NOTE: The username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
   To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the `User Credentials` section of the `config-file`.
@@ -7,11 +11,6 @@
   - /etc/systemd/system/getty@tty1.service.d/autologin.conf
   - runcmd section (sudo -u ...)
   - Any other relevant locations in this file.
-
-## Abstract
-
-This document provides a reference `cloud-init` configuration for customers using the Edge Microvisor Toolkit image
-with Desktop Virtualization features.
 
 ```yaml
 #cloud-config
