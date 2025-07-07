@@ -38,12 +38,14 @@ NEW k3s cluster IP $host_ip
           echo "Reconfiguring cluster..." | sudo tee /dev/tty0
           k3s kubectl delete node edgemicrovisortoolkit
           sudo systemctl restart k3s
+          echo "Restarted k3s" | sudo tee /dev/tty0
 	  break
       else
           echo "K3s service is still not active. Checking in 10 seconds..." | sudo tee /dev/tty0
           sleep 10
       fi
    done
+   echo $host_ip > $IPCHECK
 fi
 
 while [ true ]
