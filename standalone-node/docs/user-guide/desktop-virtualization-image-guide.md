@@ -31,15 +31,17 @@ block-beta
       blockArrowId1<["GPU SR-IOV resource"]>(up)      
       blockArrowId2<["Hugepage resource"]>(up)
       blockArrowId3<["Multiple network resource"]>(up)
-      blockArrowId4<["GPU SR-IOV resource"]>(up)
+      blockArrowId4<["USB resource"]>(up)
     end
     block:KUBE      
       K3S("k3s (Lightweight Kubernetes)")
       SRIOV("Virtualization,Networking and SR-IOV GPU addons")
     end
     EMT["EMT Desktop Virtualization image with hypervisor and container runtime"]
-    GPU["Intel Integrated GPU"]
-    IntelCore["Intel Core-based Platform"]
+    block:HARDWARE
+      IntelCore["Intel Core-based Platform with integrated GPU"]
+    end
+    
 ```
 
 ## Reference cloud-init for EMT image with Desktop Virtualization and networking features
