@@ -20,6 +20,28 @@ The EMT Desktop Virtualization image supports the following features:
 
 With this image, customers can automate the deployment of edge nodes using the EMT standalone project.
 
+```mermaid
+block-beta
+  columns 1
+    block:APP      
+      WinVM(["Windows 11 VM using GPU for Display Virtualization"])      
+      LinuxVM(["Linux VM using GPU for AI compute offload"])
+    end    
+    block:RESOURCES
+      blockArrowId1<["GPU SR-IOV resource"]>(up)      
+      blockArrowId2<["Hugepage resource"]>(up)
+      blockArrowId3<["Multiple network resource"]>(up)
+      blockArrowId4<["GPU SR-IOV resource"]>(up)
+    end
+    block:KUBE      
+      K3S("k3s (Lightweight Kubernetes)")
+      SRIOV("Virtualization,Networking and SR-IOV GPU addons")
+    end
+    EMT["EMT Desktop Virtualization image with hypervisor and container runtime"]
+    GPU["Intel Integrated GPU"]
+    IntelCore["Intel Core-based Platform"]
+```
+
 ## Reference cloud-init for EMT image with Desktop Virtualization and networking features
 
 - NOTE: The linux username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
