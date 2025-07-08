@@ -63,7 +63,7 @@ cd edge-microvisor-toolkit-standalone-node
 ##### 3. Proxy settings
 
  **Note:** If the development system is behind a firewall, ensure to add
-  the proxy configuration in the standalone-node/hook_os/config file
+  the proxy configuration in the `standalone-node/hook_os/config` file.
 
 - Update the config file
 
@@ -168,7 +168,7 @@ cd edge-microvisor-toolkit-standalone-node
      - usb-bootable-files.tar.gz: The tar file containing bootable files
      - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
      - Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node
-     - User credentials: Set the username and password for the edge node
+     - User credentials: Set the username and password for the edge node.
      ```
 
 
@@ -241,7 +241,7 @@ commands.
    kubectl get pods -A
    ```
 
-5. Install Helm*:
+5. Install Helm:
 
    ```bash
    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -282,7 +282,7 @@ commands.
 
 ## Install GPU plugin - Node Feature Discovery (NFD)
 
-For information on NFD, see [here](https://intel.github.io/kubernetes-docs/device-plugins/index.html#device-management-in-kubernetes)
+For information on NFD, see [here](https://intel.github.io/kubernetes-docs/device-plugins/index.html#device-management-in-kubernetes).
 
 - Start NFD. If your cluster does not have NFD installed, use the following command: 
 
@@ -290,25 +290,25 @@ For information on NFD, see [here](https://intel.github.io/kubernetes-docs/devic
 	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.32.0'
 	```
 
-- Create NodeFeatureRules for detecting GPUs on nodes
+- Create node feature rules for detecting GPUs on nodes:
 
 	```sh
 	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.32.0'
 	```
 	
-- Create GPU plugin daemonset
+- Create GPU plugin daemonset:
 
 	```sh
 	kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/nfd_labeled_nodes?ref=v0.32.0'
 	```
 	
-- Check if the plugin is visible
+- Check if the plugin is visible:
 
 	```sh
 	kubectl get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{'\n'}{' i915: '}{.status.allocatable.gpu\.intel\.com/i915}{'\n'}"
 	```
 	
-- Output
+- Output:
 
 	![output](../output_image.png)
 
