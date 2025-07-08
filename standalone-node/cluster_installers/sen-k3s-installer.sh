@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH="${1:-/usr/bin}"
+K3S_BIN_PATH="${1:-/usr/local/bin}"
 
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
