@@ -3,3 +3,6 @@
 
 .. toctree::
    Get-Started-Guide
+   desktop-virtualization-image-guide
+   pre-loading-user-apps
+   emt-update-guide
