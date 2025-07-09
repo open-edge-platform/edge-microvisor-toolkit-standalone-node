@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+
 # SPDX-License-Identifier: Apache-2.0
 
 # README
@@ -16,14 +17,3 @@ For detailed instructions, refer to:
 
 - [Standalone Edge Node Installer Guide](./docs/standalone-edge-node-installer.md)
 - [Development Machine Usage Guide](./development-machine-usage.md)
-
-## Disabling the Default CNI
-
-By default, k3s uses flannel as its CNI. To use Multus or another CNI, disable flannel by creating a file at `/etc/rancher/k3s/config.yaml.d/00-disable-flannel.yaml` with the following content:
-
-```yaml
-flannel-backend: none
-disable-network-policy: true
-```
-
-You can automate this process by using a custom cloud-init configuration in your `config-file` when running the `bootable-usb-prepare` script.
