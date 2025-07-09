@@ -17,3 +17,5 @@ For detailed instructions, refer to:
 
 - [Standalone Edge Node Installer Guide](./docs/standalone-edge-node-installer.md)
 - [Development Machine Usage Guide](./development-machine-usage.md)
+
+For customizing the default CNI refer to the [k3s documentation](https://docs.k3s.io/networking/basic-network-options#flannel-options)
