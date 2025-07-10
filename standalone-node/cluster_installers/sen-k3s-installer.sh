@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH="${1:-/usr/bin}"
+K3S_BIN_PATH="${1:-/usr/local/bin}"
 
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
@@ -13,14 +13,10 @@ echo "$(date): Configuring k3s 1/12" | sudo tee /var/log/cluster-init.log | sudo
 sudo mkdir -p /etc/rancher/k3s
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
-cluster-init: true
 cluster-cidr: "10.42.0.0/16"
 cluster-dns: "10.43.0.10"
 data-dir : /var/lib/rancher/k3s
 disable-kube-proxy: false
-etcd-arg:
-  - --cipher-suites=[TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256,TLS_CHACHA20_POLY1305_SHA256]
-etcd-expose-metrics: false
 kube-apiserver-arg:
   - "feature-gates=PortForwardWebsockets=true"
   - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
@@ -42,11 +38,11 @@ sudo mkdir -p $K3S_BIN_PATH
 
 # Set up mirrors
 sudo bash -c 'cat << EOF >  /etc/rancher/k3s/registries.yaml
-mirrors: 
- docker.io: 
+mirrors:
+ docker.io:
    endpoint: ["https://localhost.internal:9443"]
-   
- rs-proxy.rs-proxy.svc.cluster.local:8443: 
+
+ rs-proxy.rs-proxy.svc.cluster.local:8443:
    endpoint: ["https://localhost.internal:9443"]
 EOF'
 
@@ -140,7 +136,7 @@ IP address of the Node:
 	$IP - Ensure IP address is persistent across the reboot!
         See: https://ranchermanager.docs.rancher.com/getting-started
 	/installation-and-upgrade/installation-requirements#node-ip-
-	addresses 
+	addresses
 
 To access and view the cluster's pods run:
   source /home/<default-user>/.bashrc

@@ -46,7 +46,7 @@ tar xf sen-k3s-package.tar.gz
 1. Wait for install to finish and then all pods to come up running
 
 ```shell
-sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/bin/k3s kubectl get pods -A
+sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl get pods -A
 ```
 TODO: move to /usr/local/bin/ when binaries are available.
 

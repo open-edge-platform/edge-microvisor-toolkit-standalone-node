@@ -213,20 +213,22 @@ create_user() {
 
     # Copy the config-file from usb device to disk
     mkdir -p /mnt1
-    mount -o ro "${usb_disk}${k8_part}" /mnt1
+    check_mnt_mount_exist
+    mount "${usb_disk}${k8_part}" /mnt1
 
     # Mount the OS disk
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     cp /mnt1/config-file /mnt/etc/cloud/
 
+    passwd=$(grep '^passwd=' "/mnt1/.psswd" | cut -d '=' -f2)
+   
     umount /mnt1
     rm -rf /mnt1
 
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
     user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
-    passwd=$(grep '^passwd=' "$CONFIG_FILE" | cut -d '=' -f2)
 
     echo -e "${BLUE}Creating the User Account!!${NC}" 
     # Mount all required partitions and do chroot to OS
@@ -416,7 +418,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
@@ -551,39 +553,51 @@ custom_cloud_init_updates() {
     # Check the host type and update cloud-init accordingly
     host_type=$(grep '^host_type=' "$CONFIG_FILE" | cut -d '=' -f2)
     host_type=$(echo "$host_type" | tr -d '"')
+    huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
 
+    # Update cloud-init file to start k3s stack installations for hosty type kubernetes
     if [ "$host_type" == "kubernetes" ]; then
-        # Update cloud-init file to start k3s stack installations
-        awk '
-          BEGIN {
-            line1 = "chmod +x /etc/cloud/k3s-configure.sh"
-            line2 = "bash /etc/cloud/k3s-configure.sh"
+
+	# If huge page value set make this line as start of cloud-init file
+        if [ -n "$huge_page_size" ]; then
+            line0="echo $(( huge_page_size )) | tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
+        else
+            line0=""
+        fi
+	# K3 configuration
+        line1="chmod +x /etc/cloud/k3s-configure.sh"
+        line2="bash /etc/cloud/k3s-configure.sh"
+
+        awk -v line0="$line0" -v line1="$line1" -v line2="$line2" '
+        BEGIN {
             runcmd = 0
             in_block = 0
-         }
+        }
 
-         /^runcmd:/ { runcmd = 1 }
+        /^runcmd:/ { runcmd = 1 }
 
-         runcmd && /^  - \|/ { in_block = 1 }
-         {
-             print
-             next_line = $0
-         }
+        runcmd && /^  - \|/ { in_block = 1 }
+        {
+            print
+        }
 
-         in_block && $0 !~ /^  / {
-              print "    " line1
-              print "    " line2
-              in_block = 0
-              runcmd = 0
-          }
+        in_block && $0 !~ /^  / {
+            if (line0 != "") print "    " line0
+            print "    " line1
+            print "    " line2
+            in_block = 0
+            runcmd = 0
+        }
 
-         END {
-             if (in_block) {
-                  print "    " line1
-                  print "    " line2
-             }
-         }
-         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+        END {
+            if (in_block) {
+                if (line0 != "") print "    " line0
+                     print "    " line1
+                     print "    " line2
+            }
+        }
+        ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+
     elif [ "$host_type" == "container" ]; then 
          # TODO: will be expand in future
 	 echo "host type is container , docker services will start"
