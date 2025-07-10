@@ -223,8 +223,6 @@ create_user() {
 
     passwd=$(grep '^passwd=' "/mnt1/.psswd" | cut -d '=' -f2)
    
-    # Remove the secret password file 
-    rm -rf /mnt1/.psswd
     umount /mnt1
     rm -rf /mnt1
 
