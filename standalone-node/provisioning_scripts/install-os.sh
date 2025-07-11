@@ -437,21 +437,17 @@ EOT
 
 # Change the boot order to disk
 boot_order_chage_to_disk() {
-    echo -e "${BLUE}Changing the Boot order to disk!!${NC}" 
-
-    boot_entry="Emt"
-    efiboot_part=1
-    EFI=""
+    echo -e "${BLUE}Changing the Boot order to disk!!${NC}"
 
     # Delete the pile up Ubuntu/Emt partitions from BIOS bootMenu
-    for bootnumber in $(efibootmgr | grep -iE "emt|Ubuntu" | awk '{print $1}' | sed 's/Boot//;s/\*//'); do
+    for bootnumber in $(efibootmgr | grep -iE "Linux Boot Manager|Ubuntu" | awk '{print $1}' | sed 's/Boot//;s/\*//'); do
         efibootmgr -b "$bootnumber" -B
     done
     # Delete the duplicate boot entries from bootmenu
     boot_order=$(efibootmgr -D)
     echo "$boot_order"
 
-    # Get the rootfs 
+    # Get the rootfs
     rootfs=$(blkid | grep -Ei 'TYPE="ext4"' | grep -Ei 'LABEL="rootfs"' | awk -F: '{print $1}')
 
     efiboot=$(blkid | grep -Ei 'TYPE="vfat"' | grep -Ei 'LABEL="esp|uefi"' |  awk -F: '{print $1}')
@@ -462,45 +458,37 @@ boot_order_chage_to_disk() {
         osdisk=$(echo "$rootfs" | grep -oE 'sd[a-z]+' | head -n 1)
     fi
 
+    # Mount all required partitions to create bootctl install entry
     check_mnt_mount_exist
+
     mount "${rootfs}" /mnt
     mount $efiboot /mnt/boot/efi
+    mount --bind /dev /mnt/dev
+    mount --bind /dev/pts /mnt/dev/pts
+    mount --bind /proc /mnt/proc
+    mount --bind /sys /mnt/sys
+    mount --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
 
-    # Get the EFI boot from chroot
-    EFI=$(chroot /mnt sh -c 'basename $(find /boot/efi/EFI/Linux -type f -iname "*.efi" | head -n1)') || { echo "EFI binary not present,please check"; return 1; } 
+    chroot /mnt /bin/bash <<EOT
+    set -e
+    bootctl install
+EOT
 
-    # Unmount the file systems
-    umount /mnt/boot/efi
-    umount /mnt
-
-    # Create the boot entry
-    new_boot_number=$(efibootmgr -c -d "/dev/${osdisk}" -p $efiboot_part -L "$boot_entry" -l "\\EFI\\Linux\\$EFI") || { echo "Failed to create new boot entry"; return 1; } 
-
-    echo "Successfully created the boot entry $efiboot_part"
-
-    new_boot_number=$(efibootmgr | grep -i Emt | grep -oP 'Boot\d{4}' | head -n1 | sed 's/Boot//')
-
-    echo "New boot number is $new_boot_number"
-
-    # Update the bootorder
-    usb_boot_number=$(efibootmgr | grep -i "Bootcurrent" | awk '{print $2}')
-
-    boot_order_cur=$(efibootmgr | grep -i "Bootorder" | awk '{print $2}')
-
-    if [ -n "$boot_order_cur" ]; then
-        final_boot_order="$new_boot_number,$boot_order_cur" || { echo "Final boot order change failed"; return 1; } 
+    if [ "$?" -eq 0 ]; then
+        success "Made Disk as first boot option"
+	#unmount the partitions
+        for mount in $(mount | grep '/mnt' | awk '{print $3}' | sort -nr); do
+            umount "$mount"
+        done
+        return 0
     else
-        final_boot_order="$new_boot_number" || { echo "Final boot order change failed"; return 1; } 
-    fi
-
-    # Update the boot order using efibootmgr
-    efibootmgr -o "$final_boot_order" || { echo "Updating the Boot order with new boot entry failed"; return 1; } 
-
-    #Make UEFI boot as inactive
-    efibootmgr -b "$usb_boot_number" -A
-
-    echo "Made Disk as first boot option"
-    return 0
+        failure "Boot entry create failed,Please check!!"
+	#unmount the partitions
+        for mount in $(mount | grep '/mnt' | awk '{print $3}' | sort -nr); do
+            umount "$mount"
+        done
+        return 1
+   fi
 }
 
 # Update the MAC address under 99-dhcp.conf file
