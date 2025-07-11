@@ -4,6 +4,8 @@
 # shellcheck disable=all
 
 K3S_BIN_PATH="${1:-/usr/local/bin}"
+AIRGAP="${2:-true}"
+BINARY_INSTALL="${3:-false}"
 
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
@@ -45,6 +47,26 @@ mirrors:
  rs-proxy.rs-proxy.svc.cluster.local:8443:
    endpoint: ["https://localhost.internal:9443"]
 EOF'
+
+if [ "$AIRGAP" = true ]; then
+  mkdir -p /var/lib/rancher/k3s/agent/images/
+  echo "Copying k3s airgap images and binary"
+  sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
+fi
+
+if [ "$BINARY_INSTALL" = true ]; then
+  mkdir -p $K3S_BIN_PATH
+  chmod +x k3s
+  cp k3s $K3S_BIN_PATH
+  cp install.sh /opt/install.sh
+fi
+
+if [ -d ./images ]; then
+  sudo mkdir -p /var/lib/rancher/k3s/agent/images/
+	sudo cp ./images/* /var/lib/rancher/k3s/agent/images
+fi
+
+
 
 echo "$(date): Installing k3s 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true sh /opt/install.sh
