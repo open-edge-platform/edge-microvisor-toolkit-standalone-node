@@ -542,6 +542,7 @@ enable_dmv(){
 
     format_verity_part
 
+    e2fsck -fy "${DEST_DISK}${suffix}${emt_persistent_partition}"
     resize2fs -f "${DEST_DISK}${suffix}${emt_persistent_partition}"
     check_return_value $? "Failed to resize fs of persistent partition"
 
