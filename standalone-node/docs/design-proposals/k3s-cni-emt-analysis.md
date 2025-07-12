@@ -82,16 +82,16 @@ The table below summarizes the container images that are part of the k3s airgap 
 
 #### K3s Airgap Image Contents vs Running Pods
 
-| Image Name                         | Tag                  | Description / Use                                                  | In Use (Running Pod) |
-| ---------------------------------- | -------------------- | ------------------------------------------------------------------ | -------------------- |
-| `rancher/klipper-helm`             | v0.9.5-build20250306 | K3s internal Helm controller for deploying Helm charts             | ❌ Not running        |
-| `rancher/klipper-lb`               | v0.4.13              | Lightweight LoadBalancer implementation used by K3s on bare metal  | ❌ Not running        |
-| `rancher/local-path-provisioner`   | v0.0.31              | Dynamic local PV provisioning (for storage)                        | ✅ Running            |
-| `rancher/mirrored-coredns-coredns` | 1.12.1               | CoreDNS service for DNS in the cluster                             | ✅ Running            |
-| `rancher/mirrored-library-busybox` | 1.36.1               | Minimal base image often used in testing/debug Pods                | ❌ Not running        |
-| `rancher/mirrored-library-traefik` | 3.3.6                | Default ingress controller (used only if enabled in K3s)           | ❌ Not running        |
-| `rancher/mirrored-metrics-server`  | v0.7.2               | Metrics server for resource usage metrics (used by HPA, etc.)      | ✅ Running            |
-| `rancher/mirrored-pause`           | 3.6                  | Pause container for pod sandboxing (used internally by Kubernetes) | ✅ Implicitly running |
+| Image Name                         | Tag                  | Description / Use                                                  | In Use (Running Pod)     |
+| ----------------------------------- | -------------------- | ------------------------------------------------------------------ | ------------------------ |
+| `rancher/klipper-helm`              | v0.9.5-build20250306 | K3s internal Helm controller for deploying Helm charts             | ❌ Not running           |
+| `rancher/klipper-lb`                | v0.4.13              | Lightweight LoadBalancer implementation used by K3s on bare metal  | ❌ Not running           |
+| `rancher/local-path-provisioner`    | v0.0.31              | Dynamic local PV provisioning (for storage)                        | ✅ Running               |
+| `rancher/mirrored-coredns-coredns`  | 1.12.1               | CoreDNS service for DNS in the cluster                             | ✅ Running               |
+| `rancher/mirrored-library-busybox`  | 1.36.1               | Minimal base image often used in testing/debug Pods                | ❌ Not running           |
+| `rancher/mirrored-library-traefik`  | 3.3.6                | Default ingress controller (used only if enabled in K3s)           | ❌ Not running           |
+| `rancher/mirrored-metrics-server`   | v0.7.2               | Metrics server for resource usage metrics (used by HPA, etc.)      | ✅ Running               |
+| `rancher/mirrored-pause`            | 3.6                  | Pause container for pod sandboxing (used internally by Kubernetes) | ✅ Implicitly running    |
 
 #### K3s Airgap continer images licenses
 
