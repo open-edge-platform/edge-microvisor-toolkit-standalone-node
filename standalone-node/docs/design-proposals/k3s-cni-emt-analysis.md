@@ -1,6 +1,6 @@
 # Analysis: K3s Container images and CNI support in EMT
 
-**Author(s):** Krishna Murthy
+**Author(s):** Krishna
 
 **Last Updated:** 2025-12-07
 
@@ -77,3 +77,33 @@ user@EdgeMicrovisorToolkit [ /opt/k3s-airgap ]$ cat repositories | jq
   }
 }
 ```
+
+The table below summarizes the container images that are part of the k3s airgap image and their corresponding tags.
+
+#### K3s Airgap Image Contents vs Running Pods
+
+| Image Name                         | Tag                  | Description / Use                                                  | In Use (Running Pod) |
+| ---------------------------------- | -------------------- | ------------------------------------------------------------------ | -------------------- |
+| `rancher/klipper-helm`             | v0.9.5-build20250306 | K3s internal Helm controller for deploying Helm charts             | ❌ Not running        |
+| `rancher/klipper-lb`               | v0.4.13              | Lightweight LoadBalancer implementation used by K3s on bare metal  | ❌ Not running        |
+| `rancher/local-path-provisioner`   | v0.0.31              | Dynamic local PV provisioning (for storage)                        | ✅ Running            |
+| `rancher/mirrored-coredns-coredns` | 1.12.1               | CoreDNS service for DNS in the cluster                             | ✅ Running            |
+| `rancher/mirrored-library-busybox` | 1.36.1               | Minimal base image often used in testing/debug Pods                | ❌ Not running        |
+| `rancher/mirrored-library-traefik` | 3.3.6                | Default ingress controller (used only if enabled in K3s)           | ❌ Not running        |
+| `rancher/mirrored-metrics-server`  | v0.7.2               | Metrics server for resource usage metrics (used by HPA, etc.)      | ✅ Running            |
+| `rancher/mirrored-pause`           | 3.6                  | Pause container for pod sandboxing (used internally by Kubernetes) | ✅ Implicitly running |
+
+#### K3s Airgap continer images licenses
+
+| Image Name                         | Tag                  | License      | License Link                                                                                  |
+|-------------------------------------|----------------------|--------------|----------------------------------------------------------------------------------------------|
+| rancher/klipper-helm                | v0.9.5-build20250306 | Apache-2.0   | <https://github.com/k3s-io/klipper-helm/blob/master/LICENSE>                                   |
+| rancher/klipper-lb                  | v0.4.13              | Apache-2.0   | <https://github.com/k3s-io/klipper-lb/blob/master/LICENSE>                                     |
+| rancher/local-path-provisioner      | v0.0.31              | Apache-2.0   | <https://github.com/rancher/local-path-provisioner/blob/master/LICENSE>                        |
+| rancher/mirrored-coredns-coredns    | 1.12.1               | Apache-2.0   | <https://github.com/coredns/coredns/blob/master/LICENSE>                                       |
+| rancher/mirrored-library-busybox    | 1.36.1               | GPL-2.0      | <https://github.com/mirror/busybox/blob/master/LICENSE>                                        |
+| rancher/mirrored-library-traefik    | 3.3.6                | MIT          | <https://github.com/traefik/traefik/blob/master/LICENSE.md>                                    |
+| rancher/mirrored-metrics-server     | v0.7.2               | Apache-2.0   | <https://github.com/kubernetes-sigs/metrics-server/blob/master/LICENSE>                        |
+| rancher/mirrored-pause              | 3.6
+
+Conclusion: The K3s airgap image contains several container images, but only a subset is actively used in the current EMT deployment. The images that are not running can be considered for removal to reduce the overall footprint.
