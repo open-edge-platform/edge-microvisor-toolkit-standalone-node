@@ -97,13 +97,13 @@ The table below summarizes the container images that are part of the k3s airgap 
 
 | Image Name                         | Tag                  | License      | License Link                                                                                  |
 |-------------------------------------|----------------------|--------------|----------------------------------------------------------------------------------------------|
-| rancher/klipper-helm                | v0.9.5-build20250306 | Apache-2.0   | <https://github.com/k3s-io/klipper-helm/blob/master/LICENSE>                                   |
-| rancher/klipper-lb                  | v0.4.13              | Apache-2.0   | <https://github.com/k3s-io/klipper-lb/blob/master/LICENSE>                                     |
-| rancher/local-path-provisioner      | v0.0.31              | Apache-2.0   | <https://github.com/rancher/local-path-provisioner/blob/master/LICENSE>                        |
-| rancher/mirrored-coredns-coredns    | 1.12.1               | Apache-2.0   | <https://github.com/coredns/coredns/blob/master/LICENSE>                                       |
-| rancher/mirrored-library-busybox    | 1.36.1               | GPL-2.0      | <https://github.com/mirror/busybox/blob/master/LICENSE>                                        |
-| rancher/mirrored-library-traefik    | 3.3.6                | MIT          | <https://github.com/traefik/traefik/blob/master/LICENSE.md>                                    |
-| rancher/mirrored-metrics-server     | v0.7.2               | Apache-2.0   | <https://github.com/kubernetes-sigs/metrics-server/blob/master/LICENSE>                        |
-| rancher/mirrored-pause              | 3.6
+| rancher/klipper-helm                | v0.9.5-build20250306 | Apache-2.0   | https://github.com/k3s-io/klipper-helm/blob/master/LICENSE                                   |
+| rancher/klipper-lb                  | v0.4.13              | Apache-2.0   | https://github.com/k3s-io/klipper-lb/blob/master/LICENSE                                     |
+| rancher/local-path-provisioner      | v0.0.31              | Apache-2.0   | https://github.com/rancher/local-path-provisioner/blob/master/LICENSE                        |
+| rancher/mirrored-coredns-coredns    | 1.12.1               | Apache-2.0   | https://github.com/coredns/coredns/blob/master/LICENSE                                       |
+| rancher/mirrored-library-busybox    | 1.36.1               | GPL-2.0      | https://github.com/mirror/busybox/blob/master/LICENSE                                        |
+| rancher/mirrored-library-traefik    | 3.3.6                | MIT          | https://github.com/traefik/traefik/blob/master/LICENSE.md                                    |
+| rancher/mirrored-metrics-server     | v0.7.2               | Apache-2.0   | https://github.com/kubernetes-sigs/metrics-server/blob/master/LICENSE                        |
+| rancher/mirrored-pause              | 3.6                  | Apache-2.0   | https://github.com/kubernetes/kubernetes/blob/master/LICENSE   
 
 Conclusion: The K3s airgap image contains several container images, but only a subset is actively used in the current EMT deployment. The images that are not running can be considered for removal to reduce the overall footprint.
