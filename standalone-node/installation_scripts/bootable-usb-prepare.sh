@@ -131,7 +131,7 @@ fi
 CONFIG_FILE="config-file"
 START_MARKER="^services:"
 
-# Extract YAML content from custome cloud-init-section
+# Extract YAML content from custom cloud-init-section
 # if any error,throw the erros  
 YAML_CONTENT=$(awk "/$START_MARKER/ {found=1} found" "$CONFIG_FILE")
 
@@ -203,7 +203,7 @@ prepare_usb_setup() {
     checksum_file="usb_files/checksums.md5"
     if [ -f "$checksum_file" ]; then
         pushd usb_files >/dev/null || exit
-        for file in emt-uos.iso edge_microvisor_toolkit.raw.gz sen-k3s-package.tar.gz; do
+        for file in emt-uos.iso edge_microvisor_toolkit.raw.gz; do
             if [ -f "$file" ]; then
                 calculated_md5=$(md5sum "$file" | awk '{print $1}')
                 expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
@@ -334,10 +334,10 @@ copy_files() {
     os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
     copy_to_partition "$OS_PART" "$os_filename" "/mnt"
     echo ""
-    echo "K3-Cluster scripts copying!!!"
+    echo "Custom files copying!!!"
 
-    if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt" && copy_to_partition "$K8_PART" "$(pwd)/.psswd" "/mnt";then
-        echo "K3-Cluster scripts done!"
+    if copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt" && copy_to_partition "$K8_PART" "$(pwd)/.psswd" "/mnt";then
+        echo "Custom files copied!"
     fi
     # Remove the hidden password file
     rm -rf $(pwd)/.psswd
@@ -372,6 +372,7 @@ copy_user_apps() {
             fi
 	fi
 	umount /mnt
+	sync
     fi
 }
 
@@ -411,7 +412,7 @@ main() {
 
     # Step 5: Copy the OS && K8S files to USB 
     USB_PREPARE_STEP=5
-    show_progress_bar "$USB_PREPARE_STEP" "Copying OS,K3S files to USB"
+    show_progress_bar "$USB_PREPARE_STEP" "Copying OS,Custom files to USB"
     if ! copy_files  >> "$LOG_FILE" 2>&1; then 
         echo -e "${RED}\nWARNING: Copying files to USB failed, but main process completed.${NC}"
     fi
