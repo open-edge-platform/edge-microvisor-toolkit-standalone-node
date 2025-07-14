@@ -3,12 +3,28 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-IMG_DIR=./images
+IMG_DIR=./user-apps
 TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
 ARIGAP=true
 BINARY_INSTALL=true
+IDV_EXTENSIONS=true
+INSTALL_TYPE="${1:-IDV}"
 
+if [ "$INSTALL_TYPE" == "IDV" ]; then
+	AIRGAP=true
+	BINARY_INSTALL=false
+	IDV_EXTENSIONS=true
+else
+	if [ "$INSTALL_TYPE" == "NON-RT" ]; then
+		AIRGAP=true
+		BINARY_INSTALL=false
+		IDV_EXTENSIONS=false
+	else
+		echo "Invalid INSTALL_TYPE. Use 'IDV' or 'NON-RT'."
+		exit 1
+	fi
+fi
 # List of pre-downloaded docker images
 images=(
 	docker.io/calico/cni:v3.30.1
@@ -29,7 +45,7 @@ download_k3s_artifacts () {
 # Download airgap images
 download_airgap_images () {
 	echo "Downloading k3s airgap images"
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst
+	cd ${IMG_DIR} && curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst && cd ..
 }
 
 # Download images
@@ -71,21 +87,17 @@ download_extension_images () {
 # Install required packages for download the images
 install_pkgs () {
     sudo apt update
-    sudo apt install -y podman libarchive-tools
-    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-    sudo apt install apt-transport-https --yes
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-    sudo apt update
-    sudo apt install helm
+    sudo apt install -y docker.io
 }
 
 # Main
-install_pkgs
 if [ "${BINARY_INSTALL}" = true ]; then
 	download_k3s_artifacts
 fi
 if [ "${ARIGAP}" = true ]; then
 	download_airgap_images
 fi
-download_extension_images
+if [ "${IDV_EXTENSIONS}" = true ]; then
+	download_extension_images
+fi
 

@@ -281,6 +281,7 @@ EOT
     cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-setup-post-reboot.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-configure.sh /mnt/etc/cloud/
+    cp /etc/scripts/sen-k3s-installer.sh /mnt/etc/cloud/
 
     umount /mnt
     return 0
