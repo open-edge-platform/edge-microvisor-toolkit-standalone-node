@@ -103,6 +103,8 @@ cp write-image-to-usb.sh out/
 cp config-file out/
 cp edgenode-logs-collection.sh out/
 cp standalone-vm-setup.sh out/
+cp download_images.sh out/
+cp sen-k3s-installer.sh out/
 cp -r user-apps out/
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
@@ -121,7 +123,7 @@ else
 fi
 
 if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename"  $checksum_file > /dev/null; then
-    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh user-apps; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh user-apps download_images.sh sen-k3s-installer.sh; then
         echo ""
         echo ""
         echo ""

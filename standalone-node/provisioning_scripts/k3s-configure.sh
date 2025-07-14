@@ -5,10 +5,7 @@
 
 # Start the cluster install scripts only once
 if [ ! -f "/var/lib/rancher/k3s_status" ]; then
-    mkdir -p /tmp/k3s-artifacts/
-    tar -xf /opt/sen-k3s-package.tar.gz -C /tmp/k3s-artifacts/
-
-    cd /tmp/k3s-artifacts/
+    cd /etc/cloud/
 
     chmod +x sen-k3s-installer.sh
 
