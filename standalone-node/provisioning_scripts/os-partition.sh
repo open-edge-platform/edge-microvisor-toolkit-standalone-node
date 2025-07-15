@@ -7,6 +7,7 @@ set -x
 
 ##global variables#####
 os_disk=""
+part_number=""
 data_part_number=""
 data_partition_disk=""
 rootfs_partition_disk=""
@@ -83,7 +84,14 @@ if [ "$swap_size" -ge "$disk_size" ]; then
 fi
 
 #get the partition for the rootfs for side B for A/B upgrades
-# secondary_rootfs_disk_num=$((data_part_number+1))
+secondary_rootfs_disk_num=$((data_part_number+1))
+if echo "$disk" | grep -q "nvme"; then
+    # shellcheck disable=SC2034  # secondary_rootfs_disk is used for A/B upgrade functionality
+    secondary_rootfs_disk="p${secondary_rootfs_disk_num}"
+else
+    # shellcheck disable=SC2034  # secondary_rootfs_disk is used for A/B upgrade functionality  
+    secondary_rootfs_disk="${secondary_rootfs_disk_num}"
+fi
 
 #get the last partition end point
 data_part_end=$(parted -m "$disk" unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')
@@ -138,10 +146,13 @@ data_partition_disk=$(blkid | grep -i "edge_persistent" | grep -i ext4 |  awk -F
 
 if echo "$rootfs_partition_disk" | grep -q "nvme"; then
     os_disk=$(echo "$rootfs_partition_disk" | grep -oE 'nvme[0-9]+n[0-9]+' | head -n 1)
-    # part_number="p"
+    # shellcheck disable=SC2034  # part_number used for disk naming consistency
+    part_number="p"
     data_part_number=$(blkid | grep "edge_persistent" | awk -F'[/:]' '{print $3}'| awk -F'p' '{print $2}')
 else
     os_disk=$(echo "$rootfs_partition_disk" | grep -oE 'sd[a-z]+' | head -n 1)
+    # shellcheck disable=SC2034  # part_number used for disk naming consistency
+    part_number=""
     data_part_number=$(blkid | grep "edge_persistent" | awk -F'[/:]' '{print $3}' | sed 's/[^0-9]*//g')
 fi
 
