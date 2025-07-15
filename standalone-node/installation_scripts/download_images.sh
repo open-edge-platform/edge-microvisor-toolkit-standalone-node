@@ -55,7 +55,7 @@ download_k3s_artifacts () {
 # Download airgap images
 download_airgap_images () {
 	echo "Downloading k3s airgap images"
-	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
+	mkdir -p ${OUT_DIR}/${IMG_DIR}
 	cd ${OUT_DIR}/${IMG_DIR} && curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst && cd ../../
 }
 
@@ -63,6 +63,7 @@ download_airgap_images () {
 download_extension_manifests () {
 	echo "Downloading extension manifests"
 	mkdir -p ${OUT_DIR}/${MANIFEST_DIR}
+	cd ${OUT_DIR}/${MANIFEST_DIR}
 	for manifest in "${manifests[@]}" ; do
 		name=$(basename "${manifest}")
 		curl -OLs "${manifest}" -o "${OUT_DIR}/${MANIFEST_DIR}/${name}"
@@ -71,6 +72,7 @@ download_extension_manifests () {
 			exit 1
 		fi
 	done
+	cd ../../
 }
 # Download images
 download_extension_images () {
