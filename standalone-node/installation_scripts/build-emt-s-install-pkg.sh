@@ -104,16 +104,7 @@ cp config-file out/
 cp edgenode-logs-collection.sh out/
 cp standalone-vm-setup.sh out/
 cp download_images.sh out/
-cp sen-k3s-installer.sh out/
 cp -r user-apps out/
-# Copy k3s binary and install.sh if k3s exists
-if [ -f k3s ]; then
-    cp /k3s out/
-    if [ -f install.sh ]; then
-        cp install.sh out/
-        K3S_FILES= "install.sh k3s"
-    fi
-fi
 
 # Pack hook-os-iso,tvm image,k8-scripts as tar.gz
 pushd out > /dev/null || return 1
@@ -131,7 +122,7 @@ else
 fi
 
 if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename"  $checksum_file > /dev/null; then
-    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh user-apps download_images.sh sen-k3s-installer.sh $K3S_FILES; then
+    if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh user-apps download_images.sh; then
         echo ""
         echo ""
         echo ""
