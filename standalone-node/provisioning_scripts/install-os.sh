@@ -281,6 +281,7 @@ EOT
     cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-setup-post-reboot.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-configure.sh /mnt/etc/cloud/
+    cp /etc/scripts/sen-k3s-installer.sh /mnt/etc/cloud/
 
     umount /mnt
     return 0
@@ -389,7 +390,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
