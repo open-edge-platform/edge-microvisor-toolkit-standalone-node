@@ -56,9 +56,9 @@ images=(
 )
 
 manifests=(
-	https://github.com/k8snetworkplumbingwg/multus-cni/blob/v4.2.1/deployments/multus-daemonset.yml
-	https://github.com/intel/intel-device-plugins-for-kubernetes/blob/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
-	https://github.com/projectcalico/calico/blob/v3.30.1/manifests/calico.yaml
+	https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/v4.2.1/deployments/multus-daemonset.yml
+	https://raw.githubusercontent.com/intel/intel-device-plugins-for-kubernetes/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
+	https://raw.githubusercontent.com/projectcalico/calico/v3.30.1/manifests/calico.yaml
 )
 
 # Download k3s artifacts
@@ -89,7 +89,11 @@ download_extension_manifests () {
 		curl -OLs "${manifest}" -o "${OUT_DIR}/${MANIFEST_DIR}/${name}"
 		if [ $? -ne 0 ]; then
 			echo "Failed to download ${name}"
-			exit 1
+			exit 1			
+		fi
+		if [[ "${name}" == "multus-daemonset.yml" ]]; then
+			# Replace the image tag in the multus manifest
+			sed -i 's|ghcr.io/k8snetworkplumbingwg/multus-cni:snapshot|ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1|g' "${name}"		
 		fi
 	done
 	cd ../../
