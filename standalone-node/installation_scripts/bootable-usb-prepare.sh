@@ -113,7 +113,7 @@ fi
 # Ask the password from cmd line 
 echo -n "Please Set the Password for $user_name: "
 stty -echo
-read -r password
+read password
 stty echo
 echo 
 
@@ -124,19 +124,19 @@ chmod 600 "$(pwd)/.psswd"
 # Validate the custom-cloud-init section
 if ! dpkg -s python3 > /dev/null 2>&1; then
     apt install -y python3 > /dev/null 2>&1
-    if ! apt install -y python3 > /dev/null 2>&1; then
+    if [ "$?" -ne 0 ]; then
         echo "Pyhon installation failed,please check!!"
     fi
 fi
 CONFIG_FILE="config-file"
 START_MARKER="^services:"
 
-# Extract YAML content from custom cloud-init-section
+# Extract YAML content from custome cloud-init-section
 # if any error,throw the erros  
 YAML_CONTENT=$(awk "/$START_MARKER/ {found=1} found" "$CONFIG_FILE")
 
 # Validate using Python
-if ! echo "$YAML_CONTENT" | python3 -c '
+echo "$YAML_CONTENT" | python3 -c '
 import sys, yaml
 
 try:
@@ -158,7 +158,9 @@ try:
 except yaml.YAMLError as e:
     print("Custom cloud-init YAML is invalid:\n", e)
     sys.exit(1)
-'; then
+'
+# Catch the Error
+if [ "$?" -ne 0 ]; then
     echo "Custome cloud-init file is not valiad,Please check!!"
     exit 1
 fi
@@ -201,7 +203,7 @@ prepare_usb_setup() {
     checksum_file="usb_files/checksums.md5"
     if [ -f "$checksum_file" ]; then
         pushd usb_files >/dev/null || exit
-        for file in emt-uos.iso edge_microvisor_toolkit.raw.gz; do
+        for file in emt-uos.iso edge_microvisor_toolkit.raw.gz sen-k3s-package.tar.gz; do
             if [ -f "$file" ]; then
                 calculated_md5=$(md5sum "$file" | awk '{print $1}')
                 expected_md5=$(grep "$file" checksums.md5 | awk '{print $1}')
@@ -332,13 +334,13 @@ copy_files() {
     os_filename=$(printf "%s\n" usb_files/*.raw.gz 2>/dev/null | head -n 1)
     copy_to_partition "$OS_PART" "$os_filename" "/mnt"
     echo ""
-    echo "Custom files copying!!!"
+    echo "K3-Cluster scripts copying!!!"
 
-    if copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt" && copy_to_partition "$K8_PART" "$(pwd)/.psswd" "/mnt";then
-        echo "Custom files copied!"
+    if copy_to_partition "$K8_PART" "usb_files/sen-k3s-package.tar.gz" "/mnt" && copy_to_partition "$K8_PART" "$CONFIG_FILE" "/mnt" && copy_to_partition "$K8_PART" "$(pwd)/.psswd" "/mnt";then
+        echo "K3-Cluster scripts done!"
     fi
     # Remove the hidden password file
-    rm -rf "$(pwd)/.psswd"
+    rm -rf $(pwd)/.psswd
 }
 copy_user_apps() {
     echo "Copying user-apps to USB device..."
@@ -348,11 +350,11 @@ copy_user_apps() {
             USER_APPS_PART="p$USER_APPS_PART"
         fi
 	check_mnt_mount_exist
-        mount "${USB_DEVICE}${USER_APPS_PART}" /mnt
+        mount ${USB_DEVICE}${USER_APPS_PART} /mnt
         # Use rsync for fater copr
 	if dpkg -s rsync; then 
 	    rsync -ah --inplace user-apps /mnt/
-	    if rsync -ah --inplace user-apps /mnt/; then 
+	    if [ "$?" -eq 0 ]; then 
 	        echo "user-apps data copied successfully"
 	    else
 		echo "user-apps data failes to copy please check!!"
@@ -361,7 +363,7 @@ copy_user_apps() {
 	    fi
 	else 
 	    cp -r user-apps /mnt
-	    if cp -r user-apps /mnt; then
+	    if [ "$?" -eq 0 ]; then
                 echo "user-apps data copied successfully"
             else
                 echo "user-apps data failes to copy please check!!"
@@ -370,7 +372,6 @@ copy_user_apps() {
             fi
 	fi
 	umount /mnt
-	sync
     fi
 }
 
@@ -410,7 +411,7 @@ main() {
 
     # Step 5: Copy the OS && K8S files to USB 
     USB_PREPARE_STEP=5
-    show_progress_bar "$USB_PREPARE_STEP" "Copying OS,Custom files to USB"
+    show_progress_bar "$USB_PREPARE_STEP" "Copying OS,K3S files to USB"
     if ! copy_files  >> "$LOG_FILE" 2>&1; then 
         echo -e "${RED}\nWARNING: Copying files to USB failed, but main process completed.${NC}"
     fi
