@@ -13,12 +13,10 @@ INSTALL_TYPE="${1:-IDV}"
 
 if [ "$INSTALL_TYPE" == "IDV" ]; then
 	AIRGAP=true
-	BINARY_INSTALL=false
 	IDV_EXTENSIONS=true
 else
 	if [ "$INSTALL_TYPE" == "NON-RT" ]; then
 		AIRGAP=true
-		BINARY_INSTALL=false
 		IDV_EXTENSIONS=false
 	else
 		echo "Invalid INSTALL_TYPE. Use 'IDV' or 'NON-RT'."
