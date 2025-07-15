@@ -162,7 +162,7 @@ get_block_device_details() {
     # Remove previous LVM's data if exist
     vgname="lvmvg"
     vgremove -f "$vgname"
-    rm -rf  /dev/$vgname/
+    rm -rf  "/dev/${vgname:?}/"
     rm -rf  /dev/mapper/lvmvg-pv*
     dmsetup remove_all
     # Remove previous Physical volumes if exist
@@ -464,10 +464,10 @@ boot_order_chage_to_disk() {
 
     check_mnt_mount_exist
     mount "${rootfs}" /mnt
-    mount $efiboot /mnt/boot/efi
+    mount "$efiboot" /mnt/boot/efi
 
     # Get the EFI boot from chroot
-    EFI=$(chroot /mnt sh -c 'basename $(find /boot/efi/EFI/Linux -type f -iname "*.efi" | head -n1)') || { echo "EFI binary not present,please check"; return 1; } 
+    EFI=$(chroot /mnt sh -c "basename \$(find /boot/efi/EFI/Linux -type f -iname '*.efi' | head -n1)") || { echo "EFI binary not present,please check"; return 1; } 
 
     # Unmount the file systems
     umount /mnt/boot/efi
@@ -526,7 +526,7 @@ enable_dm_verity() {
     echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC}"
     dm_verity_script=/etc/scripts/enable-dmv.sh
 
-    if bash $dm_verity_script $lvm_size; then
+    if bash $dm_verity_script "$lvm_size"; then
         success "DM Verity and Partitions successful on $os_disk"
     else
         failure "DM Verity and Partitions failed on $os_disk,Please check!!"

@@ -3,8 +3,22 @@
 # SPDX-FileCopyrightText: (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Download the Edge Microvisor Toolkit uOS from open source no-auth file server
+
+# Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
+#FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
+#EMT_BUILD_DATE=20250604
+#EMT_FILE_NAME="microvisor/uos/emt_uos_x86_64_${EMT_BUILD_DATE}"
+#EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
+
+
+#curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
+
+# TO DO: Use no-auth file server registry to download the Edge Microvisor Toolkit image
+#FILE_RS_URL="https://af01p-png.devtools.intel.com/artifactory/edge_system-png-local/images"
+#EMT_BUILD_DATE=20250625.0555
+#EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
+
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
 EMT_BUILD_DATE=20250710
 EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"

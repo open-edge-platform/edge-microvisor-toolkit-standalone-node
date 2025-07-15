@@ -1,12 +1,41 @@
-# Standalone Node USB based provisioning
+# Get Started
 
-## Get Started
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
+build your own bootable USB from source code, or use the downloadable ISO
+image that can be flashed to a USB device and installed on edge nodes. It
+installs the microvisor and Kubernetes to the edge node with the essential
+functionality to run a single node cluster. The edge node will serve as both the
+control and worker node. Additional worker nodes can be added to the cluster
+through Kubernetes.
 
-The current release of the Edge Microvisor Toolkit Standalone Node supports the creation of a bootable USB drive
-on Linux based operating systems. This section provides step-by-step instructions to set up the environment required
+Future releases will enable standalone edge nodes to join an existing Edge
+Management Framework backend, deployed on-prem or in the cloud to support scale
+out and management of larger infrastructures. The Standalone Edge Node enables
+you to quickly get an edge node up and running without deploying backend
+services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
+Kubernetes web dashboard.
+
+> **Note**: The standalone edge node does not currently support the real-time version.
+
+## Standalone Node Provisioning
+
+There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
+
+### Creating a bootable USB from downloadable ISO image
+
+You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
+[Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
+Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
+[Deployment](#standalone-node-deployment) section.
+
+### Creating a bootable USB from Source Code
+
+On Linux based operating systems you can also create a bootable USB drive from source code.
+This section provides step-by-step instructions to set up the environment required
 for USB-based provisioning for the standalone node.
 
-Source code for the Edge Microvisor Toolkit Standalone Node is available at [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
+Source code for the Edge Microvisor Toolkit Standalone Node is available at
+[Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
 Following EMT images are supported to meet specific needs of edge deployment:
@@ -42,8 +71,6 @@ flowchart TD
 
 ### Step 1: Prerequisites
 
-> **Note:** Ubuntu 22.04 is the preferred OS for the build setup.
-
 #### 1.1: Repository Setup
 
 Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
@@ -63,10 +90,15 @@ cd edge-microvisor-toolkit-standalone-node
 
    ```
 
-> **Note:** This command will build the hook OS and generate the `sen-installation-files.tar.gz` file.  
+> **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
 #### 1.3:  Prepare the USB Drive
+
+> **Note:**
+>
+> - Ensure **the correct USB drive is selected** to avoid data loss.
+> - **Replace /dev/sdX** with the actual device name of your USB drive.
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
@@ -76,13 +108,12 @@ cd edge-microvisor-toolkit-standalone-node
 
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Use the wipefs command to remove any existing filesystem signatures from the USB drive. This ensures a clean slate for formatting
+- Use the wipefs command to remove any existing filesystem signatures from the USB drive. 
+  This ensures a clean slate for formatting
 
    ```bash
    sudo wipefs --all --force /dev/sdX
    ```
-
-   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
 
 - Format the USB drive with a FAT32 filesystem using the mkfs.vfat command.
 
@@ -90,7 +121,19 @@ cd edge-microvisor-toolkit-standalone-node
    sudo mkfs.vfat /dev/sdX
    ```
 
-   > **Note:** Replace /dev/sdX with the actual device name of your USB drive.
+- Unmount the USB drive to ensure the creation of bootable USB.
+
+  - Check what is currently mounted:
+
+    ```bash
+    df -hT
+    ```
+
+  - Unmount the drive:
+
+    ```bash
+    sudo umount /dev/sdX
+    ```
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
