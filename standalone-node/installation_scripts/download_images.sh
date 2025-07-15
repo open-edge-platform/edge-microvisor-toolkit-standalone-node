@@ -3,7 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-IMG_DIR=./user-apps
+OUT_DIR=./user-apps
+IMG_DIR=images
+MANIFEST_DIR=manifests
+ARTIFACT_DIR=artifacts
 TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
 ARIGAP=true
@@ -32,25 +35,48 @@ images=(
 	docker.io/intel/intel-gpu-plugin:0.32.1
 )
 
+manifests=(
+	https://github.com/k8snetworkplumbingwg/multus-cni/blob/v4.2.1/deployments/multus-daemonset.yml
+	https://github.com/intel/intel-device-plugins-for-kubernetes/blob/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
+	https://github.com/projectcalico/calico/blob/v3.30.1/manifests/calico.yaml
+)
+
 # Download k3s artifacts
 download_k3s_artifacts () {
 	echo "Downloading k3s artifacts"
+	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
+	cd ${OUT_DIR}/${ARTIFACT_DIR}
 	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/sha256sum-amd64.txt
 	curl -sfL https://get.k3s.io --output install.sh
 	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s
+	cd ../../
 }
 
 # Download airgap images
 download_airgap_images () {
 	echo "Downloading k3s airgap images"
-	cd ${IMG_DIR} && curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst && cd ..
+	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
+	cd ${OUT_DIR}/${IMG_DIR} && curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst && cd ../../
 }
 
+# Download extension manifests
+download_extension_manifests () {
+	echo "Downloading extension manifests"
+	mkdir -p ${OUT_DIR}/${MANIFEST_DIR}
+	for manifest in "${manifests[@]}" ; do
+		name=$(basename "${manifest}")
+		curl -OLs "${manifest}" -o "${OUT_DIR}/${MANIFEST_DIR}/${name}"
+		if [ $? -ne 0 ]; then
+			echo "Failed to download ${name}"
+			exit 1
+		fi
+	done
+}
 # Download images
 download_extension_images () {
 	
 	echo "Downloading container images"
-	mkdir -p ${IMG_DIR}
+	mkdir -p ${OUT_DIR}/${IMG_DIR}
 	for image in "${images[@]}" ; do
 		## check if image exists already in podman
 		if docker image inspect ${image} > /dev/null 2>&1; then
@@ -59,7 +85,7 @@ download_extension_images () {
 			docker pull ${image}
 		fi
 		img_name=$(echo ${image##*/} | tr ':' '-')
-		DEST=${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}
+		DEST=${OUT_DIR}/${IMG_DIR}/${TAR_PRX}-${img_name}.${TAR_SFX}
 		docker save -o ${DEST}.tmp ${image}
 		# Create temp dirs for processing
         mkdir -p /tmp/image_repacking/{manifest,content}
@@ -97,5 +123,5 @@ if [ "${ARIGAP}" = true ]; then
 fi
 if [ "${IDV_EXTENSIONS}" = true ]; then
 	download_extension_images
+	download_extension_manifests
 fi
-

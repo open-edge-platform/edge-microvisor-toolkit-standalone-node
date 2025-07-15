@@ -51,19 +51,28 @@ EOF'
 if [ "$AIRGAP" = true ]; then
   mkdir -p /var/lib/rancher/k3s/agent/images/
   echo "Copying k3s airgap images and binary"
-  sudo cp k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
+  sudo cp /opt/user-apps/images/k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
 fi
 
 if [ "$BINARY_INSTALL" = true ]; then
   mkdir -p $K3S_BIN_PATH
-  chmod +x k3s
-  cp k3s $K3S_BIN_PATH
-  cp install.sh /opt/install.sh
+  # check k3s artifacts exist
+  if [ ! -f /opt/user-apps/artifacts/k3s ]; then
+    echo "k3s binary not found in /user-apps/artifacts/"
+    exit 1
+  fi
+  if [ ! -f /opt/user-apps/artifacts/install.sh ]; then
+    echo "k3s install script not found in /user-apps/artifacts/"
+    exit 1
+  fi
+  chmod +x /opt/user-apps/artifacts/k3s
+  cp /opt/user-apps/artifacts/k3s $K3S_BIN_PATH
+  cp /opt/user-apps/artifacts/install.sh /opt/install.sh
 fi
 
-if [ -d ./images ]; then
+if [ -d /opt/user-apps/images ]; then
   sudo mkdir -p /var/lib/rancher/k3s/agent/images/
-	sudo cp ./images/* /var/lib/rancher/k3s/agent/images
+	sudo cp /opt/user-apps/images/* /var/lib/rancher/k3s/agent/images
 fi
 
 
