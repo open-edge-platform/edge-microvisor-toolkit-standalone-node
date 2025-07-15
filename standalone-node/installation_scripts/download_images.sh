@@ -12,15 +12,21 @@ TAR_SFX=linux-amd64.tar
 ARIGAP=true
 BINARY_INSTALL=true
 IDV_EXTENSIONS=true
+IDV_KUBEVIRT=true
+IDV_DEVICE_PLUGINS=true
 INSTALL_TYPE="${1:-IDV}"
 
 if [ "$INSTALL_TYPE" == "IDV" ]; then
 	AIRGAP=true
 	IDV_EXTENSIONS=true
+	IDV_KUBEVIRT=true
+	IDV_DEVICE_PLUGINS=true
 else
 	if [ "$INSTALL_TYPE" == "NON-RT" ]; then
 		AIRGAP=true
 		IDV_EXTENSIONS=false
+		IDV_KUBEVIRT=false
+		IDV_DEVICE_PLUGINS=false
 	else
 		echo "Invalid INSTALL_TYPE. Use 'IDV' or 'NON-RT'."
 		exit 1
@@ -110,6 +116,46 @@ download_extension_images () {
 	done
 }
 
+# Download Intel IDV kubevirt images and manifests
+download_idv_kubevirt_images_and_manifests () {
+	echo "Downloading idv kubevirt artifacts"
+	# download the artifacts
+	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
+	cd ${OUT_DIR}/${ARTIFACT_DIR}
+	curl -OLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-kubevirt-1.0.0-rc2.tar.gz
+	# untar
+	tar -xzf intel-idv-kubevirt-1.0.0-rc2.tar.gz -C .
+	# copy all the images (.zst) to required destination
+	mkdir -p ../../${OUT_DIR}/${IMG_DIR}
+	cp intel-idv-kubevirt-1.0.0-rc2/*.zst ../../${OUT_DIR}/${IMG_DIR}
+	# copy all manifests to required destination
+	mkdir -p ../../${OUT_DIR}/${MANIFEST_DIR}
+	cp intel-idv-kubevirt-1.0.0-rc2/*.yaml ../../${OUT_DIR}/${MANIFEST_DIR}
+	rm -rf intel-idv-kubevirt-1.0.0-rc2.tar.gz
+	rm -rf intel-idv-kubevirt-1.0.0-rc2
+	cd ../../
+}
+
+# Download Intel IDV device plugin images and manifests
+download_idv_device_plugins_images_and_manifests () {
+	echo "Downloading idv device plugin artifacts"
+	# download the artifacts
+	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
+	cd ${OUT_DIR}/${ARTIFACT_DIR}
+	curl -OLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-device-plugin-1.0.0-rc2.tar.gz
+	# untar
+	tar -xzf intel-idv-device-plugin-1.0.0-rc2.tar.gz -C .
+	# copy all the images (.zst) to required destination
+	mkdir -p ../../${OUT_DIR}/${IMG_DIR}
+	cp intel-idv-device-plugin-1.0.0-rc2/*.zst ../../${OUT_DIR}/${IMG_DIR}
+	# copy all manifests to required destination
+	mkdir -p ../../${OUT_DIR}/${MANIFEST_DIR}
+	cp intel-idv-device-plugin-1.0.0-rc2/*.yaml ../../${OUT_DIR}/${MANIFEST_DIR}
+	rm -rf intel-idv-device-plugin-1.0.0-rc2.tar.gz
+	rm -rf intel-idv-device-plugin-1.0.0-rc2
+	cd ../../
+}
+
 # Install required packages for download the images
 install_pkgs () {
     sudo apt update
@@ -127,3 +173,10 @@ if [ "${IDV_EXTENSIONS}" = true ]; then
 	download_extension_images
 	download_extension_manifests
 fi
+if [ "${IDV_KUBEVIRT}" = true ]; then
+	download_idv_kubevirt_images_and_manifests
+fi
+if [ "${IDV_DEVICE_PLUGINS}" = true ]; then
+	download_idv_device_plugins_images_and_manifests
+fi
+
