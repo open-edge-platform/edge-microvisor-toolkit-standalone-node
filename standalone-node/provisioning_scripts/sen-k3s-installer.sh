@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH="${1:-/usr/local/bin}"
+K3S_BIN_PATH="${1:-/var/lib/rancher/k3s/bin}"
 AIRGAP="${2:-true}"
-BINARY_INSTALL="${3:-false}"
+BINARY_INSTALL="${3:-true}"
 
 #Remove log file
 sudo rm -rf /var/log/cluster-init.log
@@ -66,6 +66,7 @@ if [ "$BINARY_INSTALL" = true ]; then
     exit 1
   fi
   chmod +x /opt/user-apps/artifacts/k3s
+  chmod +x /opt/user-apps/artifacts/install.sh
   cp /opt/user-apps/artifacts/k3s $K3S_BIN_PATH
   cp /opt/user-apps/artifacts/install.sh /opt/install.sh
 fi
@@ -75,7 +76,10 @@ if [ -d /opt/user-apps/images ]; then
 	sudo cp /opt/user-apps/images/* /var/lib/rancher/k3s/agent/images
 fi
 
-
+if [ -d /opt/user-apps/manifests ]; then
+  sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
+  sudo cp /opt/user-apps/manifests/* /var/lib/rancher/k3s/server/manifests
+fi
 
 echo "$(date): Installing k3s 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
 sudo INSTALL_K3S_BIN_DIR=$K3S_BIN_PATH INSTALL_K3S_SKIP_DOWNLOAD=true INSTALL_K3S_SYMLINK='skip' INSTALL_K3S_BIN_DIR_READ_ONLY=true sh /opt/install.sh

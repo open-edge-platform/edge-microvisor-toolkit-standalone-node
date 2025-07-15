@@ -390,7 +390,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT

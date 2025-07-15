@@ -344,7 +344,7 @@ parse_custom_network_config() {
 
 # Check if K3s is installed
 check_k3s_installed() {
-    if command -v k3s >/dev/null 2>&1 || command -v /usr/local/bin/k3s kubectl >/dev/null 2>&1; then
+    if command -v k3s >/dev/null 2>&1 || command -v /var/lib/rancher/k3s/bin/k3s kubectl >/dev/null 2>&1; then
         return 0
     else
         return 1
@@ -353,7 +353,7 @@ check_k3s_installed() {
 
 # Check if NetworkAttachmentDefinition CRD exists
 check_nad_crd() {
-    if /usr/local/bin/k3s kubectl get crd network-attachment-definitions.k8s.cni.cncf.io >/dev/null 2>&1; then
+    if /var/lib/rancher/k3s/bin/k3s kubectl get crd network-attachment-definitions.k8s.cni.cncf.io >/dev/null 2>&1; then
         return 0
     else
         return 1
@@ -368,7 +368,7 @@ apply_network_attachment_definition() {
     local range_start="$4"
     local range_end="$5"
     local gateway="$6"
-    cat <<EOF | /usr/local/bin/k3s kubectl apply -f -
+    cat <<EOF | /var/lib/rancher/k3s/bin/k3s kubectl apply -f -
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -421,7 +421,7 @@ main() {
         br_check_custom_network_config "$CONF_FILE"
         parse_custom_network_config "$CONF_FILE"
 
-        # Wait for K3s (or /usr/local/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
+        # Wait for K3s (or /var/lib/rancher/k3s/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
         retries=0
         max_retries=300  # e.g., 5 minutes
         until check_k3s_installed && check_nad_crd; do
