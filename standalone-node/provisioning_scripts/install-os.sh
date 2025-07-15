@@ -13,8 +13,8 @@ usb_count=""
 blk_devices=""
 os_disk=""
 os_part=5
-k8_part=6
-g_vms_part=7
+conf_part=6
+user_apps_part=7
 os_rootfs_part=2
 os_data_part=3
 deploy_mode="real"
@@ -30,7 +30,7 @@ NC='\033[0m'
 YELLOW='\033[0;33m'
 
 BAR_WIDTH=50
-TOTAL_PROVISION_STEPS=9
+TOTAL_PROVISION_STEPS=8
 PROVISION_STEP=0
 MAX_STATUS_MESSAGE_LENGTH=25
 
@@ -44,7 +44,7 @@ CLOUD_INIT_FILE=""
 # Dump the failure logs to USB for debugging
 dump_logs_to_usb() {
     # Mount the USB
-    mount "${usb_disk}${k8_part}" /mnt
+    mount "${usb_disk}${conf_part}" /mnt
     cp /var/log/os-installer.log /mnt
     umount /mnt
 }
@@ -107,22 +107,15 @@ get_usb_details() {
     else
         umount /mnt
     fi
-    #check_mnt_mount_exist
-    mount -o ro "${usb_disk}${k8_part}" /mnt
-    if ! ls /mnt/sen*.tar.gz >/dev/null 2>&1; then
-        failure "K8* Script File not Found, exiting the installation."
+    mount -o ro "${usb_disk}${conf_part}" /mnt
+    if ! ls /mnt/config-file >/dev/null 2>&1; then
+        failure "Configuration file not Found, exiting the installation."
         umount /mnt
         return 1 
-    else
-        if ! ls /mnt/config-file >/dev/null 2>&1; then
-            failure "Configuration file not Found, exiting the installation."
-            umount /mnt
-            return 1 
-        fi
-        umount /mnt
     fi
+    umount /mnt
     #check_mnt_mount_exist
-    mount -o ro "${usb_disk}${g_vms_part}" /mnt
+    mount -o ro "${usb_disk}${user_apps_part}" /mnt
     if [ -d "/mnt/user-apps" ]; then
         user_apps_data="true"
     fi
@@ -162,7 +155,7 @@ get_block_device_details() {
     # Remove previous LVM's data if exist
     vgname="lvmvg"
     vgremove -f "$vgname"
-    rm -rf  /dev/$vgname/
+    rm -rf  "/dev/${vgname:?}/"
     rm -rf  /dev/mapper/lvmvg-pv*
     dmsetup remove_all
     # Remove previous Physical volumes if exist
@@ -214,7 +207,7 @@ create_user() {
     # Copy the config-file from usb device to disk
     mkdir -p /mnt1
     check_mnt_mount_exist
-    mount "${usb_disk}${k8_part}" /mnt1
+    mount "${usb_disk}${conf_part}" /mnt1
 
     # Mount the OS disk
     check_mnt_mount_exist
@@ -288,30 +281,9 @@ EOT
     cp /etc/scripts/collect-logs.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-setup-post-reboot.sh /mnt/etc/cloud/
     cp /etc/scripts/k3s-configure.sh /mnt/etc/cloud/
+    cp /etc/scripts/sen-k3s-installer.sh /mnt/etc/cloud/
 
     umount /mnt
-    return 0
-}
-
-# Install K8* script to OS disk under /opt
-install_k8_script() {
-    echo -e "${BLUE}Copying the K8 Cluster Scripts!!${NC}" 
-    # Copy the scripts from USB disk to /opt on the disk
-    mkdir -p /mnt2
-    mount -o ro "${usb_disk}${k8_part}" /mnt2
-
-    # Mount the OS disk
-    check_mnt_mount_exist
-
-    if mount "$os_disk$os_data_part" /mnt && cp /mnt2/sen-k3s-package.tar.gz /mnt/; then
-        success "Successfuly copied the K8 scripts to /opt on the disk"
-    else
-        failure "Fail to copy the K8 scripts to /opt on the disk,please check!!!"
-        return 1 
-    fi
-    umount /mnt2
-    umount /mnt
-    rm -rf /mnt2
     return 0
 }
 
@@ -319,7 +291,7 @@ install_k8_script() {
 setup_proxy_settings() {
     echo -e "${BLUE}Set the Proxy Settings!!${NC}"
 
-    mount -o ro "${usb_disk}${k8_part}" /tmp
+    mount -o ro "${usb_disk}${conf_part}" /tmp
 
     # Mount the OS disk
     check_mnt_mount_exist
@@ -418,7 +390,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
@@ -514,7 +486,7 @@ enable_dm_verity() {
     echo -e "${BLUE}Enabling DM-VERITY on disk $os_disk!!${NC}"
     dm_verity_script=/etc/scripts/enable-dmv.sh
 
-    if bash $dm_verity_script $lvm_size; then
+    if bash $dm_verity_script "$lvm_size"; then
         success "DM Verity and Partitions successful on $os_disk"
     else
         failure "DM Verity and Partitions failed on $os_disk,Please check!!"
@@ -529,7 +501,7 @@ custom_cloud_init_updates() {
 
     # Get the custom details from config-file
     check_mnt_mount_exist
-    mount -o ro "${usb_disk}${k8_part}" /mnt
+    mount -o ro "${usb_disk}${conf_part}" /mnt
 
     config_file="/mnt/config-file"
 
@@ -733,7 +705,7 @@ copy_user_apps() {
     echo -e "${BLUE}Copying user-apps!!${NC}"
 
     mkdir -p /mnt2
-    mount -o ro "${usb_disk}${g_vms_part}" /mnt2
+    mount -o ro "${usb_disk}${user_apps_part}" /mnt2
 
     # Mount the OS disk
     check_mnt_mount_exist
@@ -742,11 +714,15 @@ copy_user_apps() {
         success "Successfuly copied the user-apps on the disk"
     else
         failure "Fail to copy user-apps on the disk,please check!!!"
+	umount /mnt2
+        umount /mnt
+        rm -rf /mnt2
         return 1
     fi
     umount /mnt2
     umount /mnt
     rm -rf /mnt2
+    sync
     return 0
 }
 
@@ -866,15 +842,8 @@ main() {
         fi
     fi
 
-    # Step 5: K8S Cluster files copy to Disk
+    # Step 5: Copy user-apps data to Disk
     PROVISION_STEP=5
-    show_progress_bar "$PROVISION_STEP" "K3S cluster Config"
-    if ! install_k8_script >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:Copying K8S scripts to disk Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
-        exit 1
-    fi
-    # Step 6: Copy user-apps data to Disk
-    PROVISION_STEP=6
     show_progress_bar "$PROVISION_STEP" "Copying user-apps"
     if [ "$user_apps_data" == "true" ]; then
         if ! copy_user_apps >> "$LOG_FILE" 2>&1; then
@@ -883,15 +852,15 @@ main() {
         fi
     fi
 
-    # Step 6: Boot order change and reboot 
-    PROVISION_STEP=7
+    # Step 6: Post install Setup and reboot 
+    PROVISION_STEP=6
     show_progress_bar "$PROVISION_STEP" "Post Install Setup"
     if ! system_finalizer  >> "$LOG_FILE" 2>&1; then
         echo -e "${RED}\nERROR:Post install Setup Failed,please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
-    PROVISION_STEP=8
+    PROVISION_STEP=7
     show_progress_bar "$PROVISION_STEP" ""
     sync
 

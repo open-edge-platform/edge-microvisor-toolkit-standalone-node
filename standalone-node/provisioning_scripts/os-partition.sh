@@ -50,13 +50,13 @@ else
         echo "Faild to mount the root file system for for swap entry update $disk"
         exit 1
     fi
-    mount $rootfs_partition_disk /mnt
+    mount "$rootfs_partition_disk" /mnt
     mount --bind /dev /mnt/dev
     mount --bind /dev/pts /mnt/dev/pts
     mount --bind /proc /mnt/proc
     mount --bind /sys /mnt/sys
     echo "UUID=$uuid swap swap default 0 2" >> /mnt/etc/fstab
-    status=$(cat "/mnt/etc/fstab" | grep -c "swap")
+    status=$(grep -c "swap" /mnt/etc/fstab)
     if [ "$status" -ge 1 ]; then
         echo "Successfuly created the swap partition for the disk $disk"
     else
@@ -86,13 +86,15 @@ fi
 #get the partition for the rootfs for side B for A/B upgrades
 secondary_rootfs_disk_num=$((data_part_number+1))
 if echo "$disk" | grep -q "nvme"; then
+    # shellcheck disable=SC2034  # secondary_rootfs_disk is used for A/B upgrade functionality
     secondary_rootfs_disk="p${secondary_rootfs_disk_num}"
 else
+    # shellcheck disable=SC2034  # secondary_rootfs_disk is used for A/B upgrade functionality  
     secondary_rootfs_disk="${secondary_rootfs_disk_num}"
 fi
 
 #get the last partition end point
-data_part_end=$(parted -m $disk unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')
+data_part_end=$(parted -m "$disk" unit GB print | grep "^$data_part_number" | cut -d: -f3 | sed 's/GB//')
 if echo "$data_part_end" | grep -qE '^[0-9]+\.[0-9]+$'; then
     data_part_end=$(printf "%.0f" "$data_part_end")
 fi
@@ -105,7 +107,7 @@ secondary_rootfs_disk_end=$((data_part_end_size+secondary_rootfs_disk_size))
 parted ---pretend-input-tty "${disk}" \
     resizepart "$data_part_number" "${data_part_end_size}GB" \
    	mkpart primary ext4 "${data_part_end_size}GB" "${secondary_rootfs_disk_end}GB"
-if [ $? -ne 0 ]; then
+if ! parted ---pretend-input-tty "${disk}" resizepart "$data_part_number" "${data_part_end_size}GB" mkpart primary ext4 "${data_part_end_size}GB" "${secondary_rootfs_disk_end}GB"; then
     echo "Partition resize for the disk ${disk} failed"
     exit 1
 else
@@ -114,7 +116,7 @@ fi
 partprobe "${disk}"
 
 #get the end size of the last partition from the  disk
-last_partition_end=$(parted -ms $disk  print | tail -n 1 | awk -F: '{print $3}' | sed 's/GB$//')
+last_partition_end=$(parted -ms "$disk" print | tail -n 1 | awk -F: '{print $3}' | sed 's/GB$//')
 if echo "$last_partition_end" | grep -qE '^[0-9]+\.[0-9]+$'; then
         last_partition_end=$(printf "%.0f" "$last_partition_end")
 fi
@@ -125,8 +127,7 @@ create_swap_partition "${disk}" "${last_partition_end}" "${swap_partition_size_e
 
 #finally expand the data partition using resize2fs
 e2fsck -f -y "$data_partition_disk"
-resize2fs "$data_partition_disk"
-if [ $? -ne 0 ]; then
+if ! resize2fs "$data_partition_disk"; then
     echo "Partition resize for the disk ${disk} failed"
     exit 1
 else
@@ -145,10 +146,12 @@ data_partition_disk=$(blkid | grep -i "edge_persistent" | grep -i ext4 |  awk -F
 
 if echo "$rootfs_partition_disk" | grep -q "nvme"; then
     os_disk=$(echo "$rootfs_partition_disk" | grep -oE 'nvme[0-9]+n[0-9]+' | head -n 1)
+    # shellcheck disable=SC2034  # part_number used for disk naming consistency
     part_number="p"
     data_part_number=$(blkid | grep "edge_persistent" | awk -F'[/:]' '{print $3}'| awk -F'p' '{print $2}')
 else
     os_disk=$(echo "$rootfs_partition_disk" | grep -oE 'sd[a-z]+' | head -n 1)
+    # shellcheck disable=SC2034  # part_number used for disk naming consistency
     part_number=""
     data_part_number=$(blkid | grep "edge_persistent" | awk -F'[/:]' '{print $3}' | sed 's/[^0-9]*//g')
 fi

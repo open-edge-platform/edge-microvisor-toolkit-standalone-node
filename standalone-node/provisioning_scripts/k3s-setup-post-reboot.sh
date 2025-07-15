@@ -54,7 +54,7 @@ do
    if [[ "$k3s_status" == "active" ]]; then
 
        echo "Waiting for all extensions to complete the deployment..." | sudo tee /dev/tty0
-       while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
+       while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
        echo "Some pods are still not ready. Checking again in 5 seconds..." | sudo tee /dev/tty0
        sleep 5
        done
