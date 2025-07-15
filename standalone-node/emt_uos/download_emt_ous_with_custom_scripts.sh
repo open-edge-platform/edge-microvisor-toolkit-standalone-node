@@ -18,12 +18,12 @@
 #FILE_RS_URL="https://af01p-png.devtools.intel.com/artifactory/edge_system-png-local/images"
 #EMT_BUILD_DATE=20250625.0555
 #EMT_FILE_NAME="emt_uos_image/emt_uos_x86_64_${EMT_BUILD_DATE}"
+
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
 EMT_BUILD_DATE=20250710
 EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
-#wget -O uos.tar.gz --no-proxy --no-check-certificate ${FILE_RS_URL}/${EMT_RAW_GZ}
 curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
 
 echo "Current working directory is: $PWD"
