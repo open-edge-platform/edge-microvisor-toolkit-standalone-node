@@ -18,9 +18,9 @@ User has flexibility to manage the artifacts and what they do using the artifact
 cloud-init configuration. 5G of USB disk space is used for the installer artifacts. Rest of the USB disk
 space is available for the user to store the application artifacts.
 
-# User App Folder
+## User App Folder
 
-This folder allows users to store application artifacts, such as container images and Helm charts. 
+This folder allows users to store application artifacts, such as container images and Helm charts.
 All files placed here will be copied to the persistent volume on the Edge node at `/opt/user-apps`.
 
 To copy,configure, or launch your applications, use the custom `cloud-init` section available in the configuration file.
@@ -28,7 +28,7 @@ To copy,configure, or launch your applications, use the custom `cloud-init` sect
 - Store your application files in this folder.
 - Update the `cloud-init` section as needed to automate deployment.
 
-# Custom Network Configuration Artifacts
+## Custom Network Configuration Artifacts
 
 ## Sample Networking Scripts for Secondary Interface Configuration
 
@@ -40,7 +40,7 @@ Create a network configuration script (e.g., save as `network_config.sh`).
 
 > **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
 
-```
+```bash
 #!/bin/bash
 
 # network_config.sh
@@ -276,7 +276,7 @@ Create a script to apply bridge networking attachment definitions (e.g., save as
 
 > **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
 
-```
+```bash
 #!/bin/bash
 
 set -euo pipefail
