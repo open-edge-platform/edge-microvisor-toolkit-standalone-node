@@ -93,7 +93,7 @@ EOF
 }
 
 # Pack the ISO image,TVM Image,K8* scripts as tar.gz file 
-pack-iso-image-k8scripts(){
+create-standalone-installer-pkg() {
 
 # Create the tar file for k8 scripts
 
@@ -113,16 +113,14 @@ checksum_file="checksums.md5"
 if {
     md5sum emt-uos.iso 
     md5sum edge_microvisor_toolkit.raw.gz
-    md5sum sen-k3s-package.tar.gz
 } >> $checksum_file; then
     echo "Checksum file $checksum_file created successfully in $(pwd)"
 else
     echo "Failed to create checksum file, please check!"
     exit 1
 fi
-tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null
 
-if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename" sen-k3s-package.tar.gz $checksum_file > /dev/null; then
+if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename"  $checksum_file > /dev/null; then
     if tar -czf standalone-installation-files.tar.gz bootable-usb-prepare.sh write-image-to-usb.sh config-file usb-bootable-files.tar.gz edgenode-logs-collection.sh standalone-vm-setup.sh user-apps; then
         echo ""
         echo ""
@@ -150,49 +148,6 @@ popd || return 1
 
 }
 
-# Download the K8 charts and images
-download-charts-and-images(){
-
-echo "Downloading K8 charts and images,please wait!!!"
-pushd ../cluster_installers > /dev/null || return 1
-chmod +x build_package.sh 
-
-# Build packages
-
-if ! bash build_package.sh > /dev/null; then
-    echo "Build pkgs failed,please check!!!"
-    popd || return 1
-    exit 1
-else
-    echo "Build pkgs successful"
-fi
-echo "Disk space usage after building k3s packages:"
-df -h
-echo "Current directory: $(pwd)"
-echo "File exists: $(ls sen-k3s-package.tar.gz)"
-echo "Target directory exists: $(ls ../installation_scripts/out/)"
-if [ ! -f sen-k3s-package.tar.gz ]; then
-    echo "File sen-k3s-package.tar.gz does not exist, please check!"
-    popd || return 1
-    exit 1
-fi
-if [ ! -d ../installation_scripts/out/ ]; then
-    echo "Directory ../installation_scripts/out/ does not exist, please check!"
-    popd || return 1
-    exit 1
-fi
-echo "Before copying sen k3s packages"
-if ! cp  sen-k3s-package.tar.gz  ../installation_scripts/out/; then
-    echo "Build pkgs && Images copy failed to out directory, please check!!"
-    popd || return 1
-    exit 1
-else
-    echo "Build pkgs && Images successfuly copied"
-fi
-echo "After copying sen k3s packages"
-popd || return 1
-}
-
 main(){
 
 echo "Main func: Disk space usage before build:"
@@ -206,9 +161,7 @@ download-tvm
 
 create-emt-uos-iso
 
-download-charts-and-images
-
-pack-iso-image-k8scripts
+create-standalone-installer-pkg
 
 }
 
