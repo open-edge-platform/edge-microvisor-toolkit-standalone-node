@@ -349,30 +349,30 @@ copy_user_apps() {
         if [[ $USB_DEVICE == /dev/nbd* ]]; then
             USER_APPS_PART="p$USER_APPS_PART"
         fi
-	check_mnt_mount_exist
+        check_mnt_mount_exist
         mount ${USB_DEVICE}${USER_APPS_PART} /mnt
         # Use rsync for fater copr
-	if dpkg -s rsync; then 
-	    rsync -ah --inplace user-apps /mnt/
-	    if [ "$?" -eq 0 ]; then 
-	        echo "user-apps data copied successfully"
-	    else
-		    echo "user-apps data failes to copy please check!!"
-		    umount /mnt
-		    exit 1
-	    fi
-	else 
-	    cp -r user-apps /mnt
-	    if [ "$?" -eq 0 ]; then
-            echo "user-apps data copied successfully"
-        else
-            echo "user-apps data failes to copy please check!!"
-            umount /mnt
-            exit 1
+        if dpkg -s rsync; then 
+            rsync -ah --inplace user-apps /mnt/
+            if [ "$?" -eq 0 ]; then 
+                echo "user-apps data copied successfully"
+            else
+                echo "user-apps data failes to copy please check!!"
+                umount /mnt
+                exit 1
+            fi
+        else 
+            cp -r user-apps /mnt
+            if [ "$?" -eq 0 ]; then
+                echo "user-apps data copied successfully"
+            else
+                echo "user-apps data failes to copy please check!!"
+                umount /mnt
+                exit 1
+            fi
         fi
-	fi
-	umount /mnt
-	sync
+        umount /mnt
+        sync
     fi
 }
 
