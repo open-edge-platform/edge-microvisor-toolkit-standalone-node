@@ -354,12 +354,12 @@ copy_user_apps() {
         # Use rsync for fater copr
 	if dpkg -s rsync; then 
 	    rsync -ah --inplace user-apps /mnt/
-        if [ "$?" -eq 0 ]; then 
+	    if [ "$?" -eq 0 ]; then 
 	        echo "user-apps data copied successfully"
 	    else
-		    echo "user-apps data failes to copy please check!!"
-		    umount /mnt
-		    exit 1
+		echo "user-apps data failes to copy please check!!"
+		umount /mnt
+		exit 1
 	    fi
 	else 
 	    cp -r user-apps /mnt
