@@ -15,6 +15,21 @@ IDV_EXTENSIONS=true
 IDV_KUBEVIRT=true
 IDV_DEVICE_PLUGINS=true
 INSTALL_TYPE="${1:-IDV}"
+INSTALL_TYPE="${1:-NON-RT}"
+
+# Help function
+show_help() {
+    echo "Usage: $0 [IDV|NON-RT]"
+    echo "  IDV     : Download images and manifests for IDV (airgap, with extensions)."
+    echo "  NON-RT  : Download images and manifests for NON-RT (airgap, no extensions). (default)"
+    echo "If no argument is given, NON-RT is used by default."
+    exit 0
+}
+
+# Parse help flag
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    show_help
+fi
 
 if [ "$INSTALL_TYPE" == "IDV" ]; then
 	AIRGAP=true
