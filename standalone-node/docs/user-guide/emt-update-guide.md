@@ -37,6 +37,7 @@ Follow all instructions outlined in the [Get Started Guide](Get-Started-Guide.md
   write-image-to-usb.sh
   config-file
   bootable-usb-prepare.sh
+  download_images.sh
   edgenode-logs-collection.sh
   ```
 

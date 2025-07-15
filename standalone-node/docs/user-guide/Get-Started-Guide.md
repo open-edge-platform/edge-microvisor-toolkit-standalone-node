@@ -150,9 +150,17 @@ cd edge-microvisor-toolkit-standalone-node
   config-file
   bootable-usb-prepare.sh
   edgenode-logs-collection.sh
-
+  download_images.sh
   ```
+- Run the image download script to collect k3s artifacts and any additional images if you're using an IDV image.
+  By default the script will only pull k3s artifacts and airgap images (NON-RT).
+   ```bash
+   sudo ./download_images.sh IDV
 
+   or
+
+   sudo ./download_images.sh NON-RT
+   ```
 - Run the preparation script to create the bootable USB
 
    ```bash
