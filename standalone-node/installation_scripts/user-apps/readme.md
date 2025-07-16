@@ -1,10 +1,12 @@
 <!--
 SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 SPDX-License-Identifier: Apache-2.0
+-->
 
 # User App Folder
 
-This folder allows users to store application artifacts, such as container images and Helm charts. 
+This folder allows users to store application artifacts, such
+as container images and Helm charts.
 All files placed here will be copied to the persistent volume on the Edge node at `/opt/user-apps`.
 
 To copy,configure, or launch your applications, use the custom `cloud-init` section available in the configuration file.
@@ -12,11 +14,11 @@ To copy,configure, or launch your applications, use the custom `cloud-init` sect
 - Store your application files in this folder.
 - Update the `cloud-init` section as needed to automate deployment.
 
-
 - Sample Networking scripts for configuring custom secondary interface
 
-* Creating network config (e.g, save it as "network_config.sh [make sure name matches with cloud-init]")
-```
+- Creating network config (e.g, save it as "network_config.sh [make sure name matches with cloud-init]")
+
+```bash
 #!/bin/bash
 
 # network_config.sh
@@ -245,8 +247,11 @@ br_main() {
 br_main "$@"
 ```
 
-* Creating applying bridge networking attachment definition (e.g, save it as "apply_bridge_nad.sh [make sure name matches with cloud-init]")
-```
+- Creating applying bridge networking attachment definition
+(e.g, save it as "apply_bridge_nad.sh [make sure name matches
+with cloud-init]")
+
+```bash
 #!/bin/bash
 
 set -euo pipefail

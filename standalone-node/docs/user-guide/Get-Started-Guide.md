@@ -26,7 +26,7 @@ There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
 You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
 [Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
 Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
-[Deployment](#standalone-node-deployment) section.
+[Deployment](standalone-node-deployment) section.
 
 ### Creating a bootable USB from Source Code
 
@@ -46,7 +46,9 @@ Following EMT images are supported to meet specific needs of edge deployment:
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
 
-Users can download the EMT image of their choice and replace the default EMT image in the installer directory before creating the bootable USB.
+Users can download the EMT image of their choice
+and replace the default EMT image in the installer
+directory before creating the bootable USB.
 
 The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
 
@@ -83,7 +85,9 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.2: Create the Standalone Installation Tar File
 
-- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
+- To create the standalone installation tar file with
+all required files for preparing a bootable USB device,
+run the following command
 
    ```bash
    sudo make build
@@ -106,9 +110,11 @@ cd edge-microvisor-toolkit-standalone-node
    lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
    ```
 
-   > **Note:** Ensure the correct USB drive is selected to avoid data loss.
+   > **Note:** Ensure the correct USB drive is selected
+   to avoid data loss.
 
-- Use the wipefs command to remove any existing filesystem signatures from the USB drive. 
+- Use the wipefs command to remove any existing filesystem
+signatures from the USB drive.
   This ensures a clean slate for formatting
 
    ```bash
@@ -145,22 +151,23 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Extracted files will include
 
-  ```
+  ```text
   usb-bootable-files.tar.gz
   config-file
   bootable-usb-prepare.sh
   edgenode-logs-collection.sh
   download_images.sh
   ```
+
 - Run the image download script to collect k3s artifacts and any additional images if you're using an IDV image.
   By default the script will only pull k3s artifacts and airgap images (NON-RT).
+
    ```bash
    sudo ./download_images.sh IDV
-
    or
-
    sudo ./download_images.sh NON-RT
    ```
+
 - Run the preparation script to create the bootable USB
 
    ```bash
@@ -201,20 +208,27 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the k3s Kubernetes cluster.
 
-#### 2.1  Login to the Edge Node After Installation complete
+### 2.1  Login to the Edge Node After Installation complete
 
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
-**Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k`` which is defined in the .bashrc of the user defined in your config.
-```
+**Note:** If you want to run kubectl commands from the edge
+node you can use the provided alias ``k`` which is defined in
+the .bashrc of the user defined in your config.
+
+```text
 k get pods -A
 ```
+
 ## Step 3: Set up tools on Developer's System
 
-Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
+Install and configure
+[kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
-> **Note:** The commands are executed from `Linux` environment, but the same can be achieved from any environment supporting `kubectl` and `helm` by using equivalent commands.
+> **Note:** The commands are executed from `Linux` environment,
+but the same can be achieved from any environment supporting `kubectl` and `helm` by using equivalent commands.
 
 1. Install `kubectl`:
 
@@ -299,7 +313,10 @@ Install a WordPress application as a test application using `helm`.
 
 3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
 
-   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the allowed traffic per needs of an application in non-test app deployments. By default the ingress and egress traffic is set to be denied.
+   > **Note:** This policy opens up all ingress and egress
+   traffic in the namespace - tailor down the allowed traffic
+   per needs of an application in non-test app deployments. By
+   default the ingress and egress traffic is set to be denied.
 
    ```yaml
    apiVersion: networking.k8s.io/v1
@@ -349,7 +366,9 @@ Install a WordPress application as a test application using `helm`.
 
 7. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
-> **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
+> **Note:** Edge AI applications from the Edge software
+catalog can be installed using `helm` and evaluated using
+similar steps.
 
 ## Troubleshooting
 
@@ -366,4 +385,7 @@ The possible reason could be USB device is mounted. Please unmount the USB drive
 
 ### Edge Node IP address
 
-The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster. It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
+The edge node operates both the Kubernetes control plane and
+node services, making it a single-node cluster. It is essential
+to ensure that the IP address of the edge node remains unchanged
+after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
