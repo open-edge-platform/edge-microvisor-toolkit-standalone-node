@@ -40,15 +40,15 @@ fi
 # Function to wipe filesystem signatures
 wipe_partition() {
     # Check existing filesystem signatures
-    echo "Checking existing filesystem signatures on "$USB_DEVICE"..."
+    echo "Checking existing filesystem signatures on $USB_DEVICE..."
     wipefs --all --no-act "$USB_DEVICE"
 
     # Prompt user for confirmation
-    read -p "Do you want to wipe all filesystem signatures from "$USB_DEVICE"? (yes/no): " user_input
+    read -rp "Do you want to wipe all filesystem signatures from $USB_DEVICE? (yes/no): " user_input
 
     if [[ "$user_input" == "yes" ]]; then
         # Wipe filesystem signatures
-        echo "Wiping filesystem signatures from "$USB_DEVICE"..."
+        echo "Wiping filesystem signatures from $USB_DEVICE..."
         wipefs --all "$USB_DEVICE" || {
             echo "Error: Failed to wipe filesystem signatures from $USB_DEVICE"
             exit 1
@@ -83,7 +83,7 @@ wipe_partition
 
 # Check for blockdev partprobe and ensure they are installed
 for cmd in blockdev partprobe; do
-    if ! command -v $cmd &> /dev/null; then
+    if ! command -v "$cmd" &> /dev/null; then
         echo "Error: $cmd is not installed. Please install it before proceeding."
         exit 1
     fi
@@ -93,7 +93,7 @@ sgdisk -e "$USB_DEVICE" >/dev/null 2>&1
 blockdev --rereadpt "${USB_DEVICE}"
 
 # Create a new partition table
-echo "Creating a new parition table on "${USB_DEVICE}" "
+echo "Creating a new partition table on $USB_DEVICE"
 create_partition() {
     local start=$1
     local end=$2
@@ -128,17 +128,17 @@ copy_to_partition() {
     while [ $attempt -lt $retries ]; do
         if mount "${USB_DEVICE}${part}" "$mount_dir" && rsync --progress "$src" "$mount_dir"; then
             if umount "$mount_dir"; then
-                echo "Successfully copied $src to "$mount_dir" on partition ${USB_DEVICE}${part}."
+                echo "Successfully copied $src to $mount_dir on partition ${USB_DEVICE}${part}."
                 break
             fi
         else
-            echo "Error: Failed to copy $src to "$mount_dir" on attempt $((attempt + 1))/$retries. Retrying..."
+            echo "Error: Failed to copy $src to $mount_dir on attempt $((attempt + 1))/$retries. Retrying..."
             umount "$mount_dir" || true
             sleep 2
         fi
         attempt=$((attempt + 1))
         if [ "$attempt" -eq 2 ]; then
-            echo "Error: Failed to copy $src to "$mount_dir" after $retries attempts!"
+            echo "Error: Failed to copy $src to $mount_dir after $retries attempts!"
             exit 1
         fi
     done
