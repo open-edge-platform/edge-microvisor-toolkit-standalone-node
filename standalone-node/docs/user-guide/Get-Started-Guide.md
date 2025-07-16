@@ -19,20 +19,10 @@ Kubernetes web dashboard.
 
 ## Standalone Node Provisioning
 
-There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
-
-### Creating a bootable USB from downloadable ISO image
-
-You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
-[Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
-Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
-[Deployment](#step-2-deploy-on-standalone-node) section.
-
 ### Creating a bootable USB from Source Code
 
-On Linux based operating systems you can also create a bootable USB drive from source code.
-This section provides step-by-step instructions to set up the environment required
-for USB-based provisioning for the standalone node.
+On Linux operating systems, you can create a bootable USB drive using source code. This section offers
+detailed instructions to establish the necessary environment for USB-based provisioning of a standalone node.
 
 Source code for the Edge Microvisor Toolkit Standalone Node is available at
 [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
@@ -74,8 +64,8 @@ flowchart TD
 
 #### 1.1: Repository Setup
 
-Begin by cloning the repository that contains all necessary scripts and configurations for deployment. This step
-is crucial for accessing the tools required for standalone node
+Start by cloning the repository that holds all the essential scripts and configurations for deployment.
+This step is vital for obtaining the tools needed for the standalone node.
 
 ```bash
 git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node
@@ -89,7 +79,6 @@ cd edge-microvisor-toolkit-standalone-node
 
    ```bash
    sudo make build
-
    ```
 
 > **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
@@ -165,10 +154,12 @@ cd edge-microvisor-toolkit-standalone-node
 - Extracted files will include
 
   ```text
-  usb-bootable-files.tar.gz
-  config-file
   bootable-usb-prepare.sh
+  write-image-to-usb.sh
+  config-file
+  usb-bootable-files.tar.gz
   edgenode-logs-collection.sh
+  standalone-vm-setup.sh
   download_images.sh
   ```
 
@@ -219,8 +210,8 @@ meet specific edge deployment needs. You can choose from:
 
 ##### Option 1: Using the Default Non Realtime Image
 
-If you're using the default Non Realtime image (recommended for most Edge AI applications),
-no additional image setup is required. The usb-bootable-files.tar.gz installer already includes this image.
+If you opt for the default Non-Realtime image, which is suggested for the majority of Edge AI applications,
+there's no need for further image setup. The usb-bootable-files.tar.gz installer comes with this image pre-included.
 
 ##### Option 2: Using Desktop Virtualization Images
 
@@ -279,7 +270,7 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 - Set the BIOS boot manager to boot from the USB pen drive
 
 - Reboot the Standalone Node
-  This will start the HookOS boot followed by Microvisor installations.
+  This will start the Edge Microvisor bootkit uOS followed by Microvisor installations.
 
 - Automatic Reboot
   The standalone edge node will automatically reboot into Microvisor.
