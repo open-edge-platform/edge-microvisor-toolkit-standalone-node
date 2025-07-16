@@ -204,30 +204,28 @@ if [ -f "$INSTALLER_CFG" ]; then
         # Use awk to find the end of the runcmd block and append new content
         awk -v script="$COMMIT_UPDATE_SCRIPT" '
         BEGIN {
-            line = "bash " script
-            runcmd = 0
-            in_block = 0
+            line = "    bash " script
+            added = 0
         }
-
         /^runcmd:/ { runcmd = 1 }
 
-        runcmd && /^  - \|/ { in_block = 1 }
-        {
+        runcmd && /source \/etc\/environment/ {
             print
-            next_line = $0
+            print line
+            added = 1
+            next
         }
 
-        in_block && $0 !~ /^  / {
-            print "    " line
-            in_block = 0
-            runcmd = 0
+        {
+            print
         }
 
         END {
-            if (in_block) {
-                print "    " line
+            if (!added) {
+                print line
             }
         }
+
         ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" && mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG"
     else
         echo "Entry for commit_update.sh already exists in installer.cfg."
