@@ -30,7 +30,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_help
 fi
 
-if [ "$INSTALL_TYPE" == "IDV" ]; then
+if [ "$INSTALL_TYPE" == "DV" ]; then
 	AIRGAP=true
 	IDV_EXTENSIONS=true
 	IDV_KUBEVIRT=true
@@ -42,7 +42,7 @@ else
 		IDV_KUBEVIRT=false
 		IDV_DEVICE_PLUGINS=false
 	else
-		echo "Invalid INSTALL_TYPE. Use 'IDV' or 'NON-RT'."
+		echo "Invalid INSTALL_TYPE. Use 'DV' or 'NON-RT'."
 		exit 1
 	fi
 fi
