@@ -72,6 +72,7 @@ check_mnt_mount_exist() {
 detect_usb() {
     for _ in {1..15}; do
         usb_devices=$(lsblk -dn -o NAME,TYPE,SIZE,RM | awk '$2 == "disk" && $4 == 1 && $3 != "0B" {print $1}')
+        # shellcheck disable=SC2086
         for disk_name in $usb_devices; do
             # Bootable USB has 6 partitions,ignore other disks
             if [ "$(lsblk -l "/dev/$disk_name" | grep -c "^$(basename "/dev/$disk_name")[0-9]")" -eq 7 ]; then
@@ -148,6 +149,7 @@ get_block_device_details() {
     echo -e "${GREEN}Found the OS disk  $os_disk${NC}" 
 
     # Clear the disk partitions
+    # shellcheck disable=SC2086
     for disk_name in ${blk_devices}; do
         dd if=/dev/zero of="/dev/$disk_name" bs=100M count=20
 	wipefs --all "/dev/$disk_name"
@@ -424,6 +426,7 @@ boot_order_chage_to_disk() {
 
     efiboot=$(blkid | grep -Ei 'TYPE="vfat"' | grep -Ei 'LABEL="esp|uefi"' |  awk -F: '{print $1}')
 
+    # shellcheck disable=SC2034
     if echo "$efiboot" | grep -q "nvme"; then
         osdisk=$(echo "$rootfs" | grep -oE 'nvme[0-9]+n[0-9]+' | head -n 1)
     elif echo "$efiboot" | grep -q "sd"; then
@@ -434,19 +437,18 @@ boot_order_chage_to_disk() {
     check_mnt_mount_exist
 
     mount "${rootfs}" /mnt
-    mount $efiboot /mnt/boot/efi
+    mount "$efiboot" /mnt/boot/efi
     mount --bind /dev /mnt/dev
     mount --bind /dev/pts /mnt/dev/pts
     mount --bind /proc /mnt/proc
     mount --bind /sys /mnt/sys
     mount --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
 
-    chroot /mnt /bin/bash <<EOT
+    if chroot /mnt /bin/bash <<EOT
     set -e
     bootctl install
 EOT
-
-    if [ "$?" -eq 0 ]; then
+    then
         success "Made Disk as first boot option"
 	#unmount the partitions
         for mount in $(mount | grep '/mnt' | awk '{print $3}' | sort -nr); do
@@ -505,7 +507,7 @@ custom_cloud_init_updates() {
 
     config_file="/mnt/config-file"
 
-    cp $config_file /etc/scripts
+    cp "$config_file" /etc/scripts
     CONFIG_FILE="/etc/scripts/config-file"
 
     umount /mnt
