@@ -131,7 +131,7 @@ CONFIG_FILE="config-file"
 START_MARKER="^services:"
 
 # Extract YAML content from custom cloud-init-section
-# if any error,throw the erros  
+# if any error,throw the errors  
 YAML_CONTENT=$(awk "/$START_MARKER/ {found=1} found" "$CONFIG_FILE")
 
 # Validate using Python
@@ -153,7 +153,7 @@ try:
                     print(f"Invalid runcmd item: {item!r}")
                     sys.exit(1)
     else:
-	    print("")
+        print("")
 except yaml.YAMLError as e:
     print("Custom cloud-init YAML is invalid:\n", e)
     sys.exit(1)
@@ -161,7 +161,7 @@ except yaml.YAMLError as e:
 # Catch the Error
 # shellcheck disable=SC2181
 if [ "$?" -ne 0 ]; then
-    echo "Custome cloud-init file is not valiad,Please check!!"
+    echo "Custom cloud-init file is not valid,Please check!!"
     exit 1
 fi
 
@@ -356,15 +356,15 @@ copy_user_apps() {
             if rsync -ah --inplace user-apps /mnt/; then 
                 echo "user-apps data copied successfully"
             else
-                echo "user-apps data failes to copy please check!!"
+                echo "user-apps data fails to copy please check!!"
                 umount /mnt
                 exit 1
             fi
         else             
-            if cp -r user-apps /mnt; then then
+            if cp -r user-apps /mnt; then
                 echo "user-apps data copied successfully"
             else
-                echo "user-apps data failes to copy please check!!"
+                echo "user-apps data fails to copy please check!!"
                 umount /mnt
                 exit 1
             fi
