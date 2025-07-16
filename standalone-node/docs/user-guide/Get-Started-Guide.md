@@ -72,7 +72,7 @@ git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalo
 cd edge-microvisor-toolkit-standalone-node
 ```
 
-#### 1.2: Create the Standalone Installation Tar File
+#### 1.2: Create the Standalone Installer
 
 - To create the standalone installation tar file with all required files for preparing a bootable USB
   device, run the following command
@@ -189,13 +189,12 @@ cd edge-microvisor-toolkit-standalone-node
 
 > **Additional Customization:** If you want to add specific configurations, helm charts, or packages to your deployment, you can refer to the [pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed instructions on customizing your EMT image.
 
-#### 1.5: Choose Your Edge Microvisor Toolkit Image
+#### 1.4: Choose Your Edge Microvisor Toolkit Image
 
 The Edge Microvisor Toolkit Standalone Node supports different EMT images to
 meet specific edge deployment needs. You can choose from:
 
 - **Edge Microvisor Toolkit Non Realtime image** (default)
-- **Edge Microvisor Toolkit Realtime image**
 - **Edge Microvisor Toolkit Desktop Virtualization image**
 
 ##### Option 1: Using the Default Non Realtime Image
@@ -207,18 +206,9 @@ there's no need for further image setup. The usb-bootable-files.tar.gz installer
 
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
-1. **Download your preferred EMT image:**
+1. Desktop Virtualization image: Download from the no Auth file server registry
 
-   - For Desktop Virtualization image: Download from the no Auth file server registry
-
-2. **Manual Image Replacement on USB (Alternative Method):**
-
-   For manual image replacement, you can manually update the image in the 5th partition of the USB drive
-   before [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
-
-   > **Note:** The default EMT image is located at the 5th partition of the USB drive.
-
-   Follow these steps to manually replace the image:
+2. Replace the default EMT image with the EMT DV image. The default EMT image is located at the 5th partition of the bootable USB drive created in the previous step. Follow these steps to replace the image:
 
    ```bash
    # Create a test directory for mounting
@@ -245,11 +235,6 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 
    > **Important:** These steps are manually executed by the user to put the desired image
    into the 5th partition before standalone deployment mentioned in [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
-
-3. **Update the configuration:**
-   - If using Desktop Virtualization image, refer to the `docs/user-guide/desktop-virtualization-cloud-init.md`
-     for specific cloud-init configuration settings
-   - Ensure your config-file includes all settings mentioned in `docs/user-guide/desktop-virtualization-cloud-init.md`
 
 ## Step 2: Deploy on Standalone Node
 
@@ -437,20 +422,12 @@ evaluated using similar steps.
 
    The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
 
-2. **Issues while provisioning the microvisor from EMT Bootkit**
+2. **Issues while provisioning the microvisor**
 
-   If any issues occur while provisioning the microvisor from EMT Bootkit, logs will be automatically collected
-   from /var/log/os-installer.log file on EMT Bootkit to identify what caused the OS provisioning to fail.
+   If any issues occur while provisioning the microvisor, logs will be automatically collected
+   from `/var/log/os-installer.log` file on EMT Bootkit to identify what caused the OS provisioning to fail.
 
 3. **Installation status banner**
 
    After successful installation, a banner is printed at the end, summarizing the installation status and
    providing useful commands/logs path for further management.
-
-### Edge Node Logs from Developer's System
-
-### Edge Node IP address
-
-The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster.
-It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent
-any indeterminate behavior of the Kubernetes control plane.
