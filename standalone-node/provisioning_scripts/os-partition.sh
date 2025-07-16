@@ -3,6 +3,10 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+# shellcheck disable=SC2086  # Double quote to prevent globbing and word splitting - intentionally not quoted for disk operations
+# shellcheck disable=SC2002  # Useless cat - using cat for readability and consistency
+# shellcheck disable=SC2181  # Check exit code directly - using $? for compatibility with sh
+
 set -x
 
 ##global variables#####
