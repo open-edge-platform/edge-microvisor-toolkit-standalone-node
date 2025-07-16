@@ -12,8 +12,8 @@ path = [
     "requirements.txt",
     "*.md",
     "cluster_installers/**",
-    "hook_os/**",
     "host_os/edge_microvisor_toolkit.raw.gz.sha256sum",
+    "emt_uos/**",
     "installation_scripts/final_release/*",
     "installation_scripts/temp_extraction/*"
 ]
