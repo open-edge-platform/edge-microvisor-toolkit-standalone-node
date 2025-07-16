@@ -9,7 +9,7 @@ MANIFEST_DIR=manifests
 ARTIFACT_DIR=artifacts
 TAR_PRX=k3s-images
 TAR_SFX=linux-amd64.tar
-ARIGAP=true
+AIRGAP=true
 BINARY_INSTALL=true
 IDV_EXTENSIONS=true
 IDV_KUBEVIRT=true
@@ -18,9 +18,9 @@ INSTALL_TYPE="${1:-NON-RT}"
 
 # Help function
 show_help() {
-    echo "Usage: $0 [IDV|NON-RT]"
-    echo "  IDV     : Download images and manifests for IDV (airgap, with extensions)."
-    echo "  NON-RT  : Download images and manifests for NON-RT (airgap, no extensions). (default)"
+    echo "Usage: $0 [DV|NON-RT]"
+    echo "  DV     : Download images and manifests for Desktop Virtualization (kubernetes and addon images and manifest)."
+    echo "  NON-RT  : Download images and manifests for Default EMT image without Desktop Virtualization and Realtime kernel (kubernetes and addon images and manifest). (default)"
     echo "If no argument is given, NON-RT is used by default."
     exit 0
 }
@@ -30,7 +30,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_help
 fi
 
-if [ "$INSTALL_TYPE" == "IDV" ]; then
+if [ "$INSTALL_TYPE" == "DV" ]; then
 	AIRGAP=true
 	IDV_EXTENSIONS=true
 	IDV_KUBEVIRT=true
@@ -42,7 +42,7 @@ else
 		IDV_KUBEVIRT=false
 		IDV_DEVICE_PLUGINS=false
 	else
-		echo "Invalid INSTALL_TYPE. Use 'IDV' or 'NON-RT'."
+		echo "Invalid INSTALL_TYPE. Use 'DV' or 'NON-RT'."
 		exit 1
 	fi
 fi
@@ -56,9 +56,9 @@ images=(
 )
 
 manifests=(
-	https://github.com/k8snetworkplumbingwg/multus-cni/blob/v4.2.1/deployments/multus-daemonset.yml
-	https://github.com/intel/intel-device-plugins-for-kubernetes/blob/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
-	https://github.com/projectcalico/calico/blob/v3.30.1/manifests/calico.yaml
+	https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/v4.2.1/deployments/multus-daemonset.yml
+	https://raw.githubusercontent.com/intel/intel-device-plugins-for-kubernetes/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
+	https://raw.githubusercontent.com/projectcalico/calico/v3.30.1/manifests/calico.yaml
 )
 
 # Download k3s artifacts
@@ -74,14 +74,14 @@ download_k3s_artifacts () {
 
 # Download airgap images
 download_airgap_images () {
-	echo "Downloading k3s airgap images"
+	echo "Downloading kubernetes container images"
 	mkdir -p ${OUT_DIR}/${IMG_DIR}
 	cd ${OUT_DIR}/${IMG_DIR} && curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst && cd ../../
 }
 
 # Download extension manifests
 download_extension_manifests () {
-	echo "Downloading extension manifests"
+	echo "Downloading addons manifests"
 	mkdir -p ${OUT_DIR}/${MANIFEST_DIR}
 	cd ${OUT_DIR}/${MANIFEST_DIR}
 	for manifest in "${manifests[@]}" ; do
@@ -89,7 +89,11 @@ download_extension_manifests () {
 		curl -OLs "${manifest}" -o "${OUT_DIR}/${MANIFEST_DIR}/${name}"
 		if [ $? -ne 0 ]; then
 			echo "Failed to download ${name}"
-			exit 1
+			exit 1			
+		fi
+		if [[ "${name}" == "multus-daemonset.yml" ]]; then
+			# Replace the image tag in the multus manifest
+			sed -i 's|ghcr.io/k8snetworkplumbingwg/multus-cni:snapshot|ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1|g' "${name}"		
 		fi
 	done
 	cd ../../
