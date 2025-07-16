@@ -32,8 +32,76 @@ NO_PROXY=""
 ssh_key=""
 
 # ------------------ User Credentials ------------------------
-# Choose credentials as you wish. Ensure the password is strong.
-# Example: user_name="user", passwd="user@1234!"
+# Choose Linux user as you wish to create. This is mandatory
+# Pswword will be taken from cmd line as input for security purpose
+# Example: user_name="user"
 
 user_name=""
-passwd=""
+
+# ------------------ Host type ------------------------
+# Choose the type of host to deploy: container or kubernetes.
+# Example: host_type="container" or host_type="kubernetes"
+# Default value is kubernetes.
+host_type="kubernetes"
+
+
+# ------------------ LVM partition size ------------------------
+# Set the LVM partition size in GB. This will be used for creating
+# the LVM partition that will be used for user data. By default,
+# `lvm_size_ingb` will be set to ZERO. Update the size in GB if required.
+# Example: lvm_size_ingb="20"
+
+# Note: If the Edge Node has only a single hard disk, update the lvm_size_ingb value; otherwise, skip it.
+lvm_size_ingb="0"
+
+# -------------------- Huge Page Size Configuration --------------------
+# Configure the huge page size for guest VMs (optional).
+# Set this value based on the requirements of your guest VMs.
+# Leave it empty if huge pages are not needed.
+#
+#  Default hugepage table size is 2048. 
+# If the hugepage table size is 2048, then the total memory allocated for hugepages is simply the product of these two values. For example, with a 2MB hugepage size, 2048 hugepages would consume 4GB of memory (2048 * 2MB = 4GB)
+# Example:
+#   huge_page_config="12 * 1024"
+# This sets up 24GB of huge pages, huge page size of 2MB (2048).
+# Calculation: 12 * 1024 * 2048 bytes = 24GB
+
+huge_page_config=""
+
+# -------------------Custom cloud-init Config file---------------------
+# This section is to customize the cloud-init config file as per User Wish
+
+# === Enable or disable systemd services ===
+# List services to enable or disable.
+# Note : Make sure Services should be part of the Base Image to enable or disable.
+# Example:
+#   services:
+#     enable: [docker, ssh]
+#     disable: [apache2]
+services:
+    enable: []
+    disable: []
+
+# === Create custom configuration files ===
+# To create a file, specify its path,permission and content.
+# Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file 
+# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages 
+#        will be present under /var/log/cloud-init-output.log file on EMT image.
+# Example:
+#   write_files:
+#     - path: /etc/cloud/test.sh
+#        permissions: '0644'
+#       content: |
+#         #!/bin/sh
+#         echo "This is Example"
+write_files: []
+
+# === Custom run commands ===
+# List commands or scripts to run at boot.
+# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present 
+#        under /var/log/cloud-init-output.log file on EMT image. 
+# Example:
+#   runcmd:
+#     - systemctl restart myservice
+#     - bash /etc/cloud/test.sh
+runcmd: 

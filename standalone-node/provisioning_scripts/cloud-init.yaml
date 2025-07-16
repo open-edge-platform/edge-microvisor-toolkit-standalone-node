@@ -1,0 +1,16 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+# shellcheck disable=all
+
+# NTP Time Sync Configuration
+ntp:
+  enabled: true
+  ntp_client: systemd-timesyncd
+  servers:
+    - time.google.com
+
+# Cloud-config file to start the k3s cluster.
+runcmd:
+  - |
+    source /etc/environment

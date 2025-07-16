@@ -40,7 +40,7 @@ The Edge Microvisor Toolkit Standalone Node solution is engineered to support a 
 
 The repository comprises the following components:
 
-* [**HookOS**](standalone-node/hook_os/): contains the Tinkerbell Installation Environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
+* [**EMT uOS**](standalone-node/emt_uos/): contains the Tinkerbell Installation Environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
 
 * [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable non-RT image as  hypervisor.
 
@@ -91,6 +91,7 @@ For support, see the [Troubleshooting section of the Get Started Guide](standalo
 
 Each component of the Edge Microvisor Toolkit Standalone Node is licensed under [Apache 2.0][apache-license].
 
-Last Updated Date: May 26, 2025
+Last Updated Date: July 14, 2025
 
 [apache-license]: https://www.apache.org/licenses/LICENSE-2.0
+

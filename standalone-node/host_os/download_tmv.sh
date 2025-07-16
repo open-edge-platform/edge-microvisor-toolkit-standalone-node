@@ -6,11 +6,15 @@
 # The file server URL is defined in FILE_RS_URL
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
 EMT_VERSION=3.0
-EMT_BUILD_DATE=20250413
-EMT_BUILD_NO=2200
+#EMT_BUILD_DATE=20250413
+#EMT_BUILD_NO=2200
+EMT_BUILD_DATE=20250711
+EMT_BUILD_NO=0415
 EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
-EMT_RAW_GZ="${EMT_FILE_NAME}-prod-signed.raw.gz"
-EMT_SHA256SUM="${EMT_FILE_NAME}-prod-signed.raw.gz.sha256sum"
+#EMT_RAW_GZ="${EMT_FILE_NAME}-prod-signed.raw.gz"
+#EMT_SHA256SUM="${EMT_FILE_NAME}-prod-signed.raw.gz.sha256sum"
+EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
+EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
 curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
 curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
