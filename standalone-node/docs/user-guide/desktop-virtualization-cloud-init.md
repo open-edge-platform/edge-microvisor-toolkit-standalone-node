@@ -57,7 +57,7 @@ write_files:
   - path: /etc/udev/rules.d/99-usb-qemu.rules
     permissions: '0644'
     content: |
-      SUBSYSTEM=="usb", MODE="0664", GROUP="qemu"
+      ACTION=="add", SUBSYSTEM=="usb", MODE="0664", GROUP="qemu", OWNER="qemu"
 
 # === Custom run commands ===
 # List commands or scripts to run at boot.
