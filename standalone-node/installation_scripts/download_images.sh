@@ -18,9 +18,9 @@ INSTALL_TYPE="${1:-NON-RT}"
 
 # Help function
 show_help() {
-    echo "Usage: $0 [IDV|NON-RT]"
-    echo "  IDV     : Download images and manifests for IDV (airgap, with extensions)."
-    echo "  NON-RT  : Download images and manifests for NON-RT (airgap, no extensions). (default)"
+    echo "Usage: $0 [DV|NON-RT]"
+    echo "  DV     : Download images and manifests for Desktop Virtualization (kubernetes and addon images and manifest)."
+    echo "  NON-RT  : Download images and manifests for Default EMT image without Desktop Virtualization and Realtime kernel (kubernetes and addon images and manifest). (default)"
     echo "If no argument is given, NON-RT is used by default."
     exit 0
 }
