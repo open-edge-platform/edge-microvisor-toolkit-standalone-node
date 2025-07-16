@@ -93,7 +93,7 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.4:  Prepare the USB Drive
+#### 1.3:  Prepare the USB Drive
 
 > **Note:**
 >
