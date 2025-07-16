@@ -168,7 +168,7 @@ cd edge-microvisor-toolkit-standalone-node
   - **User credentials:** Define the username and password for the primary user account on the edge node.
   - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations for advanced setup requirements.
     - For the default EMT Non-Realtime image, a basic Kubernetes installation will be performed automatically.
-    - For deployments requiring Desktop Virtualization features, refer to the desktop-virtualization-image-guide.md` in the `user-guide` directory. This document provides reference `cloud-init` configurations that can be tailored to your specific deployment needs.-
+    - For deployments requiring Desktop Virtualization features, refer to the [desktop-virtualization-image-guide](desktop-virtualization-image-guide.md) in the `user-guide` directory. This document provides reference `cloud-init` configurations that can be tailored to your specific deployment needs.-
   - **Hugepages configuration:** Set hugepages parameters if your workloads require them.
 
 - Run the preparation script to create the bootable USB
