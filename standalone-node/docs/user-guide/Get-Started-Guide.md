@@ -93,7 +93,21 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.3:  Prepare the USB Drive
+#### 1.3:  Download Kubernetes Artifacts
+
+- Download the kubernetes artifacts (container images and manifest files). This step is done by executing the ./download_images.sh script. If you are using EMT image with desktop virtualization features then use `DV` parameter. For default EMT image which is a non-Real Time kernel use `NON-RT` parameter.
+
+   ```bash
+   sudo ./download_images.sh DV
+
+   or
+
+   sudo ./download_images.sh NON-RT
+   ```
+
+> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
+
+#### 1.4:  Prepare the USB Drive
 
 > **Note:**
 >
@@ -108,7 +122,7 @@ cd edge-microvisor-toolkit-standalone-node
 
    > **Note:** Ensure the correct USB drive is selected to avoid data loss.
 
-- Use the wipefs command to remove any existing filesystem signatures from the USB drive. 
+- Use the wipefs command to remove any existing filesystem signatures from the USB drive.
   This ensures a clean slate for formatting
 
    ```bash
@@ -152,8 +166,10 @@ cd edge-microvisor-toolkit-standalone-node
   edgenode-logs-collection.sh
   download_images.sh
   ```
+
 - Run the image download script to collect k3s artifacts and any additional images if you're using an IDV image.
   By default the script will only pull k3s artifacts and airgap images (NON-RT).
+
    ```bash
    sudo ./download_images.sh IDV
 
@@ -161,6 +177,7 @@ cd edge-microvisor-toolkit-standalone-node
 
    sudo ./download_images.sh NON-RT
    ```
+
 - Run the preparation script to create the bootable USB
 
    ```bash
@@ -207,9 +224,11 @@ Refer to the edge node console output for instructions to verify the kubernetes 
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
 **Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k`` which is defined in the .bashrc of the user defined in your config.
+
 ```
 k get pods -A
 ```
+
 ## Step 3: Set up tools on Developer's System
 
 Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
