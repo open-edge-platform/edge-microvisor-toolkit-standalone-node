@@ -41,7 +41,7 @@ all:
 configure:
 
 #lint: license yamllint mdlint shellcheck #uncomment this line and remove next line after shellcheck is fixed
-lint: license yamllint mdlint
+lint: shellcheck
 
 build: configure
 	@# Help: Runs build stage

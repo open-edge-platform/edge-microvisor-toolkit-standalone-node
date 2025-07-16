@@ -25,7 +25,7 @@ deploy_mode=$(grep '^deploy_envmt=' "$CONFIG_FILE" | cut -d '=' -f2)
 deploy_mode=$(echo "$deploy_mode" | tr -d '"')
 
 if [ "$deploy_mode" != "ven" ]; then
-    echo "Please Make sure update the deploy_envmt="ven" in config-file"
+    echo "Please Make sure update the deploy_envmt=\"ven\" in config-file"
     exit 1
 fi
 
@@ -42,8 +42,7 @@ fi
 if ! dpkg -s qemu-system-x86 >/dev/null 2>&1; then
     echo  "Installing qemu-system-x86.., Please Wait!!"
     apt update
-    apt install -y qemu-system-x86 >/dev/null 2>&1
-    if [ "$?" -ne 0 ]; then
+    if ! apt install -y qemu-system-x86 >/dev/null 2>&1; then
         echo "Qemu Installation Failed,Please check!!"
         exit 1
     fi	
@@ -82,10 +81,10 @@ fi
 ./bootable-usb-prepare.sh /dev/nbd0 usb-bootable-files.tar.gz config-file || { echo "USB device setup failed,please check"; exit 1; }
 
 # Copy the new image if its provided
-if [ ! -z "$new_img" ]; then
+if [ -n "$new_img" ]; then
     mount /dev/nbd0p5 /mnt
+    # shellcheck disable=SC2115
     rm -rf /mnt/*
-    cp $new_img /mnt
     cp "$new_img" /mnt
     umount /mnt
     sync
@@ -103,7 +102,8 @@ echo "Starting the Installation"
 echo ""
 echo "Please see the installation status on VNC viewer.Enter $host_ip:1 on vnc viewer"
 # Added -cpu host,+vms It will support nested VM configuration as well
-sudo -E qemu-system-x86_64  \
+# shellcheck disable=SC2086
+if ! sudo -E qemu-system-x86_64  \
   -m 4G   -enable-kvm  \
   -cpu host,+vmx \
   -machine q35,accel=kvm \
@@ -114,10 +114,9 @@ sudo -E qemu-system-x86_64  \
   -device usb-storage,bus=ehci.0,drive=usb,removable=on  \
   -drive file=/dev/nbd0,format=raw,id=usb,if=none \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-  -device e1000,netdev=net0
-  
-if [ "$?" -ne 0 ]; then
-    echo "Intallation VM launch Failed,Please check!!"
+  -device e1000,netdev=net0; then
+    echo "Installation VM launch Failed,Please check!!"
 fi
 
+# shellcheck disable=SC2086
 trap 'killall --quiet standalone-vm-launch.sh || true' EXIT 
