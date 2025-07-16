@@ -84,29 +84,12 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.3: Download Kubernetes Artifacts
-
-- Download the kubernetes artifacts (container images and manifest files). This step is done by
-  executing the ./download_images.sh script. If you are using EMT image with desktop virtualization
-  features then use `DV` parameter. For default EMT image which is a non-Real Time kernel use `NON-RT`
-  parameter.
-
-   ```bash
-   sudo ./download_images.sh DV
-
-   or
-
-   sudo ./download_images.sh NON-RT
-   ```
-
-> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
-
-#### 1.4: Prepare the USB Drive
+#### 1.3: Prepare the bootable USB Drive
 
 > **Note:**
 >
 > - Ensure **the correct USB drive is selected** to avoid data loss.
-> - **Replace /dev/sdX** with the actual device name of your USB drive.
+> - **Replace `/dev/sdX`** with the actual device name of your USB drive.
 
 - Insert the USB drive into the Developer's System and identify the USB disk:
 
@@ -163,8 +146,10 @@ cd edge-microvisor-toolkit-standalone-node
   download_images.sh
   ```
 
-- Run the image download script to collect k3s artifacts and any additional images if you're using an IDV image.
-  By default the script will only pull k3s artifacts and airgap images (NON-RT).
+- Download the kubernetes artifacts (container images and manifest files). This step is done by
+  executing the ./download_images.sh script. If you are using EMT image with desktop virtualization
+  features then use `DV` parameter. For default EMT image which is a non-Real Time kernel use `NON-RT`
+  parameter.
 
    ```bash
    sudo ./download_images.sh DV
@@ -174,25 +159,30 @@ cd edge-microvisor-toolkit-standalone-node
    sudo ./download_images.sh NON-RT
    ```
 
+> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
+
+- Update the `config-file` with your deployment-specific settings. This configuration file is used to provision the edge node during its initial boot and should include the following parameters:
+
+  - **Proxy settings:** Specify if the edge node requires a proxy to access external networks.
+  - **SSH key:** Provide the public SSH key (typically your `id_rsa.pub`) from your Linux development system to enable passwordless SSH access to the edge node.
+  - **User credentials:** Define the username and password for the primary user account on the edge node.
+  - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations for advanced setup requirements.
+    - For the default EMT Non-Realtime image, a basic Kubernetes installation will be performed automatically.
+    - For deployments requiring Desktop Virtualization features, refer to the desktop-virtualization-image-guide.md` in the `user-guide` directory. This document provides reference `cloud-init` configurations that can be tailored to your specific deployment needs.-
+  - **Hugepages configuration:** Set hugepages parameters if your workloads require them.
+
 - Run the preparation script to create the bootable USB
 
    ```bash
-   sudo ./bootable-usb-prepare.sh /dev/sdX usb-bootable-files.tar.gz config-file
-   ```
-
-   ```bash
-   Example usage:
-   ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
+   sudo ./bootable-usb-prepare.sh </dev/sdX> usb-bootable-files.tar.gz config-file
    ```
 
 - Required Inputs for the Script:
 
     ```bash
-     - usb: A valid USB device name (e.g., /dev/sdc)
+     - usb: A valid USB device name (e.g., `/dev/sdc`)
      - usb-bootable-files.tar.gz: The tar file containing bootable files
-     - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
-     - Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node
-     - User credentials: Set the username for the edge node
+     - config-file: Configuration file with deployment-specific settings
     ```
 
 > **Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
