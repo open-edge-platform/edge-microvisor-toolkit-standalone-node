@@ -1,6 +1,6 @@
 # Get Started
 
-The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can can
+The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can
 build your own bootable USB from source code, or use the downloadable ISO
 image that can be flashed to a USB device and installed on edge nodes. It
 installs the microvisor and Kubernetes to the edge node with the essential
@@ -26,7 +26,7 @@ There are two methods of provisioning Edge Microvisor Toolkit for Deployment:
 You can download the Edge Microvisor Toolkit Standalone Node ISO installer from the
 [Intel® Edge Software Catalog](https://edgesoftwarecatalog.intel.com/package/edge_microvisor_toolkit_standalone_node).
 Burn the downloaded ISO file to a DVD disc or USB storage and proceed with the steps in the
-[Deployment](#standalone-node-deployment) section.
+[Deployment](#step-2-deploy-on-standalone-node) section.
 
 ### Creating a bootable USB from Source Code
 
@@ -46,7 +46,8 @@ Following EMT images are supported to meet specific needs of edge deployment:
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
 
-Users can download the EMT image of their choice and replace the default EMT image in the installer directory before creating the bootable USB.
+Users can download the EMT image of their choice and replace the default EMT image in the installer
+directory before creating the bootable USB.
 
 The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
 
@@ -61,7 +62,7 @@ flowchart TD
 
    B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
    G --> H[Replace the default raw image in the installer directory]
-   H --> I[Update the config-file with your settings. User the refrence cloud-init config-file section provided in the document directory for the image you downloaded]
+   H --> I[Update the config-file with your settings. Use the reference cloud-init config-file section provided in the document directory for the image you downloaded]
    I --> J[Create a bootable USB drive using the installer]
    J --> K[Plug the USB into the edge node and install]
    K --> L[Start using your edge node for your specific use case]
@@ -83,7 +84,8 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.2: Create the Standalone Installation Tar File
 
-- To create the standalone installation tar file with all required files for preparing a bootable USB device, run the following command
+- To create the standalone installation tar file with all required files for preparing a bootable USB
+  device, run the following command
 
    ```bash
    sudo make build
@@ -93,7 +95,24 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
-#### 1.3:  Prepare the USB Drive
+#### 1.3: Download Kubernetes Artifacts
+
+- Download the kubernetes artifacts (container images and manifest files). This step is done by
+  executing the ./download_images.sh script. If you are using EMT image with desktop virtualization
+  features then use `DV` parameter. For default EMT image which is a non-Real Time kernel use `NON-RT`
+  parameter.
+
+   ```bash
+   sudo ./download_images.sh DV
+
+   or
+
+   sudo ./download_images.sh NON-RT
+   ```
+
+> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
+
+#### 1.4: Prepare the USB Drive
 
 > **Note:**
 >
@@ -145,7 +164,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Extracted files will include
 
-  ```
+  ```text
   usb-bootable-files.tar.gz
   config-file
   bootable-usb-prepare.sh
@@ -153,7 +172,8 @@ cd edge-microvisor-toolkit-standalone-node
   download_images.sh
   ```
 
-- Download the kubernetes artifacts (container images and manifest files). This step is done by executing the ``./download_images.sh`` script. If you are using EMT image with desktop virtualization features then use `DV` parameter. For default EMT image which is a non-Real Time kernel use `NON-RT` parameter.
+- Run the image download script to collect k3s artifacts and any additional images if you're using an IDV image.
+  By default the script will only pull k3s artifacts and airgap images (NON-RT).
 
    ```bash
    sudo ./download_images.sh DV
@@ -161,9 +181,6 @@ cd edge-microvisor-toolkit-standalone-node
    or
 
    sudo ./download_images.sh NON-RT
-   ```
-
-> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
    ```
 
 - Run the preparation script to create the bootable USB
@@ -177,17 +194,81 @@ cd edge-microvisor-toolkit-standalone-node
    ./bootable-usb-prepare.sh /dev/sdc usb-bootable-files.tar.gz config-file
    ```
 
-  - Required Inputs for the Script:
+- Required Inputs for the Script:
 
-     ```bash
+    ```bash
      - usb: A valid USB device name (e.g., /dev/sdc)
      - usb-bootable-files.tar.gz: The tar file containing bootable files
      - config-file: Configuration file for proxy settings (if the edge node is behind a firewall)
      - Includes ssh_key, which is your Linux device's id_rsa.pub key for passwordless SSH access to the edge node
-     - User credentials: Set the username and password for the edge node
-     ```
+     - User credentials: Set the username for the edge node
+    ```
 
-     > **Note:**  Providing proxy settings is optional if the edge node does not require them to access internet services.
+> **Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
+
+> **Additional Customization:** If you want to add specific configurations, helm charts, or packages to your deployment, you can refer to the [pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed instructions on customizing your EMT image.
+
+#### 1.5: Choose Your Edge Microvisor Toolkit Image
+
+The Edge Microvisor Toolkit Standalone Node supports different EMT images to
+meet specific edge deployment needs. You can choose from:
+
+- **Edge Microvisor Toolkit Non Realtime image** (default)
+- **Edge Microvisor Toolkit Realtime image**
+- **Edge Microvisor Toolkit Desktop Virtualization image**
+
+##### Option 1: Using the Default Non Realtime Image
+
+If you're using the default Non Realtime image (recommended for most Edge AI applications),
+no additional image setup is required. The usb-bootable-files.tar.gz installer already includes this image.
+
+##### Option 2: Using Desktop Virtualization Images
+
+If you need Desktop Virtualization features, follow these steps to replace the default image:
+
+1. **Download your preferred EMT image:**
+
+   - For Desktop Virtualization image: Download from the no Auth file server registry
+
+2. **Manual Image Replacement on USB (Alternative Method):**
+
+   For manual image replacement, you can manually update the image in the 5th partition of the USB drive
+   before [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
+
+   > **Note:** The default EMT image is located at the 5th partition of the USB drive.
+
+   Follow these steps to manually replace the image:
+
+   ```bash
+   # Create a test directory for mounting
+   sudo mkdir -p /mnt/test
+   
+   # Mount the 5th partition of the USB drive
+   sudo mount /dev/sda5 /mnt/test
+   
+   # Navigate to the mounted directory
+   cd /mnt/test
+   
+   # Remove the older image (backup first if needed)
+   sudo rm -f <old-image-file>
+   
+   # Download the new IDV image you want to provision
+   sudo wget <your-idv-image-url> -O <new-image-file>
+   # or copy from local directory:
+   # sudo cp /path/to/your/new-image.raw ./
+   
+   # Unmount the partition
+   cd /
+   sudo umount /mnt/test
+   ```
+
+   > **Important:** These steps are manually executed by the user to put the desired image
+   into the 5th partition before standalone deployment mentioned in [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
+
+3. **Update the configuration:**
+   - If using Desktop Virtualization image, refer to the `docs/user-guide/desktop-virtualization-cloud-init.md`
+     for specific cloud-init configuration settings
+   - Ensure your config-file includes all settings mentioned in `docs/user-guide/desktop-virtualization-cloud-init.md`
 
 ## Step 2: Deploy on Standalone Node
 
@@ -206,31 +287,38 @@ cd edge-microvisor-toolkit-standalone-node
 - First Boot Configuration
   During the first boot, cloud-init will install the k3s Kubernetes cluster.
 
-#### 2.1  Login to the Edge Node After Installation complete
+### 2.1 Login to the Edge Node After Installation Completes
 
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
-**Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k`` which is defined in the .bashrc of the user defined in your config.
 
-```
+**Note:** If you want to run kubectl commands from the edge node you can use the provided alias ``k``
+which is defined in the .bashrc of the user defined in your config.
+
+```bash
 k get pods -A
 ```
 
 ## Step 3: Set up tools on Developer's System
 
-Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
+Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and
+[helm](https://helm.sh/docs/intro/install/) tools on the Developer's system.
 
-> **Note:** The commands are executed from `Linux` environment, but the same can be achieved from any environment supporting `kubectl` and `helm` by using equivalent commands.
+> **Note:** The commands are executed from `Linux` environment, but the same can be achieved from any
+environment supporting `kubectl` and `helm` by using equivalent commands.
 
 1. Install `kubectl`:
 
    ```bash
    sudo apt-get update
    sudo apt-get install -y apt-transport-https ca-certificates curl gnupg
-   curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+   curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | \
+     sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
    sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-   echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+   echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \
+     https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | \
+     sudo tee /etc/apt/sources.list.d/kubernetes.list
    sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
    sudo apt-get update
    sudo apt-get install -y kubectl
@@ -301,12 +389,15 @@ Install a WordPress application as a test application using `helm`.
    ```
 
    ```bash
-   helm install my-wordpress bitnami/wordpress --namespace wordpress --create-namespace -f values-wp.yaml --version 19.4.3
+   helm install my-wordpress bitnami/wordpress --namespace wordpress \
+     --create-namespace -f values-wp.yaml --version 19.4.3
    ```
 
 3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
 
-   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the allowed traffic per needs of an application in non-test app deployments. By default the ingress and egress traffic is set to be denied.
+   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the
+   allowed traffic per needs of an application in non-test app deployments. By default the ingress and
+   egress traffic is set to be denied.
 
    ```yaml
    apiVersion: networking.k8s.io/v1
@@ -356,21 +447,29 @@ Install a WordPress application as a test application using `helm`.
 
 7. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
-> **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and evaluated using similar steps.
+> **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and
+evaluated using similar steps.
 
 ## Troubleshooting
 
-1. Creation of USB pendrive failed
-The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
+1. **Creation of USB pendrive failed**
 
-2. If any issues while provisioning the microvisor from Hook OS, automatically logs will be collected
- from /var/log/os-installer.log file on Hook OS what caused the OS provisioning failed.
+   The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
 
-3. After sucessful installation A banner is printed at the end, summarizing the installation status and
- providing useful commands/logs path for further management.
+2. **Issues while provisioning the microvisor from EMT Bootkit**
+
+   If any issues occur while provisioning the microvisor from EMT Bootkit, logs will be automatically collected
+   from /var/log/os-installer.log file on EMT Bootkit to identify what caused the OS provisioning to fail.
+
+3. **Installation status banner**
+
+   After successful installation, a banner is printed at the end, summarizing the installation status and
+   providing useful commands/logs path for further management.
 
 ### Edge Node Logs from Developer's System
 
 ### Edge Node IP address
 
-The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster. It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent any indeterminate behavior of the Kubernetes control plane.
+The edge node operates both the Kubernetes control plane and node services, making it a single-node cluster.
+It is essential to ensure that the IP address of the edge node remains unchanged after deployment to prevent
+any indeterminate behavior of the Kubernetes control plane.
