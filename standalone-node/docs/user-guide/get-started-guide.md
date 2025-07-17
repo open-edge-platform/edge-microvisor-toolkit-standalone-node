@@ -161,14 +161,21 @@ cd edge-microvisor-toolkit-standalone-node
 
 > **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
 
-- Update the `config-file` with your deployment-specific settings. This configuration file is used to provision the edge node during its initial boot and should include the following parameters:
+- Update the `config-file` with your deployment-specific settings.
+This configuration file is used to provision the edge node during
+its initial boot and should include the following parameters:
 
   - **Proxy settings:** Specify if the edge node requires a proxy to access external networks.
-  - **SSH key:** Provide the public SSH key (typically your `id_rsa.pub`) from your Linux development system to enable passwordless SSH access to the edge node.
+  - **SSH key:** Provide the public SSH key (typically your
+  `id_rsa.pub`) from your Linux development system to enable passwordless SSH access to the edge node.
   - **User credentials:** Define the username and password for the primary user account on the edge node.
   - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations for advanced setup requirements.
-    - For the default EMT Non-Realtime image, a basic Kubernetes installation will be performed automatically.
-    - For deployments requiring Desktop Virtualization features, refer to the [desktop-virtualization-image-guide](desktop-virtualization-image-guide.md) in the `user-guide` directory. This document provides reference `cloud-init` configurations that can be tailored to your specific deployment needs.-
+    - For the default EMT Non-Realtime image, a basic
+    Kubernetes installation will be performed automatically.
+    - For deployments requiring Desktop Virtualization features,
+      refer to the [desktop-virtualization-image-guide](desktop-virtualization-image-guide.md) in the
+      `user-guide` directory. This document provides reference `cloud-init` configurations that can be
+      tailored to your specific deployment needs.
   - **Hugepages configuration:** Set hugepages parameters if your workloads require them.
 
 - Run the preparation script to create the bootable USB
@@ -186,8 +193,10 @@ cd edge-microvisor-toolkit-standalone-node
     ```
 
 > **Note:** Providing proxy settings is optional if the edge node does not require them to access internet services.
-
-> **Additional Customization:** If you want to add specific configurations, helm charts, or packages to your deployment, you can refer to the [pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed instructions on customizing your EMT image.
+> **Additional Customization:** If you want to add specific configurations,
+helm charts, or packages to your deployment, you can refer to the
+[pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed
+instructions on customizing your EMT image.
 
 #### 1.4: Choose Your Edge Microvisor Toolkit Image
 
@@ -208,33 +217,37 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 
 1. Desktop Virtualization image: Download from the no Auth file server registry
 
-2. Replace the default EMT image with the EMT DV image. The default EMT image is located at the 5th partition of the bootable USB drive created in the previous step. Follow these steps to replace the image:
+2. Replace the default EMT image with the EMT DV image. The
+default EMT image is located at the 5th partition of the
+bootable USB drive created in the previous step.
+Follow these steps to replace the image:
 
-   ```bash
-   # Create a test directory for mounting
-   sudo mkdir -p /mnt/test
-   
-   # Mount the 5th partition of the USB drive
-   sudo mount /dev/sda5 /mnt/test
-   
-   # Navigate to the mounted directory
-   cd /mnt/test
-   
-   # Remove the older image (backup first if needed)
-   sudo rm -f <old-image-file>
-   
-   # Download the new IDV image you want to provision
-   sudo wget <your-idv-image-url> -O <new-image-file>
-   # or copy from local directory:
-   # sudo cp /path/to/your/new-image.raw ./
-   
-   # Unmount the partition
-   cd /
-   sudo umount /mnt/test
-   ```
+  ```bash
+  # Create a test directory for mounting
+  sudo mkdir -p /mnt/test
 
-   > **Important:** These steps are manually executed by the user to put the desired image
-   into the 5th partition before standalone deployment mentioned in [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
+  # Mount the 5th partition of the USB drive
+  sudo mount /dev/sda5 /mnt/test
+
+  # Navigate to the mounted directory
+  cd /mnt/test
+
+  # Remove the older image (backup first if needed)
+  sudo rm -f <old-image-file>
+
+  # Download the new DV image you want to provision
+  sudo wget <your-dv-image-url> -O <new-image-file>
+  # or copy from local directory:
+  # sudo cp /path/to/your/new-image.raw ./
+
+  # Unmount the partition
+  cd /
+  sudo umount /mnt/test
+  ```
+
+  > **Important:** These steps are manually executed by the user to put the desired image
+  > into the 5th partition before standalone deployment mentioned in
+  > [Step 2: Deploy Edge Node](#step-2-deploy-edge-node)
 
 ## Step 2: Deploy Edge Node
 
@@ -383,7 +396,9 @@ evaluated using similar steps.
 
 ## Step 5: Upgrade to the EMT
 
-Edge Microvisor Toolkit Standalone Node supports upgrading to a newwer version of EMT image via split A/B immutable update mechanism. For detailed instruction refer to [emt-update-guide](emt-update-guide.md).
+Edge Microvisor Toolkit Standalone Node supports upgrading to a newwer version
+of EMT image via split A/B immutable update mechanism. For detailed instruction
+refer to [emt-update-guide](emt-update-guide.md).
 
 ## Troubleshooting
 
