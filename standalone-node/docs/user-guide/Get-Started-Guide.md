@@ -60,7 +60,7 @@ flowchart TD
 
 > **Tip:** For most users, the default Non Realtime image is recommended. Advanced users can swap in other images as needed.
 
-### Step 1: Prerequisites
+### Step 1: Prepare
 
 #### 1.1: Repository Setup
 
@@ -236,7 +236,7 @@ If you need Desktop Virtualization features, follow these steps to replace the d
    > **Important:** These steps are manually executed by the user to put the desired image
    into the 5th partition before standalone deployment mentioned in [Step 2: Deploy on Standalone Node](#step-2-deploy-on-standalone-node)
 
-## Step 2: Deploy on Standalone Node
+## Step 2: Deploy Edge Node
 
 - Unplug the attached bootable USB from developer system
 
@@ -245,7 +245,7 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 - Set the BIOS boot manager to boot from the USB pen drive
 
 - Reboot the Standalone Node
-  This will start the Edge Microvisor bootkit uOS followed by Microvisor installations.
+  This will start Microvisor installations.
 
 - Automatic Reboot
   The standalone edge node will automatically reboot into Microvisor.
@@ -416,16 +416,20 @@ Install a WordPress application as a test application using `helm`.
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and
 evaluated using similar steps.
 
+## Step 5: Upgrade to the EMT
+
+Edge Microvisor Toolkit Standalone Node supports upgrading to a newwer version of EMT image via split A/B immutable update mechanism. For detailed instruction refer to [emt-update-guide](emt-update-guide.md).
+
 ## Troubleshooting
 
-1. **Creation of USB pendrive failed**
+1. **Creation of bootable USB failed**
 
    The possible reason could be USB device is mounted. Please unmount the USB drive and retry creating the bootable USB drive.
 
 2. **Issues while provisioning the microvisor**
 
    If any issues occur while provisioning the microvisor, logs will be automatically collected
-   from `/var/log/os-installer.log` file on EMT Bootkit to identify what caused the OS provisioning to fail.
+   from `/var/log/os-installer.log` file to identify reasons for OS provisioning failures.
 
 3. **Installation status banner**
 
