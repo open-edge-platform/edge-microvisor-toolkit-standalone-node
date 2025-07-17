@@ -235,6 +235,8 @@ else
     exit 1
 fi
 
+bootctl install
+
 # Reboot the system
 echo "Rebooting the system..."
 reboot
