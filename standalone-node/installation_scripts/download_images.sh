@@ -184,7 +184,7 @@ install_pkgs () {
 if [ "${BINARY_INSTALL}" = true ]; then
 	download_k3s_artifacts
 fi
-if [ "${ARIGAP}" = true ]; then
+if [ "${AIRGAP}" = true ]; then
 	download_airgap_images
 fi
 if [ "${IDV_EXTENSIONS}" = true ]; then
