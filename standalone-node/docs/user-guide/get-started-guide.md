@@ -359,42 +359,7 @@ Install a WordPress application as a test application using `helm`.
      --create-namespace -f values-wp.yaml --version 19.4.3
    ```
 
-3. Apply network policy for `wordpress` namespace create a file `wp-net-policy.yaml` and apply.
-
-   > **Note:** This policy opens up all ingress and egress traffic in the namespace - tailor down the
-   allowed traffic per needs of an application in non-test app deployments. By default the ingress and
-   egress traffic is set to be denied.
-
-   ```yaml
-   apiVersion: networking.k8s.io/v1
-   kind: NetworkPolicy
-   metadata:
-     name: wordpress-egress
-     namespace: wordpress
-   spec:
-     egress:
-     - {}
-     policyTypes:
-     - Egress
-   ---
-   apiVersion: networking.k8s.io/v1
-   kind: NetworkPolicy
-   metadata:
-     name: wordpress-ingress
-     namespace: wordpress
-   spec:
-     ingress:
-     - {}
-     podSelector: {}
-     policyTypes:
-     - Ingress
-   ```
-
-   ```bash
-   kubectl apply -f wp-net-policy.yaml
-   ```
-
-4. View the pods running
+3. View the pods running
 
    ```bash
    kubectl get pods -n wordpress
