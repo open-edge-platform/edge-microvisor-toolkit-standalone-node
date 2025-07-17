@@ -403,15 +403,15 @@ Install a WordPress application as a test application using `helm`.
    my-wordpress-mariadb-0         1/1     Running   0              10m
    ```
 
-5. Forward port to be able to access WP
+4. Forward port to be able to access WP
 
    ```bash
    kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
    ```
 
-6. Access the WP blog from browser using `http://localhost:8080/admin` URL.
+5. Access the WP blog from browser using `http://localhost:8080/admin` URL.
 
-7. Login using the `admin` (login) and `password` (`<pass>`) credentials
+6. Login using the `admin` (login) and `password` (`<pass>`) credentials
 
 > **Note:** Edge AI applications from the Edge software catalog can be installed using `helm` and
 evaluated using similar steps.
