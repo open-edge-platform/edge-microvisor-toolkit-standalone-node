@@ -50,7 +50,7 @@ For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Ge
 
 ## How It Works
 
-To begin the evaluation process, the customer build the Edge Microvisor Toolkit Standalone Node source code generate the USB bootable installer image. This system will be used to create a bootable USB installer for the edge node designated for evaluation. During this stage, the customer can configure settings such as proxy and user credentials.
+To start the evaluation process, the customer compiles the Edge Microvisor Toolkit Standalone Node source code to create a USB bootable installer image. This image will be utilized to produce a bootable USB installer for the edge node intended for evaluation. At this stage, the customer has the option to configure settings like proxy and user credentials.
 
 Next, the customer runs the automated installer, which generates a bootable USB stick. This USB stick is self-contained and includes all the necessary software components to install the Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
 
