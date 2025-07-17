@@ -44,13 +44,13 @@ The repository comprises the following components:
 
 * [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable non-RT image as  hypervisor.
 
-* [**Kubernetes Cluster**](standalone-node/cluster_installers): The Kubernetes RKE2 cluster is deployed along the cluster extensions.
+* [**Kubernetes Cluster**](standalone-node/installation_Scripts/): The Kubernetes k3s cluster is deployed along the cluster extensions.
 
 For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
 
 ## How It Works
 
-To begin the evaluation process, the customer downloads the Edge Microvisor Toolkit Standalone Node installer to their laptop or development system. This system will be used to create a bootable USB installer for the edge node designated for evaluation. During this stage, the customer can configure settings such as proxy and user credentials.
+To start the evaluation process, the customer compiles the Edge Microvisor Toolkit Standalone Node source code to create a USB bootable installer image. This image will be utilized to produce a bootable USB installer for the edge node intended for evaluation. At this stage, the customer has the option to configure settings like proxy and user credentials.
 
 Next, the customer runs the automated installer, which generates a bootable USB stick. This USB stick is self-contained and includes all the necessary software components to install the Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
 
