@@ -12,8 +12,8 @@ EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+wget --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250717.0734/edge-readonly-3.0.20250717.0734.raw.gz -O edge_microvisor_toolkit.raw.gz
+wget --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250717.0734/edge-readonly-3.0.20250717.0734.raw.gz.sha256sum -O edge_microvisor_toolkit.raw.gz.sha256sum
 
 # Verify the SHA256 checksum
 echo "Verifying SHA256 checksum..."

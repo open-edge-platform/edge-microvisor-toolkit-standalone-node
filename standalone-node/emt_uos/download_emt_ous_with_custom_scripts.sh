@@ -24,7 +24,7 @@ EMT_BUILD_DATE=20250710
 EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
-curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
+wget  --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/emt-bootkit/3.0/20250717.0828/emt-bootkit-3.0.20250717.0828.tar.gz -O uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
 
 echo "Current working directory is: $PWD"
 
