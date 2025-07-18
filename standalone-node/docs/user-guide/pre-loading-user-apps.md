@@ -36,9 +36,11 @@ This section provides sample scripts for configuring custom secondary network in
 
 ### 1. Network Configuration Script
 
-Create a network configuration script (e.g., save as `network_config.sh`).
+Create a network configuration script (e.g., save as `user-apps/scripts/management/network_config.sh`).
 
-> **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
+> **Note**: 
+- Ensure the script filename matches the reference in your `cloud-init` configuration.
+- User shall create the 'user-apps/scripts/management/' folder to create the scripts.
 
 ```bash
 #!/bin/bash
@@ -272,9 +274,11 @@ br_main "$@"
 
 ### 2. Bridge Network Attachment Definition Script
 
-Create a script to apply bridge networking attachment definitions (e.g., save as `apply_bridge_nad.sh`).
+Create a script to apply bridge networking attachment definitions (e.g., save as `user-apps/scripts/management/apply_bridge_nad.sh`).
 
-> **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
+> **Note**: 
+- Ensure the script filename matches the reference in your `cloud-init` configuration.
+- User shall create the 'user-apps/scripts/management/' folder to create the scripts.
 
 ```bash
 #!/bin/bash
@@ -451,7 +455,7 @@ main "$@"
 ## Important Notes
 
 1. **Script Storage and Execution**:
-   - Save above scripts in the `user-apps` folder
+   - Save above scripts in the `user-apps/scripts/management` folder.
    - Add the execution command in the `runcmd` section of your `cloud-init` configuration
    - For detailed instructions, refer to `desktop-virtualization-cloud-init.md`
 
