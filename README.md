@@ -8,7 +8,7 @@
 The Edge Microvisor Toolkit Standalone Node solution is designed to empower developers and
 enterprise customers by allowing for efficient trials and evaluation of Edge AI applications
 on Intel Architecture-based platforms. This comprehensive solution stack includes the
-edge-optimized immutable Edge Microvisor Toolkit integrated with Kubernetes and foundational
+edge-optimized immutable Edge Microvisor Toolkit integrated with K3s Kubernetes and foundational
 extensions, which enables deployment of both cloud-native and legacy VM-based applications.
 
 ### Key Features
@@ -21,7 +21,7 @@ extensions, which enables deployment of both cloud-native and legacy VM-based ap
 - **Foundational Extensions:** These extensions support the deployment of diverse application
   types, including both modern cloud-native as well as traditional VM-based applications.
 - **Real-Time Extensions:** The
-  [RT version of Edge Microvisor Toolkit](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/  emt-architecture-overview.md#edge-microvisor-toolkit-real-time)
+  [RT version of Edge Microvisor Toolkit](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/emt-architecture-overview.md#kernel-with-real-time-extensions-and-integrated-docker-and-k3s)
   supports workloads processing real-time data streams.
 - **Easy Evaluation:** The Edge Microvisor Standalone Node allows for critical insights into
   the capabilities of Edge AI solutions, which is beneficial for deployments of
@@ -71,7 +71,7 @@ The repository comprises the following components.
   [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/docs/developer-guide/emt-bootkit.md).
 
 - [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable
-  non-RT image as  hypervisor.
+  non-RT image, serving as hypervisor.
 
 - [**Kubernetes Cluster**](standalone-node/cluster_installers): The K3s Kubernetes cluster
   is deployed along the cluster extensions.

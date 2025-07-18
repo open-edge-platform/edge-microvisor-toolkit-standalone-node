@@ -80,8 +80,8 @@ services:
 # === Create custom configuration files ===
 # To create a file, specify its path,permission and content.
 # Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file
-# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages
-#        will be present under /var/log/cloud-init-output.log file on EMT image.
+# Note : Make sure scripts/files passing to cloud-init file are well tested. In case of any issues in the script/file, error messages
+#        will be present in the /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   write_files:
 #     - path: /etc/cloud/test.sh
@@ -173,8 +173,8 @@ write_files:
 
 # === Custom run commands ===
 # List commands or scripts to run at boot.
-# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present
-#        under /var/log/cloud-init-output.log file on EMT image.
+# Note : Make sure syntax is correct for the commands. In case of any issues in commands, error messages will be present
+#        in the /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   runcmd:
 #     - systemctl restart myservice

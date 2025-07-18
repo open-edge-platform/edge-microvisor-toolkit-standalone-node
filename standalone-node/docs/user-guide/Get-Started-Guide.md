@@ -2,7 +2,7 @@
 
 The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. It is published
 in two versions: Non-RT and
-[RT (with real time extensions)](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/emt-architecture-overview.md#edge-microvisor-toolkit-real-time). You can build your own bootable USB from source code,
+[RT (with real time extensions)](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0-dev/docs/developer-guide/emt-architecture-overview.md#kernel-with-real-time-extensions-and-integrated-docker-and-k3s). You can build your own bootable USB from source code,
 or use the downloadable ISO image that can be flashed to a USB device and installed on edge
 nodes. It installs the microvisor and Kubernetes to the edge node with the essential
 functionality to run a single node cluster. The edge node will serve as both the
@@ -11,7 +11,7 @@ through Kubernetes.
 
 The Standalone Edge Node can be included in
 [Edge Manageability Framework](https://github.com/open-edge-platform/edge-manageability-framework),
-deployed on-prem or in the cloud to support scale out and management of larger infrastructures.
+deployed on-premises or in the cloud to support scale out and management of larger infrastructures.
 It enables you to quickly get an edge node up and running without deploying backend
 services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
 Kubernetes web dashboard.
@@ -25,8 +25,8 @@ for USB-based provisioning of the standalone node.
 To meet specific needs of edge deployment, Edge Microvisor Toolkit Standalone Node can be
 built as one of available OS image versions:
 
-- Edge Microvisor Toolkit Non-RT (default)
-- Edge Microvisor Toolkit RT (real-time)
+- Edge Microvisor Toolkit Non-RT (standard kernel)
+- Edge Microvisor Toolkit RT (real-time kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
 
 You can create a bootable USB drive with a selected image. For most use cases, the default

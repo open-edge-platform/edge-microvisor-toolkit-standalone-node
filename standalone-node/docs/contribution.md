@@ -9,7 +9,7 @@ The current release of the Edge Microvisor Toolkit Standalone Node supports the 
 on Linux-based operating systems. This capability opens up several avenues for contribution:
 
 - **USB-Based Provisioning:** Improve and optimize the process for creating bootable USB drives and
-  develop tools and scripts that streamline the provisioning of the Standalone Node
+  develop tools and scripts that streamline the provisioning of the Standalone Node.
 
 - **Feature Development:** Innovate by adding new features or enhancing existing microvisor image to support
   more complex use cases. Kubernetes K3s clusters along with cluster extensions to enhance
