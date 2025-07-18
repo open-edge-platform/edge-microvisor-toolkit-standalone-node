@@ -172,10 +172,10 @@ write_files:
 #   runcmd:
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
-# If custom scripts in user-apps are getting not getting invoked. please make sure to add the scripts in "user-apps" folder
+# To fix custom scripts not being invoked in user-apps, verify the command uses the accurate absolute path for each script.
 # Example:
 #   runcmd:
-#     - bash /opt/user-apps/network-config.sh /etc/cloud/custom_network.conf
+#     - bash /opt/user-apps/scripts/management/network-config.sh /etc/cloud/custom_network.conf
 runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
@@ -185,6 +185,7 @@ runcmd:
   - sudo -u guest mv /etc/cloud/rc.xml /home/guest/.config/openbox/rc.xml  
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
   - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
-  - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
+  - test -f /opt/user-apps/scripts/management/network_config.sh && bash /opt/user-apps/scripts/management/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
+  - test -f /opt/user-apps/scripts/management/apply_bridge_nad.sh && bash /opt/user-apps/scripts/management/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
 ```
+
