@@ -51,12 +51,12 @@ images=(
 	docker.io/calico/cni:v3.30.1
 	docker.io/calico/kube-controllers:v3.30.1
 	docker.io/calico/node:v3.30.1
-	ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1
+	ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1-thick
 	docker.io/intel/intel-gpu-plugin:0.32.1
 )
 
 manifests=(
-	https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/v4.2.1/deployments/multus-daemonset.yml
+	https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/v4.2.1/deployments/multus-daemonset-thick.yml
 	https://raw.githubusercontent.com/intel/intel-device-plugins-for-kubernetes/v0.32.1/deployments/gpu_plugin/base/intel-gpu-plugin.yaml
 	https://raw.githubusercontent.com/projectcalico/calico/v3.30.1/manifests/calico.yaml
 )
@@ -94,7 +94,7 @@ download_extension_manifests () {
 		fi
 		if [[ "${name}" == "multus-daemonset.yml" ]]; then
 			# Replace the image tag in the multus manifest
-			sed -i 's|ghcr.io/k8snetworkplumbingwg/multus-cni:snapshot|ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1|g' "${name}"		
+			sed -i 's|ghcr.io/k8snetworkplumbingwg/multus-cni:snapshot|ghcr.io/k8snetworkplumbingwg/multus-cni:v4.2.1-thick |g' "${name}"		
 		fi
 	done
 	cd ../../
