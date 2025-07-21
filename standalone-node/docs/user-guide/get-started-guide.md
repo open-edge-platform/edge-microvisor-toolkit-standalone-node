@@ -244,6 +244,8 @@ Follow these steps to replace the image:
   cd /
   sudo umount /mnt/test
   ```
+  The following DV image can be used
+  https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20250717.0840.raw.gz
 
   > **Important:** These steps are manually executed by the user to put the desired image
   > into the 5th partition before standalone deployment mentioned in
