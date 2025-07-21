@@ -8,6 +8,46 @@ source /etc/environment
 
 set -x
 
+# Function to extract paths under the write_files section
+extract_write_files_paths() {
+  local config_file="$1"
+  local in_write_files_section=false
+  local paths=()
+
+  while IFS= read -r line; do
+    # Check if the line contains the start of the write_files section
+    if [[ "$line" =~ ^write_files: ]]; then
+      in_write_files_section=true
+      continue
+    fi
+
+    # If we are in the write_files section, look for paths
+    if $in_write_files_section; then
+      # Check if the line contains a path
+      if [[ "$line" =~ path:\ (\/[^ ]+) ]]; then
+        paths+=("${BASH_REMATCH[1]}")
+      fi
+
+      # Check for the end of the write_files section (assuming next section starts with a comment or another keyword)
+      if [[ "$line" =~ ^[^[:space:]] ]]; then
+        in_write_files_section=false
+      fi
+    fi
+  done < "$config_file"
+
+  # Return the list of paths
+  echo "${paths[@]}"
+}
+
+# Specify the configuration file
+config_file="/etc/cloud/config-file"
+
+# Check if the file exists
+if [[ ! -f "$config_file" ]]; then
+  echo "Configuration file not found: $config_file"
+  exit 1
+fi
+
 # Function to check the last command's exit status
 check_success() {
     if [ "$?" -ne 0 ]; then
@@ -159,6 +199,20 @@ INSTALLER_CFG="/etc/cloud/cloud.cfg.d/installer.cfg"
 cp /etc/passwd /etc/cloud/passwd_backup
 cp /etc/shadow /etc/cloud/shadow_backup
 cp /etc/group /etc/cloud/group_backup
+cp -rf /etc/sudoers.d /etc/cloud/sudoers.d_backup
+
+# Extract paths under write_files and store them in a list
+paths_list=$(extract_write_files_paths "$config_file")
+paths_file="/etc/cloud/paths_list.txt"
+
+# Print the list of paths
+echo "Paths under write_files in $config_file:"
+for path in $paths_list; do
+  cp -rf "$path" "${path}_bkp"
+done
+
+# Save paths to a file
+echo "$paths_list" > "$paths_file"
 
 # Create commit_update.sh only if it doesn't already exist
 if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
@@ -169,6 +223,12 @@ if [ -e /etc/cloud/passwd_backup ] && [ -e /etc/cloud/shadow_backup ]; then
   mv /etc/cloud/passwd_backup /etc/passwd
   mv /etc/cloud/shadow_backup /etc/shadow
   mv /etc/cloud/group_backup /etc/group
+  cp -rf /etc/cloud/sudoers.d_backup/* /etc/sudoers.d
+  # Read paths from the file
+  paths_list=$(cat "/etc/cloud/paths_list.txt")
+  for path in $paths_list; do
+    mv "${path}_bkp" "$path"
+  done
 fi
 
 # Add user
