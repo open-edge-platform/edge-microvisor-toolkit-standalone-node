@@ -45,6 +45,44 @@ block-beta
     
 ```
 
+## Infrastructure resource usage KPI
+
+Infrastructure resource utilization KPI measurement were conducted on the following hardware:
+
+- 13th Gen Intel(R) Core(TM) i7-1365URE
+- CPU(s): 12
+- Mem:62Gi
+- HDD: 931.5G (nvme)
+
+EMT Desktop Virtualization infra consists of following components
+
+```bash
+  Namespace                   Name                                        CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                        ------------  ----------  ---------------  -------------  ---
+  default                     intel-gpu-plugin-kjpcm                      40m (0%)      100m (0%)   45Mi (0%)        90Mi (0%)      31m
+  kube-system                 calico-kube-controllers-64b69c8f54-llhbw    0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
+  kube-system                 calico-node-qp92s                           250m (2%)     0 (0%)      0 (0%)           0 (0%)         31m
+  kube-system                 coredns-697968c856-dlzw6                    100m (0%)     0 (0%)      70Mi (0%)        170Mi (0%)     31m
+  kube-system                 device-plugin-jk4q7                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
+  kube-system                 kube-multus-ds-bwn2r                        100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      31m
+  kube-system                 local-path-provisioner-774c6665dc-hd7l5     0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
+  kube-system                 metrics-server-6f4c6675d5-8t8v8             100m (0%)     0 (0%)      70Mi (0%)        0 (0%)         31m
+  kubevirt                    virt-api-57fbc959fb-4svfj                   5m (0%)       0 (0%)      500Mi (1%)       0 (0%)         30m
+  kubevirt                    virt-controller-cc4564f8f-ggsjb             10m (0%)      0 (0%)      275Mi (0%)       0 (0%)         30m
+  kubevirt                    virt-controller-cc4564f8f-l8rtz             10m (0%)      0 (0%)      275Mi (0%)       0 (0%)         30m
+  kubevirt                    virt-handler-8pnlp                          10m (0%)      0 (0%)      357Mi (0%)       0 (0%)         30m
+  kubevirt                    virt-operator-64645b6948-lf788              10m (0%)      0 (0%)      450Mi (1%)       0 (0%)         31m
+  kubevirt                    virt-operator-64645b6948-qg6wj              10m (0%)      0 (0%)      450Mi (1%)       0 (0%)         31m
+```
+
+### Summary of resource utilization
+
+- Consume 5% or less CPU without workload running (0.6 core)
+- Consume less than 3G of RAM (on 64G system) without workload running
+- Consume less than 2% of HDD space (on 1TB HDD)
+
+> **Note** RAM usage is directly Proportional to the number of `hugepages` allocated and user should tune according to needs.
+
 ## Reference cloud-init for EMT image with Desktop Virtualization and networking features
 
 - NOTE: The linux username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
