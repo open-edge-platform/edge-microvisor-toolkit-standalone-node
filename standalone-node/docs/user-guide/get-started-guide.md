@@ -31,7 +31,6 @@ Edge Microvisor Toolkit Standalone Node supports installation of EMT image of us
 Following EMT images are supported to meet specific needs of edge deployment:
 
 - Edge Microvisor Toolkit Non Realtime image
-- Edge Microvisor Toolkit Realtime image
 - Edge Microvisor Toolkit desktop virtualization image
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
@@ -81,7 +80,7 @@ cd edge-microvisor-toolkit-standalone-node
    sudo make build
    ```
 
-> **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
+> **Note:** This command will generate the `standalone-installation-files.tar.gz` file.
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
 #### 1.3: Prepare the bootable USB Drive
@@ -128,10 +127,10 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
-  Extract the contents of sen-installation-files.tar.gz
+  Extract the contents of standalone-installation-files.tar.gz
 
   ```bash
-   tar -xzf sen-installation-files.tar.gz
+   tar -xzf standalone-installation-files.tar.gz
   ```
 
 - Extracted files will include
@@ -144,6 +143,7 @@ cd edge-microvisor-toolkit-standalone-node
   edgenode-logs-collection.sh
   standalone-vm-setup.sh
   download_images.sh
+  user-apps
   ```
 
 - Download the kubernetes artifacts (container images and manifest files). This step is done by
