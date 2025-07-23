@@ -34,7 +34,8 @@ Following EMT image types are supported to meet specific needs of edge deploymen
 - Edge Microvisor Toolkit desktop virtualization image
 - Customized immutable Edge Microvisor Toolkit created using "Edge Microvisor Toolkit Developer Node"
 
-> **Note:** User shall update the config-file according to the requirement of the customized Edge Microvisor Toolkit immutable image
+> **Note:** User shall update the config-file according to the requirement of the customized
+> Edge Microvisor Toolkit immutable image
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
 
@@ -220,9 +221,11 @@ there's no need for further image setup. The usb-bootable-files.tar.gz installer
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Desktop Virtualization image: Download from the no Auth file server registry
-> **Note:** Custom created image can be copied locally from your development system to the 5th partition as shown in step 2 below.
 
-2. Replace the default EMT image with the EMT DV or custom created image. The
+> **Note:** Custom created image can be copied locally from your development system to the 5th
+> partition as shown in step 2 below.
+
+1. Replace the default EMT image with the EMT DV or custom created image. The
 default EMT image is located at the 5th partition of the
 bootable USB drive created in the previous step.
 Follow these steps to replace the image:
@@ -416,7 +419,9 @@ refer to [emt-update-guide](emt-update-guide.md).
 
 2. **Issues while provisioning the microvisor**
 
-   If you encounter issues during microvisor provisioning with the EMT boot kit, you can login with root username and password using `chroot` to check the `/var/log/os-installer.log` file for detailed error messages and troubleshooting information.
+   If you encounter issues during microvisor provisioning with the EMT boot kit, you can login
+   with root username and password using `chroot` to check the `/var/log/os-installer.log` file
+   for detailed error messages and troubleshooting information.
 
 3. **Installation status banner**
 
