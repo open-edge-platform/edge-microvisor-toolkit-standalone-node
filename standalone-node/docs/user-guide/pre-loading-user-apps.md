@@ -36,9 +36,9 @@ This section provides sample scripts for configuring custom secondary network in
 
 ### 1. Network Configuration Script
 
-Create a network configuration script (e.g., save as `network_config.sh`).
+Create a network configuration script and save it as `nw_custom_service.sh` in the `user-apps/scripts/management/` directory.
 
-> **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
+> **Note**: The script should be placed in `user-apps/scripts/management/` directory and named `nw_custom_service.sh` to match the systemd service configuration in `cloud-init`.
 
 ```bash
 #!/bin/bash
@@ -277,9 +277,9 @@ br_main "$@"
 
 ### 2. Bridge Network Attachment Definition Script
 
-Create a script to apply bridge networking attachment definitions (e.g., save as `apply_bridge_nad.sh`).
+Create a script to apply bridge networking attachment definitions and save it as `apply_bridge_nad.sh` in the `user-apps/scripts/management/` directory.
 
-> **Note**: Ensure the script filename matches the reference in your `cloud-init` configuration.
+> **Note**: The script should be placed in `user-apps/scripts/management/` directory to align with the systemd service configuration.
 
 ```bash
 #!/bin/bash
@@ -496,8 +496,9 @@ main "$@"
 ## Important Notes
 
 1. **Script Storage and Execution**:
-   - Save above scripts in the `user-apps` folder
-   - Add the execution command in the `runcmd` section of your `cloud-init` configuration
+   - Save the above scripts in the `user-apps/scripts/management/` directory
+   - The systemd service is configured to execute scripts from `/opt/user-apps/scripts/management/`
+   - Add the systemd service configuration in the `write_files` section of your `cloud-init` configuration
    - For detailed instructions, refer to `desktop-virtualization-cloud-init.md`
 
 2. **Custom Network Configuration**:
