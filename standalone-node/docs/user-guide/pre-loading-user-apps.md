@@ -36,9 +36,11 @@ This section provides sample scripts for configuring custom secondary network in
 
 ### 1. Network Configuration Script
 
-Create a network configuration script and save it as `nw_custom_service.sh` in the `user-apps/scripts/management/` directory.
+Create a network configuration script and save it as `nw_custom_service.sh` in the
+`user-apps/scripts/management/` directory.
 
-> **Note**: The script should be placed in `user-apps/scripts/management/` directory and named `nw_custom_service.sh` to match the systemd service configuration in `cloud-init`.
+> **Note**: The script should be placed in `user-apps/scripts/management/` directory and named
+> `nw_custom_service.sh` to match the systemd service configuration in `cloud-init`.
 
 ```bash
 #!/bin/bash
@@ -277,9 +279,11 @@ br_main "$@"
 
 ### 2. Bridge Network Attachment Definition Script
 
-Create a script to apply bridge networking attachment definitions and save it as `apply_bridge_nad.sh` in the `user-apps/scripts/management/` directory.
+Create a script to apply bridge networking attachment definitions and save it as
+`apply_bridge_nad.sh` in the `user-apps/scripts/management/` directory.
 
-> **Note**: The script should be placed in `user-apps/scripts/management/` directory to align with the systemd service configuration.
+> **Note**: The script should be placed in `user-apps/scripts/management/` directory to align with the
+> systemd service configuration.
 
 ```bash
 #!/bin/bash
