@@ -220,7 +220,8 @@ there's no need for further image setup. The usb-bootable-files.tar.gz installer
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Desktop Virtualization image: Download from the no Auth file server registry
-> **Note:** Custom created image can be copied locally 
+> **Note:** Custom created image can be copied locally from your development system to the 5th partition as shown in step 2 below.
+
 2. Replace the default EMT image with the EMT DV or custom created image. The
 default EMT image is located at the 5th partition of the
 bootable USB drive created in the previous step.
@@ -239,10 +240,11 @@ Follow these steps to replace the image:
   # Remove the older image (backup first if needed)
   sudo rm -f <old-image-file>
 
-  # Download the new DV image you want to provision
+  # For Desktop Virtualization image: Download from registry
   sudo wget <your-dv-image-url> -O <new-image-file>
-  # or copy new DV or custom created image from local directory:
-  # sudo cp /path/to/your/new-image.raw ./
+  
+  # For Custom created image: Copy from local directory to 5th partition
+  sudo cp /path/to/your/custom-image.raw ./
 
   # Unmount the partition
   cd /
