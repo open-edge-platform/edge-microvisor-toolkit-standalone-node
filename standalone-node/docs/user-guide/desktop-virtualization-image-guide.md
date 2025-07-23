@@ -126,7 +126,7 @@ write_files:
     content: |
       export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
       export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')
-   - path: /etc/systemd/system/nw_custom_file.service
+  - path: /etc/systemd/system/nw_custom_file.service
     content: |
       [Unit]
       Description=network custom file services

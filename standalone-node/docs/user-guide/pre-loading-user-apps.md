@@ -43,6 +43,9 @@ Create a network configuration script (e.g., save as `network_config.sh`).
 ```bash
 #!/bin/bash
 
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 # network_config.sh
 # This script configures a Linux network bridge with custom settings for edge or server deployments.
 # It validates configuration, sets up a bridge interface, and applies sysctl and optional iptables rules.
@@ -198,15 +201,17 @@ br_add_bridge() {
     if ! ip link show "$bridge_name" > /dev/null 2>&1; then
         echo "Creating bridge $bridge_name..."
         ip link add name "$bridge_name" type bridge
-        if ! bridge link show | grep -q "$secondary_interfaces"; then
-          ip link set "$secondary_interfaces" master "$bridge_name"
-        fi
-        ip addr add "$BR_GATEWAY"/"$BR_NETMASK" dev "$bridge_name"
-        ip link set dev "$bridge_name" up
-        ip link set dev "$secondary_interfaces" up
     else
         echo "Bridge $bridge_name already exists."
     fi
+
+    if ! bridge link show | grep -q "$secondary_interfaces"; then
+      ip link set "$secondary_interfaces" master "$bridge_name"
+    fi
+    ip addr add "$BR_GATEWAY"/"$BR_NETMASK" dev "$bridge_name"
+    ip link set dev "$bridge_name" up
+    ip link set dev "$secondary_interfaces" up
+
 }
 
 # Apply sysctl configuration for bridge networking
@@ -278,6 +283,9 @@ Create a script to apply bridge networking attachment definitions (e.g., save as
 
 ```bash
 #!/bin/bash
+
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 
 set -euo pipefail
 
@@ -373,7 +381,7 @@ apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
   name: my-bridge-network
-  namespace: default
+  namespace: user-apps
 spec:
   config: |
     {
@@ -423,16 +431,42 @@ main() {
 
         # Wait for K3s (or /var/lib/rancher/k3s/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
         retries=0
-        max_retries=300  # e.g., 5 minutes
+        max_retries=600   # 10 minute
         until check_k3s_installed && check_nad_crd; do
-          ((retries++))
+          retries=$((retries + 1))
           if ((retries > max_retries)); then
             echo "Timeout waiting for K3s or CRD."
             exit 1
           fi
-          sleep 1
+          sleep 5
         done
 
+        # wait for multus pods to exist first
+        echo "Waiting for multus pods to be created..."
+        retries=0
+        max_retries=600  # 10 minute
+        until /var/lib/rancher/k3s/bin/k3s kubectl get pods -l app=multus -n kube-system --no-headers 2>/dev/null | grep -q .; do
+          retries=$((retries + 1))
+          if ((retries > max_retries)); then
+            echo "Timeout waiting for multus pods to be created."
+            exit 1
+          fi
+          sleep 5
+        done
+
+        # wait for multus pods to be ready
+        echo "Waiting for multus pods to be ready..."
+        /var/lib/rancher/k3s/bin/k3s kubectl wait --for=condition=Ready pod -l app=multus -n kube-system --timeout=600s
+
+        # Create user-apps namespace if it doesn't exist
+        /var/lib/rancher/k3s/bin/k3s kubectl create ns user-apps || echo "Namespace user-apps already exists or failed to create"
+
+        # Create Multus symbolic links after successful NAD application
+        sudo ln -s /etc/cni/net.d/00-multus.conf /var/lib/rancher/k3s/agent/etc/cni/net.d/00-multus.conf
+        sudo ln -s /opt/cni/bin/multus /var/lib/rancher/k3s/data/cni/multus
+
+        sleep 3
+        
         apply_network_attachment_definition \
             "$BR_NAME" \
             "$BR_CIDR" \
@@ -440,6 +474,17 @@ main() {
             "$BR_START_RANGE" \
             "$BR_END_RANGE" \
             "$BR_GATEWAY"
+
+        # Check for sample file, restart k3s if it doesn't exist
+        sample_file="/etc/cloud/k3s_restarted.txt"
+        if [[ ! -f "$sample_file" ]]; then
+            # Create sample file
+            touch "$sample_file"
+            sudo systemctl restart k3s
+        fi
+        
+        # Disable iptables rules for bridge traffic
+        sudo sysctl -w net.bridge.bridge-nf-call-iptables=0
     else
         echo "Usage: $0 <custom_network.conf>"
     fi
