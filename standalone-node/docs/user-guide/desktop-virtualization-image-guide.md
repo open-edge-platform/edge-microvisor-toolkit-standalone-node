@@ -230,7 +230,7 @@ runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
   - udevadm control --reload-rules
-  # Add the user to render group (assuming username is 'guest')
+  # Add the user to render group (assuming username is 'user')
   - sudo usermod -a -G render user
   - sudo -u user mkdir -p /home/user/.config/openbox/
   - sudo -u user mv /etc/cloud/rc.xml /home/user/.config/openbox/rc.xml
