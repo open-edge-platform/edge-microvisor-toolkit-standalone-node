@@ -32,7 +32,7 @@ Following EMT image types are supported to meet specific needs of edge deploymen
 
 - Edge Microvisor Toolkit Non Realtime image
 - Edge Microvisor Toolkit desktop virtualization image
-- Customized immutable Edge Microvisor Toolkit created using "Edge Microvisior Toolkit Developer Node"
+- Customized immutable Edge Microvisor Toolkit created using "Edge Microvisor Toolkit Developer Node"
 
 > **Note:** User shall update the config-file according to the requirement of the customized Edge Microvisor Toolkit immutable image
 
@@ -208,7 +208,7 @@ meet specific edge deployment needs. You can choose from:
 
 - **Edge Microvisor Toolkit Non Realtime image** (default)
 - **Edge Microvisor Toolkit Desktop Virtualization image**
-- **Customized immutable Edge Microvisor Toolkit created using "Edge Microvisior Toolkit Developer Node**
+- **Customized immutable Edge Microvisor Toolkit created using "Edge Microvisor Toolkit Developer Node"**
 
 ##### Option 1: Using the Default Non Realtime Image
 
@@ -414,8 +414,9 @@ refer to [emt-update-guide](emt-update-guide.md).
 
 2. **Issues while provisioning the microvisor**
 
-   If any issues occur while provisioning the microvisor, logs will be automatically collected
-   from `/var/log/os-installer.log` file to identify reasons for OS provisioning failures.
+  If you encounter issues during microvisor provisioning with the EMT boot kit, log in using `chroot`
+  as the root user and check the `/var/log/os-installer.log` file for detailed error messages
+  and troubleshooting information.
 
 3. **Installation status banner**
 
