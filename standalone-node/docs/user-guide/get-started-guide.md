@@ -208,19 +208,20 @@ meet specific edge deployment needs. You can choose from:
 
 - **Edge Microvisor Toolkit Non Realtime image** (default)
 - **Edge Microvisor Toolkit Desktop Virtualization image**
+- **Customized immutable Edge Microvisor Toolkit created using "Edge Microvisior Toolkit Developer Node**
 
 ##### Option 1: Using the Default Non Realtime Image
 
 If you opt for the default Non-Realtime image, which is suggested for the majority of Edge AI applications,
 there's no need for further image setup. The usb-bootable-files.tar.gz installer comes with this image pre-included.
 
-##### Option 2: Using Desktop Virtualization Images
+##### Option 2: Using Desktop Virtualization or Custom created image
 
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Desktop Virtualization image: Download from the no Auth file server registry
-
-2. Replace the default EMT image with the EMT DV image. The
+> **Note:** Custom created image can be copied locally 
+2. Replace the default EMT image with the EMT DV or custom created image. The
 default EMT image is located at the 5th partition of the
 bootable USB drive created in the previous step.
 Follow these steps to replace the image:
@@ -240,7 +241,7 @@ Follow these steps to replace the image:
 
   # Download the new DV image you want to provision
   sudo wget <your-dv-image-url> -O <new-image-file>
-  # or copy from local directory:
+  # or copy new DV or custom created image from local directory:
   # sudo cp /path/to/your/new-image.raw ./
 
   # Unmount the partition
