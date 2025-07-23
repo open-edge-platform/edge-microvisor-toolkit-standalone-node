@@ -416,9 +416,7 @@ refer to [emt-update-guide](emt-update-guide.md).
 
 2. **Issues while provisioning the microvisor**
 
-  If you encounter issues during microvisor provisioning with the EMT boot kit, log in using `chroot`
-  as the root user and check the `/var/log/os-installer.log` file for detailed error messages
-  and troubleshooting information.
+   If you encounter issues during microvisor provisioning with the EMT boot kit, you can login with root username and password using `chroot` to check the `/var/log/os-installer.log` file for detailed error messages and troubleshooting information.
 
 3. **Installation status banner**
 
