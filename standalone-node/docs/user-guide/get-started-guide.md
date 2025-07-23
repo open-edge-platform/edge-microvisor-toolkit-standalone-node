@@ -28,15 +28,18 @@ Source code for the Edge Microvisor Toolkit Standalone Node is available at
 [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
-Following EMT images are supported to meet specific needs of edge deployment:
+Following EMT image types are supported to meet specific needs of edge deployment:
 
 - Edge Microvisor Toolkit Non Realtime image
 - Edge Microvisor Toolkit desktop virtualization image
+- Customized immutable Edge Microvisor Toolkit created using "Edge Microvisior Toolkit Developer Node"
+
+> **Note:** User shall update the config-file according to the requirement of the customized Edge Microvisor Toolkit immutable image
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
 
-Users can download the EMT image of their choice and replace the default EMT image in the installer
-directory before creating the bootable USB.
+Users can download or can re-use the customized EMT image of their choice and replace the default EMT image
+in the installer directory before creating the bootable USB.
 
 The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
 
@@ -49,7 +52,7 @@ flowchart TD
    D --> E[Plug the USB into the edge node and install]
    E --> F[Start using your edge node for AI apps or other use cases]
 
-   B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
+   B -- "Desktop Virtualization or Customized image" --> G[Download your preferred image]
    G --> H[Replace the default raw image in the installer directory]
    H --> I[Update the config-file with your settings. Use the reference cloud-init config-file section provided in the document directory for the image you downloaded]
    I --> J[Create a bootable USB drive using the installer]
