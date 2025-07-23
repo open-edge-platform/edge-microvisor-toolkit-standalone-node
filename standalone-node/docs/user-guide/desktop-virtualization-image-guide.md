@@ -239,6 +239,6 @@ runcmd:
   - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user start idv-init.service
   - sudo systemctl start nw_custom_file.service
   - test -f /opt/user-apps/scripts/management/apply_bridge_nad.sh && bash /opt/user-apps/scripts/management/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1
-  # Generic customer will add their application specific commands to automate the application deployment like this
+  # User shall add their application specific commands to automate the application deployment like this
   # bash /opt/user-apps/scripts/management/app-deploy.sh
 ```
