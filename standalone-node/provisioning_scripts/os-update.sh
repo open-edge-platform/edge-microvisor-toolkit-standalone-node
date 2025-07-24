@@ -233,6 +233,7 @@ if [ -e /etc/cloud/passwd_backup ] && [ -e /etc/cloud/shadow_backup ]; then
       mv "/etc/cloud/backup/$name" "$file_path"
     fi
   done
+  rm -rf /etc/cloud/backup
 fi
 
 # Add user
