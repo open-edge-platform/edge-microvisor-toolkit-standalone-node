@@ -202,12 +202,13 @@ cp /etc/group /etc/cloud/group_backup
 
 # Extract paths under write_files and store them in a list
 paths_list=$(extract_write_files_paths "$config_file")
-paths_file="/etc/cloud/paths_list.txt"
+mkdir -p /etc/cloud/backup
+paths_file="/etc/cloud/backup/paths_list.txt"
 
 # Print the list of paths
 echo "Paths under write_files in $config_file:"
 for path in $paths_list; do
-  cp -rf "$path" "${path}_bkp"
+  cp -rf "$path" "/etc/cloud/backup/"
 done
 
 # Save paths to a file
@@ -223,9 +224,14 @@ if [ -e /etc/cloud/passwd_backup ] && [ -e /etc/cloud/shadow_backup ]; then
   mv /etc/cloud/shadow_backup /etc/shadow
   mv /etc/cloud/group_backup /etc/group
   # Read paths from the file
-  paths_list=$(cat "/etc/cloud/paths_list.txt")
-  for path in $paths_list; do
-    mv "${path}_bkp" "$path"
+  paths_list=$(cat "/etc/cloud/backup/paths_list.txt")
+  for file_path in $paths_list; do
+    name=$(basename "$file_path")
+    if [ "$name" = "paths_list.txt" ]; then
+      continue
+    else
+      mv "/etc/cloud/backup/$name" "$file_path"
+    fi
   done
 fi
 
