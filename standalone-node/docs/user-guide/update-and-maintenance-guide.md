@@ -1,10 +1,81 @@
-# Standalone Node A/B Update of Edge Microvisor Toolkit
+# Update and Maintenance Guide
 
-## Get Started
+Keep your Edge Microvisor Toolkit (EMT) Standalone Node current and healthy.
 
-The Edge Microvisor Toolkit operates on an immutable EMT image, where EMT image packages are integrated into the image itself.
-To update these packages, a new EMT image with updated package versions is required. This guide provides step-by-step
-instructions for setting up the environment necessary to update the Edge Microvisor Toolkit on a standalone node using USB.
+## Overview
+
+This guide covers updating your EMT node to newer versions and performing routine maintenance.
+EMT uses an A/B update system that provides safe, atomic updates with automatic rollback capability.
+
+**Time required:** 30-60 minutes  
+**Difficulty:** Intermediate  
+**Target audience:** Operations teams, system administrators
+
+## Update System Overview
+
+EMT uses an immutable operating system with A/B partitioning:
+
+- **Immutable OS:** The base system cannot be modified, only replaced
+- **A/B Updates:** Two system partitions allow safe updates with instant rollback
+- **Atomic Updates:** Either the entire update succeeds or fails - no partial states
+- **Automatic Rollback:** Failed updates automatically revert to the previous version
+
+### What Gets Updated
+
+- **Operating system kernel and drivers**
+- **System packages and security updates**
+- **Container runtime and Kubernetes (k3s)**
+- **EMT-specific components**
+
+### What Doesn't Change
+
+- **User data and applications** (preserved across updates)
+- **Kubernetes workloads** (continue running during updates)
+- **Configuration files** (maintained automatically)
+
+## Prerequisites
+
+Before updating your EMT node:
+
+### Verify Current System
+
+```bash
+# Check current image version
+cat /etc/image-id
+
+# Check system health
+systemctl status k3s
+kubectl get nodes
+kubectl get pods -A
+```
+
+### Backup Considerations
+
+While user data is preserved, consider backing up:
+
+- **Application data:** Export important application data
+- **Custom configurations:** Save any manual configuration changes
+- **Kubeconfig files:** Back up kubectl configuration
+
+```bash
+# Example backup commands
+kubectl get all -A -o yaml > k8s-backup.yaml
+cp /etc/rancher/k3s/k3s.yaml ~/kubeconfig-backup.yaml
+```
+
+## Update Methods
+
+EMT supports two update methods:
+
+### Method 1: Direct Mode (USB-based)
+
+Best for: Offline environments, controlled updates
+
+### Method 2: URL Mode (Network-based)
+
+Best for: Online environments, automated updates
+
+## Method 1: Direct Mode Update
 
 ### Step 1: Prerequisites
 

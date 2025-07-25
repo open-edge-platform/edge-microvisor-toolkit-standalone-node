@@ -1,21 +1,53 @@
-# Get Started
+# Complete Setup Guide
 
-The Edge Microvisor Toolkit Standalone Node uses the standard immutable build. You can
-build your own bootable USB from source code, or use the downloadable ISO
-image that can be flashed to a USB device and installed on edge nodes. It
-installs the microvisor and Kubernetes to the edge node with the essential
-functionality to run a single node cluster. The edge node will serve as both the
-control and worker node. Additional worker nodes can be added to the cluster
-through Kubernetes.
+Comprehensive installation and configuration guide for Edge Microvisor Toolkit (EMT) Standalone Node.
 
-Future releases will enable standalone edge nodes to join an existing Edge
-Management Framework backend, deployed on-prem or in the cloud to support scale
-out and management of larger infrastructures. The Standalone Edge Node enables
-you to quickly get an edge node up and running without deploying backend
-services, ready to deploy Kubernetes applications through `kubectl`, `helm`, or
-Kubernetes web dashboard.
+## Overview
 
-> **Note**: The standalone edge node does not currently support the real-time version.
+This guide provides detailed instructions for setting up EMT with full configuration control.
+It covers all image types, networking options, and customization scenarios.
+
+**Time required:** 2-3 hours  
+**Difficulty:** Intermediate to Advanced  
+**Target audience:** System administrators, advanced users
+
+> **🚀 New to EMT?** Consider starting with the [Quick Start Guide](quick-start-guide.md) for
+> a faster evaluation experience.
+
+## What This Guide Covers
+
+- Complete installation process from source
+- All supported EMT image types (Non-RT, Desktop Virtualization, Custom)
+- Advanced networking and proxy configuration
+- Custom cloud-init configurations
+- Troubleshooting procedures
+- Production deployment considerations
+
+## EMT Image Types
+
+The Edge Microvisor Toolkit Standalone Node uses immutable builds and supports multiple image types
+to meet specific edge deployment needs. You can build your own bootable USB from source code, or use
+downloadable ISO images that can be flashed to a USB device and installed on edge nodes.
+
+The toolkit installs the microvisor and Kubernetes to the edge node with essential functionality to
+run a single node cluster. The edge node serves as both control and worker node. Additional worker
+nodes can be added through standard Kubernetes operations.
+
+Future releases will enable standalone edge nodes to join existing Edge Management Framework
+backends, deployed on-premises or in the cloud to support scale-out and management of larger
+infrastructures. The Standalone Edge Node enables you to quickly get an edge node up and running
+without deploying backend services, ready to deploy Kubernetes applications through `kubectl`,
+`helm`, or the Kubernetes web dashboard.
+
+### Supported Image Types
+
+| Image Type | Use Case | Features | Recommended For |
+|------------|----------|----------|-----------------|
+| **Non-Realtime** (default) | General edge AI applications | Basic Kubernetes, container runtime | Most deployments |
+| **Desktop Virtualization** | VM workloads with GPU | SR-IOV, display virtualization | Virtual desktop infra |
+| **Custom Images** | Specialized requirements | User-defined configurations | Advanced customization |
+
+> **Note:** The standalone edge node does not currently support real-time kernel versions.
 
 ## Standalone Node Provisioning
 
