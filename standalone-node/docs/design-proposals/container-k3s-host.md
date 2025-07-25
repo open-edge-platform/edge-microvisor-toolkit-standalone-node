@@ -11,26 +11,22 @@ Last updated: 03/06/2025
 
 ## Abstract
 
-The Edge Microvisor Toolkit Standalone (EMT-S) provides a simplified approach to deploying an Edge Microvisor Toolkit
-(EMT) edge. There are usecases where customer would like to deploy native container apps without using Kubernetes for
-container orchestration.
+The Edge Microvisor Toolkit Standalone (EMT-S) provides simplified edge node deployment.
+There are use cases where customers would like to manage container orchestration without
+Kubernetes and deploy native container apps.
 
-To enable this use case, going forward EMT will support container runtime and kubernetes installer as part of the same
+To accommodate this use case, the toolkit will support container runtime and kubernetes installer as part of the same
 immutable image.
-
-This proposal focuses on enabling the installation of container only host and kubernetes host using the same image.
-The proposal is to leverage the current user input configuration mechanism to allow users to select the type of host
-they want to deploy.
 
 ## Proposal
 
-Edge Microvisor Toolkit Standalone uses the [config](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/installation_scripts/config-file)
-file to take user inputs during bootable USB creation. This user input will be used to configure setting during the EMT
-provisioning process.
+To deploy the standalone node, user needs to configure settings in the
+[config-file](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/installation_scripts/config-file),
+required for creation of a bootable USB drive.
 
-The proposal is to extend the current user input configuration mechanism to allow users to select the type of host they
-want to deploy. The user will be able to choose between a container only host or a kubernetes host. This can be a new
-section like below:
+This proposal focuses on enabling the installation of a container only host and a kubernetes host using the same image.
+It will improve the current configuration by allowing users to select the type of host they
+want to deploy. For that, a new section in config-file will be added:
 
 ```bash
 # ------------------ Host type ------------------------
@@ -39,7 +35,7 @@ section like below:
 host_type=""
 ```
 
-By default `host_type=kubernetes` will be set. Any error input should stop the provisioning process.
+By default, `host_type=kubernetes` will be set. Any input error will stop the provisioning process.
 
 ```mermaid
 flowchart TD
@@ -59,11 +55,11 @@ flowchart TD
 
 ### User Experience
 
-- User creates a bootable USB using the EMT-S USB Installer.
-- During creation, the user edits the config-file to set `host_type`.
+- User creates a bootable USB drive.
+- During creation, the user edits config-file to set `host_type`.
 - On boot, the installer reads `host_type` and provisions the appropriate host.
 - If an invalid value is provided, the installer halts and displays an error.
 
 ### Default Behavior
 
-When user has not set the `host_type`, `kubernetes` will be the default host type.
+If the `host_type` is not set, the default `kubernetes` host type will be used.

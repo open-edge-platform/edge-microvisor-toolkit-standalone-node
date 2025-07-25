@@ -1,9 +1,9 @@
-# Guideline for using Edge Microvisor Toolkit (EMT) to create a Desktop Virtualization
+# Desktop Virtualization on Edge Microvisor Toolkit (EMT)
 
-## Abstract
+## Overview
 
-This document introduces the use of the Edge Microvisor Toolkit (EMT) for creating an immutable Desktop
-Virtualization image. It also provides a reference cloud-init configuration for deploying EMT images with
+This guide explains how to use of the Edge Microvisor Toolkit (EMT) to create an immutable Desktop
+Virtualization image. It also provides configuration of cloud-init for deploying EMT images with
 Desktop Virtualization features.
 
 The EMT Desktop Virtualization image supports the following features:
@@ -18,31 +18,31 @@ The EMT Desktop Virtualization image supports the following features:
   add-ons for networking and GPU resource allocation. As a result, the image is larger than the standard EMT
   image.
 
-With this image, customers can automate the deployment of edge nodes using the EMT standalone project.
+You can use this image in the EMT standalone project to automate the deployment of edge nodes.
 
 ```mermaid
 block-beta
   columns 1
-    block:APP      
-      WinVM(["Customer App: Windows 11 VM using GPU for Display Virtualization"])      
+    block:APP
+      WinVM(["Customer App: Windows 11 VM using GPU for Display Virtualization"])
       LinuxVM(["Customer App: Linux VM using GPU for AI compute offload"])
       AppPod[["Customer App: Containerized AI app"]]
-    end    
+    end
     block:RESOURCES
-      blockArrowId1<["GPU SR-IOV resource"]>(up)      
+      blockArrowId1<["GPU SR-IOV resource"]>(up)
       blockArrowId2<["Hugepage resource"]>(up)
       blockArrowId3<["Multiple network resource"]>(up)
       blockArrowId4<["USB resource"]>(up)
     end
-    block:KUBE      
+    block:KUBE
       K3S("k3s (Lightweight Kubernetes)")
-      SRIOV("Virtualization,Networking and SR-IOV GPU addons")
+      SRIOV("Virtualization, networking and SR-IOV GPU addons")
     end
     EMT["EMT Desktop Virtualization image with hypervisor and container runtime"]
     block:HARDWARE
-      IntelCore["Intel Core-based Platform with integrated GPU"]
+      IntelCore["Intel Core-based platform with integrated GPU"]
     end
-    
+
 ```
 
 ## Infrastructure resource usage KPI
@@ -85,14 +85,21 @@ EMT Desktop Virtualization infra consists of following components
 
 ## Reference cloud-init for EMT image with Desktop Virtualization and networking features
 
-- NOTE: The linux username `guest` is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
-  To use a different user, replace all occurrences of `guest` with the `user_name` that is set in the
-  `User Credentials` section of the `config-file`.
-  For example, if your user is 'myuser', replace `guest` with `myuser` in:
-  - `/etc/sudoers.d/idv_scripts`
-  - `/etc/systemd/system/getty@tty1.service.d/autologin.conf`
-  - `runcmd` section (sudo -u ...)
-  - Any other relevant locations in this file.
+Use this configuration to enable desktop virtualization and networking features in the
+microvisor image.
+
+Note that the `guest` Linux username is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
+To use a different username, replace all occurrences of `guest` with the `user_name` that you set in the
+`User Credentials` section of the `config-file`.
+
+For example, if your user is `myuser`, replace `guest` with `myuser` in:
+
+- `/etc/sudoers.d/idv_scripts`
+- `/etc/systemd/system/getty@tty1.service.d/autologin.conf`
+- `runcmd` section (sudo -u ...)
+- Any other relevant locations in this file.
+
+**Use and customize the following configuration script:**
 
 ```yaml
 #cloud-config
@@ -111,8 +118,8 @@ services:
 # === Create custom configuration files ===
 # To create a file, specify its path,permission and content.
 # Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file
-# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages 
-#        will be present under /var/log/cloud-init-output.log file on EMT image.
+# Note : Make sure scripts/files passing to cloud-init file are well tested. In case of any issues in the script/file, error messages
+#        will be present in the /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   write_files:
 #     - path: /etc/cloud/test.sh
@@ -216,8 +223,8 @@ write_files:
 
 # === Custom run commands ===
 # List commands or scripts to run at boot.
-# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present 
-#        under /var/log/cloud-init-output.log file on EMT image. 
+# Note : Make sure syntax is correct for the commands. In case of any issues in commands, error messages will be present
+#        in the /var/log/cloud-init-output.log file on EMT image.
 # Example:
 #   runcmd:
 #     - systemctl restart myservice

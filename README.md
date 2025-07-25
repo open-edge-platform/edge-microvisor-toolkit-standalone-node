@@ -5,27 +5,40 @@
 
 ## Overview
 
-The Edge Microvisor Toolkit Standalone Node solution is designed to empower developers and enterprise customers by allowing for efficient trials and evaluation of Edge AI applications on Intel Architecture-based platforms. This comprehensive solution stack includes the edge-optimized immutable Edge Microvisor Toolkit integrated with Kubernetes and foundational extensions, which enables deployment of both cloud-native and legacy VM-based applications.
+The Edge Microvisor Toolkit Standalone Node solution is designed to empower developers and
+enterprise customers by allowing for efficient trials and evaluation of Edge AI applications
+on Intel Architecture-based platforms. This comprehensive solution stack includes the
+edge-optimized immutable Edge Microvisor Toolkit integrated with K3s Kubernetes and foundational
+extensions, which enables deployment of both cloud-native and legacy VM-based applications.
 
-### Key Features:
+### Key Features
 
-- **Edge Optimized Immutable Toolkit:** The Edge Microvisor Toolkit is specifically optimized for edge environments, ensuring security and robust
-performance on Intel Architecture-based platforms.
-- **Kubernetes Integration:** Seamlessly deploy and manage applications using Kubernetes and cloud-native tools.
-- **Foundational Extensions:** These extensions support the deployment of diverse application types, including both modern cloud-native as well as traditional VM-based applications.
-- **Easy Evaluation:** The Edge Microvisor Standalone Node allows for critical insights into the capabilities of Edge AI solutions, which is beneficial for deployments of use-case-specific applications and potential scale outs.
+- **Edge Optimized Immutable Toolkit:** The Edge Microvisor Toolkit is specifically optimized
+  for edge environments, ensuring security and robust performance on Intel Architecture-based
+  platforms.
+- **Kubernetes Integration:** Seamlessly deploy and manage applications using Kubernetes and
+  cloud-native tools.
+- **Foundational Extensions:** These extensions support the deployment of diverse application
+  types, including both modern cloud-native as well as traditional VM-based applications.
+- **Easy Evaluation:** The Edge Microvisor Standalone Node allows for critical insights into
+  the capabilities of Edge AI solutions, which is beneficial for deployments of
+  use-case specific applications and potential scale outs.
+
 
 ## System Requirements
 
-The Edge Microvisor Toolkit Standalone Node solution is engineered to support a diverse range of Intel® platforms, ensuring compatibility and optimal performance. Below is a detailed summary of the supported processor families and system requirements:
+The Edge Microvisor Toolkit Standalone Node solution is engineered to support a diverse
+range of Intel® platforms, ensuring compatibility and optimal performance. Below is a
+detailed summary of the supported processor families and system requirements:
 
-### Supported Processor Families
+### Supported CPUs
 
 | Processor Family            | Supported Models                                                                |
 |-----------------------------|---------------------------------------------------------------------------------|
 | **Intel Atom® Processors**  | Intel® Atom® X Series                                                           |
 | **Intel® Core™ Processors** | 12th Gen Intel® Core™, 13th Gen Intel® Core™, Intel® Core™ Ultra (Series 1)     |
-| **Intel® Xeon® Processors** | 4th Gen Intel® Xeon® SP, 3rd Gen Intel® Xeon® SP                                |
+| **Intel® Xeon® Processors** | 5th Gen Intel® Xeon® SP, 4th Gen Intel® Xeon® SP, 3rd Gen Intel® Xeon® SP       |
+
 
 ### Memory, Storage and Networking Requirements
 
@@ -38,29 +51,45 @@ The Edge Microvisor Toolkit Standalone Node solution is engineered to support a 
 
 ## Get Started
 
-The repository comprises the following components:
+The repository comprises the following components.
 
-* [**EMT uOS**](standalone-node/emt_uos/): contains the Tinkerbell Installation Environment for bare-metal. It runs in-memory, installs operating system, and handles deprovisioning.
+- [**Edge Microvisor Bootkit**](standalone-node/emt_uos): contains the minimal
+  build of Edge Microvisor Toolkit which serves as an installation environment for
+  bare-metal. It runs in RAM memory, installs the operating system, and handles deprovisioning.
+  To learn more about Bootkit and its deployment, refer to
+  [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/docs/developer-guide/emt-bootkit.md).
 
-* [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable non-RT image as  hypervisor.
+- [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable
+  non-RT image, serving as hypervisor.
 
-* [**Kubernetes Cluster**](standalone-node/installation_Scripts/): The Kubernetes k3s cluster is deployed along the cluster extensions.
+- [**Kubernetes Cluster**](standalone-node/cluster_installers): The K3s Kubernetes cluster
+  is deployed along the cluster extensions.
 
-For more details refer to [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md).
+  > **Note** The 3.1 version does not support updating from 3.0 due to the change in
+    kubernetes distribution.
+
+For more details refer to [Get Started Guide](standalone-node/docs/user-guide/get-started-guide.md).
 
 ## How It Works
 
-To start the evaluation process, the customer compiles the Edge Microvisor Toolkit Standalone Node source code to create a USB bootable installer image. This image will be utilized to produce a bootable USB installer for the edge node intended for evaluation. At this stage, the customer has the option to configure settings like proxy and user credentials.
+To start the evaluation process, the customer compiles the Edge Microvisor Toolkit Standalone
+Node source code to create a USB bootable installer image for the edge node intended for evaluation.
+At this stage, the customer has the option to configure settings like proxy and user credentials.
 
-Next, the customer runs the automated installer, which generates a bootable USB stick. This USB stick is self-contained and includes all the necessary software components to install the Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
+Next, the customer runs the automated installer, which generates a bootable USB drive. This USB
+drive is self-contained and includes all the necessary software components to install the
+Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
 
-With the bootable USB stick prepared, the customer can proceed to install it on the edge node.
+With the bootable USB drive prepared, the customer can proceed to install it on the edge node.
 
-Once the edge node is up and running, the customer evaluates various Edge AI applications, pipelines, and microservices available from the Intel Edge services catalog and open-source repositories using standard tools like `helm`.
+Once the edge node is up and running, the customer evaluates various Edge AI applications,
+pipelines, and microservices available from the Intel Edge services catalog and open-source
+repositories using standard tools like `helm`.
 
-Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the latest Intel® kernel to ensure all features are exposed and available for application and workloads.
+Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the
+latest Intel® kernel to ensure all features are exposed and available for application and workloads.
 
-![How it works](standalone-node/images/howitworks.png)  
+![How it works](standalone-node/images/howitworks.png)
 
 ## Getting Help
 
@@ -71,11 +100,12 @@ Before submitting a new report, check the existing issues to see if a similar on
 been filed already. If no matching issue is found, feel free to file the issue as described
 in the [contribution guide](./standalone-node/docs/contribution.md).
 
-For security-related concerns, please refer to [SECURITY.md](./SECURITY.md).
+For security-related concerns, refer to [SECURITY.md](./SECURITY.md).
 
 ## Develop
 
-To develop an Edge Microvisor Toolkit Standalone Node, you'll need to follow the instructions provided in the [Get Started Guide](standalone-node/docs/user-guide/Get-Started-Guide.md) located in its respective folder.
+To develop an Edge Microvisor Toolkit Standalone Node, you will need to follow the instructions
+provided in the [Get Started Guide](standalone-node/docs/user-guide/get-started-guide.md).
 
 ## Contribute
 
