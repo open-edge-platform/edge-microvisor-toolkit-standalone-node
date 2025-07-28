@@ -125,8 +125,20 @@ write_files:
     append: true
     content: |
       export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
-      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')  
-
+      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')
+  - path: /etc/systemd/system/nw_custom_file.service
+    content: |
+      [Unit]
+      Description=network custom file services
+      After=network.target
+      [Service]
+      WorkingDirectory=/opt/user-apps/scripts/management/
+      ExecStart=bash /opt/user-apps/scripts/management/nw_custom_service.sh
+      Restart=on-failure
+      [Install]
+      WantedBy=multi-user.target
+  # autologin.conf configures automatic login for the specified user on tty1.
+  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
   # autologin.conf configures automatic login for the specified user on tty1.
   # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
   - path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -218,11 +230,15 @@ runcmd:
   # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
   - source /etc/environment
   - udevadm control --reload-rules
+  # Add the user to render group (assuming username is 'user')
+  - sudo usermod -a -G render user
+  - sudo -u user mkdir -p /home/user/.config/openbox/
+  - sudo -u user mv /etc/cloud/rc.xml /home/user/.config/openbox/rc.xml
   # Change `guest` to your intended username if not using 'guest' user.
-  - sudo -u guest mkdir -p /home/guest/.config/openbox/
-  - sudo -u guest mv /etc/cloud/rc.xml /home/guest/.config/openbox/rc.xml  
-  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user enable idv-init.service
-  - sudo -u guest XDG_RUNTIME_DIR=/run/user/$(id -u guest) systemctl --user start idv-init.service
-  - test -f /opt/user-apps/network_config.sh && bash /opt/user-apps/network_config.sh /etc/cloud/custom_network.conf || echo "network_config.sh is missing"
-  - test -f /opt/user-apps/apply_bridge_nad.sh && bash /opt/user-apps/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1 &  
+  - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user enable idv-init.service
+  - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user start idv-init.service
+  - sudo systemctl start nw_custom_file.service
+  - test -f /opt/user-apps/scripts/management/apply_bridge_nad.sh && bash /opt/user-apps/scripts/management/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1
+  # User shall add their application specific commands to automate the application deployment like this
+  # bash /opt/user-apps/scripts/management/app-deploy.sh
 ```

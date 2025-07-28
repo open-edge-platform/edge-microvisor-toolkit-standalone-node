@@ -28,16 +28,19 @@ Source code for the Edge Microvisor Toolkit Standalone Node is available at
 [Open Edge Platform GitHub](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node).
 
 Edge Microvisor Toolkit Standalone Node supports installation of EMT image of user choice.
-Following EMT images are supported to meet specific needs of edge deployment:
+Following EMT image types are supported to meet specific needs of edge deployment:
 
 - Edge Microvisor Toolkit Non Realtime image
-- Edge Microvisor Toolkit Realtime image
 - Edge Microvisor Toolkit desktop virtualization image
+- Customized immutable Edge Microvisor Toolkit created using "Edge Microvisor Toolkit Developer Node"
+
+> **Note:** User shall update the config-file according to the requirement of the customized
+> Edge Microvisor Toolkit immutable image
 
 By default the installer is packaged with Edge Microvisor Toolkit Non Realtime image.
 
-Users can download the EMT image of their choice and replace the default EMT image in the installer
-directory before creating the bootable USB.
+Users can download or can re-use the customized EMT image of their choice and replace the default EMT image
+in the installer directory before creating the bootable USB.
 
 The diagram below illustrates the steps involved in the USB-based provisioning of the standalone node.
 
@@ -50,7 +53,7 @@ flowchart TD
    D --> E[Plug the USB into the edge node and install]
    E --> F[Start using your edge node for AI apps or other use cases]
 
-   B -- "Realtime or Desktop Virtualization" --> G[Download your preferred image]
+   B -- "Desktop Virtualization or Customized image" --> G[Download your preferred image]
    G --> H[Replace the default raw image in the installer directory]
    H --> I[Update the config-file with your settings. Use the reference cloud-init config-file section provided in the document directory for the image you downloaded]
    I --> J[Create a bootable USB drive using the installer]
@@ -81,7 +84,7 @@ cd edge-microvisor-toolkit-standalone-node
    sudo make build
    ```
 
-> **Note:** This command will generate the `sen-installation-files.tar.gz` file.  
+> **Note:** This command will generate the `standalone-installation-files.tar.gz` file.
   The file will be located in the `$(pwd)/installation-scripts/out` directory.
 
 #### 1.3: Prepare the bootable USB Drive
@@ -128,10 +131,10 @@ cd edge-microvisor-toolkit-standalone-node
 
 - Copy standalone installation tar file to developer system to prepare the Bootable USB
 
-  Extract the contents of sen-installation-files.tar.gz
+  Extract the contents of standalone-installation-files.tar.gz
 
   ```bash
-   tar -xzf sen-installation-files.tar.gz
+   tar -xzf standalone-installation-files.tar.gz
   ```
 
 - Extracted files will include
@@ -144,6 +147,7 @@ cd edge-microvisor-toolkit-standalone-node
   edgenode-logs-collection.sh
   standalone-vm-setup.sh
   download_images.sh
+  user-apps
   ```
 
 - Download the kubernetes artifacts (container images and manifest files). This step is done by
@@ -205,19 +209,23 @@ meet specific edge deployment needs. You can choose from:
 
 - **Edge Microvisor Toolkit Non Realtime image** (default)
 - **Edge Microvisor Toolkit Desktop Virtualization image**
+- **Customized immutable Edge Microvisor Toolkit created using "Edge Microvisor Toolkit Developer Node"**
 
 ##### Option 1: Using the Default Non Realtime Image
 
 If you opt for the default Non-Realtime image, which is suggested for the majority of Edge AI applications,
 there's no need for further image setup. The usb-bootable-files.tar.gz installer comes with this image pre-included.
 
-##### Option 2: Using Desktop Virtualization Images
+##### Option 2: Using Desktop Virtualization or Custom created image
 
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Desktop Virtualization image: Download from the no Auth file server registry
 
-2. Replace the default EMT image with the EMT DV image. The
+> **Note:** Custom created image can be copied locally from your development system to the 5th
+> partition as shown in step 2 below.
+
+1. Replace the default EMT image with the EMT DV or custom created image. The
 default EMT image is located at the 5th partition of the
 bootable USB drive created in the previous step.
 Follow these steps to replace the image:
@@ -235,10 +243,11 @@ Follow these steps to replace the image:
   # Remove the older image (backup first if needed)
   sudo rm -f <old-image-file>
 
-  # Download the new DV image you want to provision
+  # For Desktop Virtualization image: Download from registry
   sudo wget <your-dv-image-url> -O <new-image-file>
-  # or copy from local directory:
-  # sudo cp /path/to/your/new-image.raw ./
+  
+  # For Custom created image: Copy from local directory to 5th partition
+  sudo cp /path/to/your/custom-image.raw ./
 
   # Unmount the partition
   cd /
@@ -410,8 +419,9 @@ refer to [emt-update-guide](emt-update-guide.md).
 
 2. **Issues while provisioning the microvisor**
 
-   If any issues occur while provisioning the microvisor, logs will be automatically collected
-   from `/var/log/os-installer.log` file to identify reasons for OS provisioning failures.
+   If you encounter issues during microvisor provisioning with the EMT boot kit, you can login
+   with root username and password using `chroot` to check the `/var/log/os-installer.log` file
+   for detailed error messages and troubleshooting information.
 
 3. **Installation status banner**
 
