@@ -96,7 +96,6 @@ jobs:
       run_docker_build: true
       run_artifact: true
       run_artifact_push: true
-      artifact_to_s3: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
@@ -105,8 +104,6 @@ jobs:
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
-      NO_AUTH_S3_PUSH_USERNAME: ${{ secrets.NO_AUTH_S3_PUSH_USERNAME }}
-      NO_AUTH_S3_PUSH_PASSWD: ${{ secrets.NO_AUTH_S3_PUSH_PASSWD }}
   final-check:
       runs-on: ubuntu-latest
       permissions:
