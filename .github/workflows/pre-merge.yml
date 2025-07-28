@@ -9,7 +9,6 @@ on:
     branches:
       - main
       - release-*
-      - sn-emt-uOS-integration
 
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
@@ -95,7 +94,6 @@ jobs:
       run_validate_clean_folder: false
       run_docker_build: true
       run_artifact: true
-      run_artifact_push: true
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
