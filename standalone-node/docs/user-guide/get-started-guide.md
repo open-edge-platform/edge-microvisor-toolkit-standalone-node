@@ -192,11 +192,11 @@ cd edge-microvisor-toolkit-standalone-node
 > **Note:** Providing proxy settings is optional if the edge node does not require them to
   access internet services.
 
+**Additional Customization:**
 
-> **Additional Customization:**
-> If you want to add specific configurations, helm charts, or packages to your deployment,
-> you can refer to the [pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed
-> instructions on customizing your EMT image.
+If you want to add specific configurations, helm charts, or packages to your deployment,
+you can refer to the [pre-loading-user-apps guide](pre-loading-user-apps.md) for detailed
+instructions on customizing your EMT image.
 
 #### 1.4: Choose Your Edge Microvisor Toolkit Image
 
