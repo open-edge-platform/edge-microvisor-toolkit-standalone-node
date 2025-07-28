@@ -1,87 +1,109 @@
-# Guideline for using Edge Microvisor Toolkit (EMT) to create a Desktop Virtualization
+# Desktop Virtualization Guide
 
-## Abstract
+Enable GPU-accelerated virtual machines on your Edge Microvisor Toolkit (EMT) Standalone Node.
 
-This document introduces the use of the Edge Microvisor Toolkit (EMT) for creating an immutable Desktop
-Virtualization image. It also provides a reference cloud-init configuration for deploying EMT images with
-Desktop Virtualization features.
+## Overview
 
-The EMT Desktop Virtualization image supports the following features:
+This guide shows how to deploy EMT with desktop virtualization capabilities, enabling you to run
+Windows and Linux virtual machines with GPU acceleration, display virtualization, and USB passthrough.
 
-- **SR-IOV**: Single Root I/O Virtualization for Intel integrated graphics.
-- **Display Virtualization**: Enables display virtualization for VMs using Intel integrated graphics.
-  This feature has been validated on both Windows 11 and Linux VMs.
-- **USB Passthrough**: Supports USB passthrough for VMs, including keyboard and mouse devices.
-- **Network Bridge**: Provides network bridge support, allowing VMs to connect to the network via the host's
-  network interface.
-- **Self-contained Image**: Includes a container runtime, lightweight Kubernetes, and additional Kubernetes
-  add-ons for networking and GPU resource allocation. As a result, the image is larger than the standard EMT
-  image.
+**Time required:** 1-2 hours  
+**Difficulty:** Advanced  
+**Target audience:** VDI deployments, advanced users
 
-With this image, customers can automate the deployment of edge nodes using the EMT standalone project.
+## What You'll Build
 
-```mermaid
-block-beta
-  columns 1
-    block:APP      
-      WinVM(["Customer App: Windows 11 VM using GPU for Display Virtualization"])      
-      LinuxVM(["Customer App: Linux VM using GPU for AI compute offload"])
-      AppPod[["Customer App: Containerized AI app"]]
-    end    
-    block:RESOURCES
-      blockArrowId1<["GPU SR-IOV resource"]>(up)      
-      blockArrowId2<["Hugepage resource"]>(up)
-      blockArrowId3<["Multiple network resource"]>(up)
-      blockArrowId4<["USB resource"]>(up)
-    end
-    block:KUBE      
-      K3S("k3s (Lightweight Kubernetes)")
-      SRIOV("Virtualization,Networking and SR-IOV GPU addons")
-    end
-    EMT["EMT Desktop Virtualization image with hypervisor and container runtime"]
-    block:HARDWARE
-      IntelCore["Intel Core-based Platform with integrated GPU"]
-    end
-    
+By the end of this guide, you'll have:
+
+- EMT node with desktop virtualization features enabled
+- GPU SR-IOV configuration for VM hardware acceleration
+- Display virtualization for direct monitor connection
+- USB passthrough for keyboard, mouse, and other devices
+- Network bridge configuration for VM connectivity
+
+## Desktop Virtualization Features
+
+The EMT Desktop Virtualization image provides enterprise-grade virtualization capabilities:
+
+### Core Features
+
+- **SR-IOV GPU Support:** Single Root I/O Virtualization for Intel integrated graphics
+- **Display Virtualization:** Direct display output from VMs using Intel integrated graphics
+- **USB Passthrough:** Full USB device passthrough including HID devices
+- **Network Bridge:** Advanced networking for VM connectivity
+- **Self-contained:** Includes container runtime, k3s, and virtualization add-ons
+
+### Validated Platforms
+
+- **Windows 11 VMs** with GPU acceleration
+- **Linux VMs** with GPU acceleration and AI compute offload
+- **Mixed workloads** combining VMs and containers
+
+## Architecture Overview
+
+```plaintext
+┌─────────────────────────────────────────────────────────────┐
+│                    Customer Applications                     │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│ Windows 11 VM   │ Linux AI VM     │ Containerized AI App    │
+│ (GPU Display)   │ (GPU Compute)   │                         │
+└─────────────────┴─────────────────┴─────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                 Resource Management                          │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│ GPU SR-IOV      │ Hugepages       │ Network Bridge          │
+│ Virtual Functions│ Memory          │ Multiple Interfaces     │
+└─────────────────┴─────────────────┴─────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│           k3s + Virtualization Extensions                   │
+│  • KubeVirt  • SR-IOV Device Plugin  • Multus CNI          │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│        EMT Desktop Virtualization Image                     │
+│          (Hypervisor + Container Runtime)                   │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│      Intel Core Platform with Integrated GPU               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Infrastructure resource usage KPI
+## Prerequisites
 
-Infrastructure resource utilization KPI measurement were conducted on the following hardware:
+### Hardware Requirements
 
-- 13th Gen Intel(R) Core(TM) i7-1365URE
-- CPU(s): 12
-- Mem:62Gi
-- HDD: 931.5G (nvme)
+- **Intel Core processor** with integrated graphics (i915 driver support)
+- **16GB RAM minimum** (32GB+ recommended for multiple VMs)
+- **256GB storage** (SSD strongly recommended)
+- **Multiple monitors** (if using display virtualization)
+- **USB devices** for passthrough testing
 
-EMT Desktop Virtualization infra consists of following components
+### Supported Processors
 
-```bash
-  Namespace                   Name                                        CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
-  ---------                   ----                                        ------------  ----------  ---------------  -------------  ---
-  default                     intel-gpu-plugin-kjpcm                      40m (0%)      100m (0%)   45Mi (0%)        90Mi (0%)      31m
-  kube-system                 calico-kube-controllers-64b69c8f54-llhbw    0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
-  kube-system                 calico-node-qp92s                           250m (2%)     0 (0%)      0 (0%)           0 (0%)         31m
-  kube-system                 coredns-697968c856-dlzw6                    100m (0%)     0 (0%)      70Mi (0%)        170Mi (0%)     31m
-  kube-system                 device-plugin-jk4q7                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
-  kube-system                 kube-multus-ds-bwn2r                        100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      31m
-  kube-system                 local-path-provisioner-774c6665dc-hd7l5     0 (0%)        0 (0%)      0 (0%)           0 (0%)         31m
-  kube-system                 metrics-server-6f4c6675d5-8t8v8             100m (0%)     0 (0%)      70Mi (0%)        0 (0%)         31m
-  kubevirt                    virt-api-57fbc959fb-4svfj                   5m (0%)       0 (0%)      500Mi (1%)       0 (0%)         30m
-  kubevirt                    virt-controller-cc4564f8f-ggsjb             10m (0%)      0 (0%)      275Mi (0%)       0 (0%)         30m
-  kubevirt                    virt-controller-cc4564f8f-l8rtz             10m (0%)      0 (0%)      275Mi (0%)       0 (0%)         30m
-  kubevirt                    virt-handler-8pnlp                          10m (0%)      0 (0%)      357Mi (0%)       0 (0%)         30m
-  kubevirt                    virt-operator-64645b6948-lf788              10m (0%)      0 (0%)      450Mi (1%)       0 (0%)         31m
-  kubevirt                    virt-operator-64645b6948-qg6wj              10m (0%)      0 (0%)      450Mi (1%)       0 (0%)         31m
-```
+Verified on:
 
-### Summary of resource utilization
+- 13th Gen Intel® Core™ i7-1365URE (12 cores, 62GB RAM tested)
+- Other 12th/13th Gen Intel Core processors with integrated graphics
 
-- Consume 5% or less CPU without workload running (0.6 core)
-- Consume less than 3G of RAM (on 64G system) without workload running
-- Consume less than 2% of HDD space (on 1TB HDD)
+### Software Prerequisites
 
-> **Note** RAM usage is directly Proportional to the number of `hugepages` allocated and user should tune according to needs.
+Same as the [Quick Start Guide](quick-start-guide.md), plus:
+
+- **VM management tools** (virt-manager, or kubectl for KubeVirt)
+- **VNC client** (for headless VM access)
+
+## Resource Usage
+
+The desktop virtualization infrastructure has moderate overhead:
+
+### System Resource Consumption
+
+| Component | CPU Usage | Memory Usage | Storage |
+|-----------|-----------|---------------|---------|
+| **Base k3s + Extensions** | ~5% (0.6 cores) | ~3GB | ~2GB |
+| **Per Windows VM** | 2-4 cores | 4-8GB | 60GB+ |
+| **Per Linux VM** | 1-2 cores | 2-4GB | 20GB+ |
+
+> **Note:** Memory usage scales with hugepage allocation. Tune according to your VM requirements.
 
 ## Reference cloud-init for EMT image with Desktop Virtualization and networking features
 

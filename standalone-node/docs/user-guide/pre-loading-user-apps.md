@@ -1,22 +1,68 @@
-# Pre-loading User Application artifacts as part of USB installer
+# Pre-loading Applications Guide
 
-Edge Microvisor Toolkit (EMT) Standalone Node enables users to quickly deploy a single-node
-cluster based on lightweight Kubernetes. In scenarios such as OEM (Original Equipment Manufacturer)
-use cases, users may need to pre-load applications onto the edge node before testing and shipping
-it to its final installation site.This capability is especially useful for those who want their
-applications to be available and ready for use immediately after installation.
+Automate application deployment by including your apps in the EMT installer.
 
-To support these requirements, EMT Standalone Node allows users to include their application artifacts
-within the USB installer.
+## Overview
 
-After extracting the standalone node installer, users can find `user-apps` placeholder apps placed in the root of
-the directory where installer is extracted. Users can place their application files like container
-images, helm charts, VM images in the `user-apps` folder. The artifacts will be automatically copied
-to persistent volume on the Edge node at `/opt/user-apps`. User can use the custom `cloud-init` section
-available in the configuration file `config-file` to launch the application after the kubernetes cluster has come up.
-User has flexibility to manage the artifacts and what they do using the artifacts and the custom
-cloud-init configuration. 5G of USB disk space is used for the installer artifacts. Rest of the USB disk
-space is available for the user to store the application artifacts.
+This guide shows how to pre-load applications, container images, and configuration scripts into your
+EMT Standalone Node installer. This is particularly useful for OEM deployments, offline environments,
+or automated edge installations where applications need to be ready immediately after installation.
+
+**Time required:** 1-2 hours  
+**Difficulty:** Intermediate  
+**Target audience:** OEMs, automated deployments, offline environments
+
+## What You'll Achieve
+
+By the end of this guide, you'll be able to:
+
+- Include custom applications in your EMT installer
+- Deploy container images automatically during installation
+- Configure custom networking and services
+- Create fully automated edge deployments
+
+## Use Cases
+
+Pre-loading applications is ideal for:
+
+- **OEM Deployments:** Ship edge devices with applications pre-installed
+- **Offline Environments:** Deploy without internet connectivity for downloads
+- **Fleet Management:** Standardize application deployments across many nodes
+- **Quick Evaluation:** Test applications immediately after installation
+
+## How It Works
+
+The EMT Standalone Node installer reserves space on the USB drive for user applications:
+
+- **5GB:** Reserved for installer system files
+- **Remaining space:** Available for your application artifacts
+- **Automatic copy:** Files copied to `/opt/user-apps` during installation
+- **Cloud-init integration:** Custom scripts run after Kubernetes is ready
+
+## Architecture
+
+```plaintext
+┌─────────────────────────────────────────────────────────────┐
+│                    USB Installer                            │
+├─────────────────────────────────────────────────────────────┤
+│ System Files (5GB)          │ User Apps (Remaining Space)   │
+│ • EMT Image                 │ • Container Images             │
+│ • Kubernetes Components     │ • Helm Charts                 │
+│ • Installation Scripts      │ • VM Images                   │
+│                             │ • Custom Scripts              │
+└─────────────────────────────┴─────────────────────────────────┘
+                              │
+                              ▼ (During Installation)
+┌─────────────────────────────────────────────────────────────┐
+│                     Edge Node                               │
+├─────────────────────────────────────────────────────────────┤
+│ /opt/user-apps/             │ Custom Cloud-init Scripts     │
+│ • Container Images          │ • Network Configuration       │
+│ • Helm Charts               │ • Application Deployment      │
+│ • VM Images                 │ • Service Configuration       │
+│ • Scripts and Config        │                               │
+└─────────────────────────────┴─────────────────────────────────┘
+```
 
 ## User App Folder
 
