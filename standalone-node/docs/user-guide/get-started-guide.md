@@ -24,7 +24,7 @@ Edge Microvisor Toolkit Standalone Node:
 
 - Edge Microvisor Toolkit Non-RT (standard kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
-- Custom immutable Edge Microvisor Toolkit created using 
+- Custom immutable Edge Microvisor Toolkit created using
   [Edge Microvisor Toolkit Developer Node](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0/docs/developer-guide/get-started/emt-building-howto.md)
 
 > **Note:** Make sure to update `config-file` according to the requirements of the custom
@@ -191,6 +191,7 @@ cd edge-microvisor-toolkit-standalone-node
 
 > **Note:** Providing proxy settings is optional if the edge node does not require them to
   access internet services.
+
 
 > **Additional Customization:**
 > If you want to add specific configurations, helm charts, or packages to your deployment,
