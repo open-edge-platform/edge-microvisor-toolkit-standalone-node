@@ -9,7 +9,6 @@ on:
     branches:
       - main
       - release-*
-      - sn-emt-uOS-integration
     paths:
       - "standalone-node/**"
 
@@ -30,7 +29,6 @@ jobs:
       run_lint: true
       run_docker_build: true
       run_artifact_push: true
-      artifact_to_s3: true
       run_docker_push: false
       run_version_tag: true
       prefix_tag_separator: "/"
@@ -41,6 +39,4 @@ jobs:
       COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
-      NO_AUTH_S3_PUSH_USERNAME: ${{ secrets.NO_AUTH_S3_PUSH_USERNAME }}
-      NO_AUTH_S3_PUSH_PASSWD: ${{ secrets.NO_AUTH_S3_PUSH_PASSWD }}
       MSTEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
