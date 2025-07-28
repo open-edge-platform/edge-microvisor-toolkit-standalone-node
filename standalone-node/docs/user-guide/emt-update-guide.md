@@ -4,7 +4,8 @@
 
 The Edge Microvisor Toolkit operates on an immutable EMT image, where packages are integrated into the image itself.
 To update these packages, you need to build a new EMT image with updated packages. This guide provides step-by-step
-instructions for setting up the environment necessary to update the Edge Microvisor Toolkit on a standalone node using USB drive.
+instructions for setting up the environment necessary to update the Edge Microvisor Toolkit on a standalone node 
+using USB drive.
 
 ### Step 1: Prerequisites
 
