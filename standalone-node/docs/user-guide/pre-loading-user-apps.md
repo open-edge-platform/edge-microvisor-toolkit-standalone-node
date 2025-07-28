@@ -14,8 +14,8 @@ the directory where installer is extracted. Users can place their application fi
 images, helm charts, VM images in the `user-apps` folder. The artifacts will be automatically copied
 to persistent volume on the Edge node at `/opt/user-apps`. User can use the custom `cloud-init` section
 available in the configuration file `config-file` to launch the application after the kubernetes cluster has come up.
-Users can benefit from custom cloud-init configuration and the flexibility to freely 
-manage and use the artifacts. 5 GB of USB disk space is used for the installer artifacts. 
+Users can benefit from custom cloud-init configuration and the flexibility to freely
+manage and use the artifacts. 5 GB of USB disk space is used for the installer artifacts.
 Remaining disk space is available for storing the application artifacts.
 
 ## User App Folder
