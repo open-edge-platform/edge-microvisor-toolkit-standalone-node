@@ -105,3 +105,5 @@ write_files: []
 #     - systemctl restart myservice
 #     - bash /etc/cloud/test.sh
 runcmd: 
+    # Allow helm/kubectl access from external development system
+    - iptables -A INPUT -p tcp --dport 6443 -j ACCEPT
