@@ -304,7 +304,7 @@ user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2)
 user_name=${user_name//\"/}
 usermod -aG sudo "$user_name"
 
- bootctl_output=$(bootctl list)
+bootctl_output=$(bootctl list)
 # Check if linux-2.efi or linux.efi is selected
 # Make the updated image persistent for future boots
 if os-update-tool.sh -c; then
