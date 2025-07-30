@@ -414,9 +414,9 @@ refer to [emt-update-guide](emt-update-guide.md).
 
 2. **Issues while provisioning the microvisor**
 
-   If you encounter issues during provisioning the microvisor with EMT Bootkit, you can login
-   as root, using `chroot` to check the `/var/log/os-installer.log` file
-   for detailed error messages and troubleshooting information.
+   If you encounter issues during microvisor provisioning with the EMT Bootkit, check the `os-installer.log`
+   file located on partition 6 of the bootable USB device (e.g., `/dev/sdX6`). This log contains detailed
+   error messages and troubleshooting information to help diagnose and resolve installation problems.
 
 3. **Installation status banner**
 
