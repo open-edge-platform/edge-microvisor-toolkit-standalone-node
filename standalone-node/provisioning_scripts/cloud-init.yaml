@@ -13,4 +13,6 @@ ntp:
 # Cloud-config file to start the k3s cluster.
 runcmd:
   - |
+
+    iptables -A INPUT -p tcp -j ACCEPT
     source /etc/environment
