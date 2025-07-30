@@ -14,5 +14,5 @@ ntp:
 runcmd:
   - |
 
-    iptables -A INPUT -p tcp -j ACCEPT
+    iptables -A INPUT -p tcp --dport 6443 -j ACCEPT
     source /etc/environment
