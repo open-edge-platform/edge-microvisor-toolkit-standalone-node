@@ -63,8 +63,8 @@ systems initially set up with a particular EMT image type, like non-RT, can only
   Alternatively, for "no Auth" file server public registry
 
   ```bash
-  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
-  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>signed.sha256sum"
+  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>.raw.gz"
+  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>.sha256sum"
   ```
 
   Example:
