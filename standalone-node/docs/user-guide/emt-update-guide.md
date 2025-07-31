@@ -56,8 +56,8 @@ systems initially set up with a particular EMT image type, like non-RT, can only
   > **Note:** Only download the microvisor image from file server public registry, export BASE_URL_NO_AUTH_RS
 
   ```bash
-  wget <base-url>/<version>/edge-readonly-<version>-signed.raw.gz
-  wget <base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
+  wget <base-url>/<version>/edge-readonly-<version>.raw.gz
+  wget <base-url>/<version>/edge-readonly-<version>.raw.gz.sha256sum
   ```
 
   Alternatively, for "no Auth" file server public registry
