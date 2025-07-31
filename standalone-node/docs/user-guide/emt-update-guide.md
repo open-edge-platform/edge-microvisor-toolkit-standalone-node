@@ -81,11 +81,11 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo ./write-image-to-usb.sh /dev/sdc /path/to/microvisor_image.raw.gz /path/to/microvisor_image.raw.gz.sha256sum
   ```
 
-## Step 2: Perform Edge Microvisor Toolkit Update on Standalone Node
+### Step 2: Perform Edge Microvisor Toolkit Update on Standalone Node
 
 > **Note:** You can choose either direct mode or URL mode for the microvisor update.
 
-### Step 2.1 Direct Mode
+#### Step 2.1 Direct Mode
 
 - Unplug the prepared bootable USB drive from the developer system.
 - Plug the bootable USB drive into the standalone edge node.
@@ -103,7 +103,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250718.0822.raw.gz -c /mnt/edge-readonly-3.0.20250718.0822.raw.gz.sha256sum
   ```
 
-### Step 2.2 URL Mode
+#### Step 2.2 URL Mode
 
 - To start the microvisor update, execute the script with the following options:
 
@@ -117,7 +117,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo ./os-update.sh -u https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt -r 3.0 -v 20250718.0822
   ```
 
-## Automatic Reboot
+### Automatic Reboot
 
   Once the update has completed, the EMT provisioned node will automatically reboot into the
   updated EMT image.
@@ -128,7 +128,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo bootctl list
   ```
 
-## Check the details of the updated image:
+### Check the details of the updated image:
 
   ```bash
   cat /etc/image-id
