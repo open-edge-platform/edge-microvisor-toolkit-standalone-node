@@ -39,6 +39,12 @@ extract_write_files_paths() {
   echo "${paths[@]}"
 }
 
+# Function to convert date string to seconds since epoch
+convert_to_epoch() {
+    local date_string="$1"
+    date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
+}
+
 # Specify the configuration file
 config_file="/etc/cloud/config-file"
 
@@ -61,6 +67,59 @@ error_exit() {
     echo "Error: $1"
     exit 1
 }
+
+# Function to perform before update 
+perform_update_check() {
+    local image_path="$1"
+
+    # Mandatory checks before the update
+
+    # Decompress the image
+    gunzip -c "$image_path" > /etc/cloud/update.raw
+
+    # Set up the loop device with the decompressed image
+    loopdevice=$(losetup --find --partscan --show /etc/cloud/update.raw)
+
+    # Extract UUID from the loop device partition
+    local uuid
+    uuid=$(lsblk -no UUID "$loopdevice"p2)
+
+    # Get boot UUID from bootctl list
+    bootctl list | grep -E 'default|boot_uuid' > /etc/cloud/input.txt
+    local boot_uuid
+    boot_uuid=$(awk '/\(default\)/ {getline; if ($0 ~ /options/) {match($0, /boot_uuid=([a-f0-9-]+)/, arr); print arr[1]; exit}}' /etc/cloud/input.txt)
+
+    # Clean up temporary files
+    rm -rf /etc/cloud/input.txt /etc/cloud/update.raw
+
+    # Check #1 Compare UUIDs
+    if [ "$uuid" = "$boot_uuid" ]; then
+        echo "UUID of update image and provisioned image are the same"
+	losetup -d "$loopdevice"
+        exit 1
+    fi
+
+    # Check #2 Upgrades only with future dates
+    # Convert both dates to seconds since epoch
+    mount "$loopdevice"p2 /mnt
+    IMAGE_BUILD_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /etc/image-id)
+    FUTURE_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /mnt/etc/image-id)
+    image_build_epoch=$(convert_to_epoch "$IMAGE_BUILD_DATE")
+    upgrade_image_date_epoch=$(convert_to_epoch "$FUTURE_DATE")
+    umount /mnt
+
+    if [ "$upgrade_image_date_epoch" -lt "$image_build_epoch" ]; then
+       echo "Downgrades are not supported. Only upgrades with images having a future build date are allowed."
+       losetup -d "$loopdevice"
+       exit 1 
+    else
+       echo "The image build date is on or after the future date."
+    fi
+
+    # Detach the loop device
+    losetup -d "$loopdevice"
+}
+
 
 # Function to display usage information
 show_help() {
@@ -181,6 +240,9 @@ else
     SHA_ID=$(awk '{print $1}' "$SHA_FILE")
     echo "Extracted SHA256 checksum: $SHA_ID"
 fi
+
+# Call the function with the path to the image
+perform_update_check "$IMAGE_PATH"
 
 # Invoke the os-update-tool.sh script
 echo "Initiating OS update..."
