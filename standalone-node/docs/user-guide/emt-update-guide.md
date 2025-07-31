@@ -1,4 +1,4 @@
-# Standalone Node A/B Update of Edge Microvisor Toolkit
+# Standalone Node A/B Upgrade of Edge Microvisor Toolkit
 
 ## Get Started
 
@@ -12,8 +12,10 @@ using USB drive.
 Make sure your standalone node is provisioned with the specified version of immutable image.
 Follow all instructions outlined in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
 
-> **Note**: Keep in mind that the standalone node updates do not support mutable or ISO images
-  of Edge Microvisor Toolkit.
+> **Important Notes**:
+<span style="color: red;"><strong>Note #1:</strong> Keep in mind that the standalone node updates do not support mutable or ISO images of Edge Microvisor Toolkit.</span>
+<span style="color: red;"><strong>Note #2:</strong> Only upgrades with Edge Microvisor Toolkit (EMT) images are supported, meaning that updates can only be performed with the latest available versions of EMT images. Users can regularly check for new EMT image releases and plan their upgrade accordingly.</span>
+<span style="color: red;"><strong>Note #3:</strong> The Edge Microvisor Toolkit (EMT) supports upgrades exclusively within its designated image type. Which means systems initially provisioned with non-RT EMT images then upgrades for systems using non-RT EMT images. </span>
 
 #### 1.1: Prepare the USB Drive
 
