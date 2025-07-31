@@ -126,7 +126,7 @@ cd edge-microvisor-toolkit-standalone-node
   Extract the contents of `standalone-installation-files.tar.gz`:
 
   ```bash
-   tar -xzf standalone-installation-files.tar.gz
+   sudo tar -xzf standalone-installation-files.tar.gz
   ```
 
 - Extracted files will include
