@@ -53,16 +53,17 @@ detailed summary of the supported processor families and system requirements:
 
 The repository comprises the following components.
 
-- [**Edge Microvisor Bootkit**](standalone-node/emt_uos): contains the minimal
-  build of Edge Microvisor Toolkit which serves as an installation environment for
-  bare-metal. It runs in RAM memory, installs the operating system, and handles deprovisioning.
-  To learn more about Bootkit and its deployment, refer to
+- [**Edge Microvisor Bootkit**](standalone-node/emt_uos): Includes scripts for downloading the minimal
+  build of the Edge Microvisor Toolkit, which acts as an installation environment for bare-metal systems.
+  It operates in RAM, installs the operating system, and manages provisioning.
+  For further information on Bootkit, please consult
   [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/docs/developer-guide/emt-bootkit.md).
 
-- [**Edge Microvisor Toolkit**](standalone-node/host_os/): Edge Microvisor Toolkit immutable
-  non-RT image, serving as hypervisor.
+- [**Edge Microvisor Toolkit**](standalone-node/host_os/): The Edge Microvisor Toolkit's non-real-time
+  image is immutable and functions as a hypervisor. The scripts available here will download this
+  immutable Edge Microvisor Toolkit non-RT image.
 
-- [**Kubernetes Cluster**](standalone-node/cluster_installers): The K3s Kubernetes cluster
+- [**Provisioing Scripts**](standalone-node/provisiong_scripts): The K3s Kubernetes cluster
   is deployed along the cluster extensions.
 
   > **Note** The 3.1 version does not support updating from 3.0 due to the change in
