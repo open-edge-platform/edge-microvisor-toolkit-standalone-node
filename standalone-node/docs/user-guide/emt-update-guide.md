@@ -2,28 +2,37 @@
 
 ## Get Started
 
-The Edge Microvisor Toolkit operates on an immutable EMT image, where packages are integrated into the image itself.
-To update these packages, you need to build a new EMT image with updated packages. This guide provides step-by-step
-instructions for setting up the environment necessary to update the Edge Microvisor Toolkit on a standalone node
-using USB drive.
+The Edge Microvisor Toolkit runs on a fixed EMT image, with packages embedded directly into the image.
+To update these packages, you must create a new EMT image that includes the updated packages.
+This guide offers detailed instructions for preparing the environment needed to update the Edge Microvisor
+Toolkit on a standalone node using a USB drive.
 
 ### Step 1: Prerequisites
 
-Make sure your standalone node is provisioned with the specified version of immutable image.
-Follow all instructions outlined in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
+Ensure that your standalone node is equipped with the designated version of the immutable image. Adhere to all
+the steps provided in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
 
-> **Note**: Keep in mind that the standalone node updates do not support mutable or ISO images
-  of Edge Microvisor Toolkit.
+#### **Important Notes**
+
+Note #1: Please be aware that updates to the Edge Microvisor Toolkit are not compatible with mutable or ISO images.
+
+Note #2: Updates are supported only with Edge Microvisor Toolkit(EMT) images, which means updates must be performed
+using the most recent EMT image versions. Users should regularly check for new EMT image releases to plan their
+updates, as reverting to older images is not supported.
+
+Note #3: The Edge Microvisor Toolkit allows updates solely within its specific image types, such as DV or non-RT.
+This means that systems initially set up with a particular EMT image type, like non-RT, can only be updated using
+images of the same type.
 
 #### 1.1: Prepare the USB Drive
 
-- Connect the USB drive to your developer system and identify the correct USB disk using the following command:
+- Attach the USB drive to your development system and use the following command to locate the appropriate USB disk:
 
   ```bash
   lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,FSTYPE,MOUNTPOINT,MODEL
   ```
 
-  > **Note:** Ensure you select the correct USB drive to avoid data loss.
+  > **Note:** Make sure to choose the correct USB drive to prevent any data loss.
 
 - Copy `standalone-installation-files.tar.gz` to the developer system to prepare the bootable USB drive.
 
@@ -44,37 +53,23 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   edgenode-logs-collection.sh
   ```
 
-- Download the Edge Microvisor Toolkit image and the corresponding sha256sum file.
+- Obtain the Edge Microvisor Toolkit image along with its corresponding sha256sum file.
 
-  > **Note:** Only download the microvisor image from "no Auth" file server public registry, export BASE_URL_NO_AUTH_RS
+  > **Note:** Download the microvisor image exclusively from the file server's public registry and export BASE_URL_NO_AUTH_RS.
 
   ```bash
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
+  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>.raw.gz"
+  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>.sha256sum"
   ```
 
   Example:
 
   ```bash
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz.sha256sum
+  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250717.0734.raw.gz
+  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250717.0734.raw.gz.sha256sum
   ```
 
-  Alternatively, for "no Auth" file server public registry
-
-  ```bash
-  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<release>.<build date>-signed.raw.gz"
-  wget "<BASE_URL_NO_AUTH_RS>/edge-readonly-<version>.<build date>signed.sha256sum"
-  ```
-
-  Example:
-
-  ```bash
-  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz
-  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
-  ```
-
-- To update a new Edge Microvisor Toolkit image, first execute the preparation script to write it to the USB drive:
+- To update the Edge Microvisor Toolkit image, begin by running the preparation script to transfer it onto the USB drive:
 
   ```bash
   sudo ./write-image-to-usb.sh </dev/sdX> </path/to/microvisor_image.raw.gz> </path/to/microvisor_image.raw.gz.sha256sum>
@@ -86,11 +81,11 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo ./write-image-to-usb.sh /dev/sdc /path/to/microvisor_image.raw.gz /path/to/microvisor_image.raw.gz.sha256sum
   ```
 
-## Step 2: Perform Edge Microvisor Toolkit Update on Standalone Node
+### Step 2: Execute the Edge Microvisor Toolkit Update on a Standalone Node
 
 > **Note:** You can choose either direct mode or URL mode for the microvisor update.
 
-### Direct Mode
+#### Step 2.1 Direct Mode
 
 - Unplug the prepared bootable USB drive from the developer system.
 - Plug the bootable USB drive into the standalone edge node.
@@ -105,12 +100,12 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   ```bash
   sudo ./os-update.sh -i /path/to/microvisor_image.raw.gz -c /path/to/microvisor_image.sha256sum
   # Example:
-  sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250611.0526-signed.raw.gz -c /mnt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
+  sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250718.0822.raw.gz -c /mnt/edge-readonly-3.0.20250718.0822.raw.gz.sha256sum
   ```
 
-### URL Mode
+#### Step 2.2 URL Mode
 
-- To start the microvisor update, execute the script with the following options:
+- Initiate the microvisor update by running the script with these options:
 
   ```bash
   sudo ./os-update.sh -u <base url> -r <release> -v <build version>
@@ -119,21 +114,20 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   Example:
 
   ```bash
-  sudo ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
+  sudo ./os-update.sh -u https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt -r 3.0 -v 20250718.0822
   ```
 
-- Automatic Reboot
+### Automatic Reboot
 
-  Once the update has completed, the standalone edge node will automatically reboot into the
-  updated microvisor OS.
-
-- Upon successful boot, verify that the system is running correctly with the new image:
-
+- Once the update has completed, the EMT provisioned node will automatically reboot into the updated EMT image.
+  
+- After a successful boot, confirm that the system is operating properly with the new image:
+  
   ```bash
   sudo bootctl list
   ```
 
-- Check the details of the updated image:
+### Review the specifics of the updated image
 
   ```bash
   cat /etc/image-id
