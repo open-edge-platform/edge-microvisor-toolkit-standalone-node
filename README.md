@@ -64,8 +64,9 @@ The repository comprises the following components.
   immutable Edge Microvisor Toolkit non-RT image.  For further information on Edge Microvisor Toolkit,
   please consult [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0/README.md)
 
-- [**Provisioing Scripts**](standalone-node/provisiong_scripts): This folder contains installation scripts
-  for the Edge Microvisor Toolkit, and the K3s Kubernetes cluster is set up alongside the cluster extensions.
+- [**Provisioing Scripts**](standalone-node/provisiong_scripts): This folder contains provisioning scripts
+  for the Edge Microvisor Toolkit, as well as the installation and configuration of the K3s Kubernetes
+  cluster with its extensions.
 
   > **Note** The 3.1 version does not support updating from 3.0 due to the change in
     kubernetes distribution.
