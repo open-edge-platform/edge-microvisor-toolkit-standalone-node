@@ -13,6 +13,7 @@ Make sure your standalone node is provisioned with the specified version of immu
 Follow all instructions outlined in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
 
 #### **Important Notes**:
+<span style="color: red;"><strong>Note #1:</strong> Keep in mind that the standalone node updates do not support mutable or ISO images of Edge Microvisor Toolkit.</span>
 - **Note #1**: Keep in mind that the standalone node updates do not support mutable or ISO images of Edge Microvisor Toolkit.
 - **Note #2**: Only upgrades with Edge Microvisor Toolkit (EMT) images are supported, meaning that updates can only be performed with the latest available versions of EMT images. Users can regularly check for new EMT image releases and plan their upgrade accordingly.
 - **Note #3**: The Edge Microvisor Toolkit (EMT) supports upgrades exclusively within its designated image type. Which means systems initially provisioned with non-RT EMT images then upgrades for systems using non-RT EMT images.
