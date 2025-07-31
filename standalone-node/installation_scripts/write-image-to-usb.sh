@@ -30,7 +30,6 @@ USB_FILE1="$2"
 USB_FILE2="$3"
 OS_UPDATE_PART=1
 
-
 # Validate USB device
 if ! [[ "$USB_DEVICE" =~ ^/dev/(sd[a-z]+|nvme[0-9]+n[0-9]+|vd[a-z]+|mmcblk[0-9]+)$ ]]; then
     echo "Error: '$USB_DEVICE' is NOT a valid USB/block device!"

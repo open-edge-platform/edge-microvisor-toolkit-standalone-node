@@ -3,7 +3,6 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-#set -x
 LOCAL_OUTPUT_DIR="$(pwd)/remote_logs"
 REMOTE_CMDS="cd /etc/cloud/; sudo chmod +x collect-logs.sh; bash collect-logs.sh"
 REMOTE_FILE_PATH="/var/log/edge_node_logs/edge_node_logs.tar.gz"
