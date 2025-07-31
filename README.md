@@ -57,7 +57,7 @@ The repository comprises the following components.
   build of the Edge Microvisor Toolkit, which acts as an installation environment for bare-metal systems.
   It operates in RAM, installs the operating system, and manages provisioning.
   For further information on Bootkit, please consult
-  [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/docs/developer-guide/emt-bootkit.md).
+  [the documentation](https://github.com/open-edge-platform/edge-microvisor-toolkit/blob/3.0/docs/developer-guide/emt-bootkit.md).
 
 - [**Edge Microvisor Toolkit**](standalone-node/host_os/): The Edge Microvisor Toolkit's non-real-time
   image is immutable and functions as a hypervisor. The scripts available here will download this
