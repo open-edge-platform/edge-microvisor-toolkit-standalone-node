@@ -60,7 +60,7 @@ flowchart TD
 #### 1.1: Repository Setup
 
 Start by cloning the repository that holds all the essential scripts and configurations for
-deployment in the Ubuntu Linux system. This step is vital for obtaining the tools needed 
+deployment in the Ubuntu Linux system. This step is vital for obtaining the tools needed
 for the standalone node.
 
 ```bash
