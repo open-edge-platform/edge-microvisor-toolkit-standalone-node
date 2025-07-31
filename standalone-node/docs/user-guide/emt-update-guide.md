@@ -9,17 +9,20 @@ Toolkit on a standalone node using a USB drive.
 
 ### Step 1: Prerequisites
 
-Ensure that your standalone node is equipped with the designated version of the immutable image. Adhere to all the steps provided in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
+Ensure that your standalone node is equipped with the designated version of the immutable image. Adhere to all
+the steps provided in the [Get Started Guide](get-started-guide.md#prerequisites) to complete the initial setup.
 
-#### **Important Notes**:
+#### **Important Notes**
+
 Note #1: Please be aware that updates to the Edge Microvisor Toolkit are not compatible with mutable or ISO images.
 
-Note #2: Updates are supported only with Edge Microvisor Toolkit(EMT) images, which means updates must be performed using the most
-recent EMT image versions. Users should regularly check for new EMT image releases to plan their updates, as reverting to older
-images is not supported.
+Note #2: Updates are supported only with Edge Microvisor Toolkit(EMT) images, which means updates must be performed
+using the most recent EMT image versions. Users should regularly check for new EMT image releases to plan their
+updates, as reverting to older images is not supported.
 
-Note #3: The Edge Microvisor Toolkit allows updates solely within its specific image types, such as DV or non-RT. This means that
-systems initially set up with a particular EMT image type, like non-RT, can only be updated using images of the same type.
+Note #3: The Edge Microvisor Toolkit allows updates solely within its specific image types, such as DV or non-RT.
+This means that systems initially set up with a particular EMT image type, like non-RT, can only be updated using
+images of the same type.
 
 #### 1.1: Prepare the USB Drive
 
@@ -124,7 +127,7 @@ systems initially set up with a particular EMT image type, like non-RT, can only
   sudo bootctl list
   ```
 
-### Review the specifics of the updated image:
+### Review the specifics of the updated image
 
   ```bash
   cat /etc/image-id
