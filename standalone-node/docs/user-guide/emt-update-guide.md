@@ -1,4 +1,4 @@
-# Standalone Node A/B Upgrade of Edge Microvisor Toolkit
+# Standalone Node A/B Update of Edge Microvisor Toolkit
 
 ## Get Started
 
@@ -14,8 +14,8 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
 
 #### **Important Notes**:
 - **Note #1: Keep in mind that the standalone node updates do not support mutable or ISO images of Edge Microvisor Toolkit.**
-- **Note #2: Only upgrades with Edge Microvisor Toolkit (EMT) images are supported, meaning that updates can only be performed with the latest available versions of EMT images. Users can regularly check for new EMT image releases and plan their upgrade accordingly.**
-- **Note #3: The Edge Microvisor Toolkit (EMT) supports upgrades exclusively within its designated image type. Which means systems initially provisioned with non-RT EMT images then upgrades for systems using non-RT EMT images only.**
+- **Note #2: Only updates with Edge Microvisor Toolkit (EMT) images are supported, meaning that updates can only be performed with the latest available versions of EMT images. Users can regularly check for new EMT image releases and plan their updates accordingly. Fallback to older images are not supported**
+- **Note #3: The Edge Microvisor Toolkit (EMT) supports updates exclusively within its image type like dv, non-rt. Which means systems initially provisioned with non-RT EMT images then updates for systems using non-RT EMT images ONLY.**
 
 #### 1.1: Prepare the USB Drive
 
@@ -48,18 +48,11 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
 
 - Download the Edge Microvisor Toolkit image and the corresponding sha256sum file.
 
-  > **Note:** Only download the microvisor image from "no Auth" file server public registry, export BASE_URL_NO_AUTH_RS
+  > **Note:** Only download the microvisor image from file server public registry, export BASE_URL_NO_AUTH_RS
 
   ```bash
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz
-  wget <artifact-base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
-  ```
-
-  Example:
-
-  ```bash
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz
-  wget https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt/3.0/20250611.0526/edge-readonly-3.0.20250611.0526-signed.raw.gz.sha256sum
+  wget <base-url>/<version>/edge-readonly-<version>-signed.raw.gz
+  wget <base-url>/<version>/edge-readonly-<version>-signed.raw.gz.sha256sum
   ```
 
   Alternatively, for "no Auth" file server public registry
@@ -121,10 +114,10 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   Example:
 
   ```bash
-  sudo ./os-update.sh -u https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/non-rt -r 3.0 -v 20250608.2200
+  sudo ./os-update.sh -u xyz -r 3.0 -v 20250608.2200
   ```
 
-- Automatic Reboot
+### Automatic Reboot
 
   Once the update has completed, the standalone edge node will automatically reboot into the
   updated microvisor OS.
@@ -135,7 +128,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo bootctl list
   ```
 
-- Check the details of the updated image:
+### Check the details of the updated image:
 
   ```bash
   cat /etc/image-id
