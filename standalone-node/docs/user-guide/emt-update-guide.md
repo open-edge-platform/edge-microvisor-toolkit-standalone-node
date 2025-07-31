@@ -15,7 +15,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
 #### **Important Notes**:
 Note #1: Please be aware that updates to the Edge Microvisor Toolkit are not compatible with mutable or ISO images.
 
-Note #2: Updates are supported only with Edge Microvisor Toolkit images, which means updates must be performed using the most
+Note #2: Updates are supported only with Edge Microvisor Toolkit(EMT) images, which means updates must be performed using the most
 recent EMT image versions. Users should regularly check for new EMT image releases to plan their updates, as reverting to older
 images is not supported.
 
