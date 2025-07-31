@@ -65,8 +65,8 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   Example:
 
   ```bash
-  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz
-  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
+  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250717.0734.raw.gz
+  wget https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt/edge-readonly-3.0.20250717.0734.raw.gz.sha256sum
   ```
 
 - To update a new Edge Microvisor Toolkit image, first execute the preparation script to write it to the USB drive:
@@ -85,7 +85,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
 
 > **Note:** You can choose either direct mode or URL mode for the microvisor update.
 
-### Direct Mode
+### Step 2.1 Direct Mode
 
 - Unplug the prepared bootable USB drive from the developer system.
 - Plug the bootable USB drive into the standalone edge node.
@@ -100,10 +100,10 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   ```bash
   sudo ./os-update.sh -i /path/to/microvisor_image.raw.gz -c /path/to/microvisor_image.sha256sum
   # Example:
-  sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250611.0526-signed.raw.gz -c /mnt/edge-readonly-3.0.20250608.2200-signed.raw.gz.sha256sum
+  sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250718.0822.raw.gz -c /mnt/edge-readonly-3.0.20250718.0822.raw.gz.sha256sum
   ```
 
-### URL Mode
+### Step 2.2 URL Mode
 
 - To start the microvisor update, execute the script with the following options:
 
@@ -114,13 +114,13 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   Example:
 
   ```bash
-  sudo ./os-update.sh -u xyz -r 3.0 -v 20250608.2200
+  sudo ./os-update.sh -u https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt -r 3.0 -v 20250718.0822
   ```
 
-### Automatic Reboot
+## Automatic Reboot
 
-  Once the update has completed, the standalone edge node will automatically reboot into the
-  updated microvisor OS.
+  Once the update has completed, the EMT provisioned node will automatically reboot into the
+  updated EMT image.
 
 - Upon successful boot, verify that the system is running correctly with the new image:
 
@@ -128,7 +128,7 @@ Follow all instructions outlined in the [Get Started Guide](get-started-guide.md
   sudo bootctl list
   ```
 
-### Check the details of the updated image:
+## Check the details of the updated image:
 
   ```bash
   cat /etc/image-id
