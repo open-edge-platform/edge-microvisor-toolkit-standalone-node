@@ -116,8 +116,7 @@ systems initially set up with a particular EMT image type, like non-RT, can only
 
 ### Automatic Reboot
 
-    Once the update has completed, the EMT provisioned node will automatically reboot into the
-  updated EMT image.
+  Once the update has completed, the EMT provisioned node will automatically reboot into the updated EMT image.
   
 - After a successful boot, confirm that the system is operating properly with the new image:
   
