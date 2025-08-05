@@ -88,11 +88,11 @@ EMT Desktop Virtualization infra consists of following components
 Use this configuration to enable desktop virtualization and networking features in the
 microvisor image.
 
-Note that the `guest` Linux username is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
-To use a different username, replace all occurrences of `guest` with the `user_name` that you set in the
+Note that the `user` Linux username is used throughout this configuration (e.g., in sudoers, systemd user services, etc.).
+To use a different username, replace all occurrences of `user` with the `user_name` that you set in the
 `User Credentials` section of the `config-file`.
 
-For example, if your user is `myuser`, replace `guest` with `myuser` in:
+For example, if your user is `myuser`, replace `user` with `myuser` in:
 
 - `/etc/sudoers.d/idv_scripts`
 - `/etc/systemd/system/getty@tty1.service.d/autologin.conf`
@@ -145,22 +145,22 @@ write_files:
       [Install]
       WantedBy=multi-user.target
   # autologin.conf configures automatic login for the specified user on tty1.
-  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
+  # Change AUTOLOGIN_USER to your intended username if not using 'user' Linux username.
   # autologin.conf configures automatic login for the specified user on tty1.
-  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
+  # Change AUTOLOGIN_USER to your intended username if not using 'user' Linux username.
   - path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
     permissions: '0644'
     content: |
       [Service]
-      Environment="AUTOLOGIN_USER=guest"
+      Environment="AUTOLOGIN_USER=user"
       ExecStart=
       ExecStart=-/sbin/agetty -o '-f -- \\u' --autologin $AUTOLOGIN_USER --noclear %I $TERM
 
-  # Change `guest` to your intended username if not using 'guest' user.
+  # Change `user` to your intended username if not using 'user' Linux username.
   - path: /etc/sudoers.d/idv_scripts
     permissions: '0644'
     content: |
-      guest ALL=(ALL) NOPASSWD: /usr/bin/X, \
+      user ALL=(ALL) NOPASSWD: /usr/bin/X, \
       /usr/bin/idv/init/setup_sriov_vfs.sh, \
       /usr/bin/idv/init/setup_display.sh, \
       /usr/bin/idv/launcher/start_vm.sh, \
@@ -190,10 +190,10 @@ write_files:
     content: |
       ACTION=="add", SUBSYSTEM=="usb", MODE="0664", GROUP="qemu", OWNER="qemu"
 
-    # Change `guest` to your intended username if not using 'guest' user.
+    # Change `user` to your intended username if not using 'user' Linux username.
   - path: /etc/cloud/rc.xml
     permissions: '0644'
-    owner: 'guest:guest'
+    owner: 'user:user'
     content: |
       <openbox_config xmlns="http://openbox.org/3.6/rc">
         <keyboard>
@@ -241,7 +241,7 @@ runcmd:
   - sudo usermod -a -G render user
   - sudo -u user mkdir -p /home/user/.config/openbox/
   - sudo -u user mv /etc/cloud/rc.xml /home/user/.config/openbox/rc.xml
-  # Change `guest` to your intended username if not using 'guest' user.
+  # Change `user` to your intended username if not using 'user' Linux username.
   - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user enable idv-init.service
   - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user start idv-init.service
   - sudo systemctl start nw_custom_file.service
