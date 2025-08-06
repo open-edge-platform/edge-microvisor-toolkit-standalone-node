@@ -90,9 +90,7 @@ repositories using standard tools like `helm`.
 Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the
 latest Intel® kernel to ensure all features are exposed and available for application and workloads.
 
-![How it works](standalone-node/images/howitworks.png)
-
-<embed src="standalone-node/docs/user-guide/Demo-presentation.pdf" width="100%" height="600px" type="application/pdf">
+![How it works](standalone-node/images/Demo-presentation.gif)
 
 ## Getting Help
 
