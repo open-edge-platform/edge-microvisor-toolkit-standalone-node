@@ -92,6 +92,15 @@ latest Intel® kernel to ensure all features are exposed and available for appli
 
 ![How it works](standalone-node/images/Demo-presentation.gif)
 
+**Links in the above demo-presentation**
+
+- [User guide](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/get-started-guide.md)
+- [Immutable split A/B update](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/emt-update-guide.md)
+- [Preloading user apps](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/pre-loading-user-apps.md)
+- [Desktop virtualization image](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/desktop-virtualization-image-guide.md)
+- [Edge AI Suits](https://github.com/open-edge-platform/edge-ai-suites)
+- [Edge AI libraries](https://github.com/open-edge-platform/edge-ai-libraries)
+
 ## Getting Help
 
 If you encounter bugs, have feature requests, or need assistance,
