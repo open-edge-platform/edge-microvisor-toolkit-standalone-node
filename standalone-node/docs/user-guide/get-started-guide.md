@@ -218,6 +218,8 @@ there is no need for further image setup. The `usb-bootable-files.tar.gz` instal
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Download the desktop virtualization image (DV) from the "no Auth" file server registry.
+   The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20250717.0840.raw.gz)
+   Link to the [sha256sum for this image]()
 
    > **Note:** A custom image can be copied locally from your development system to the 5th
    > partition, as shown in **Step 2** below.
@@ -250,8 +252,6 @@ If you need Desktop Virtualization features, follow these steps to replace the d
    cd /
    sudo umount /mnt/test
    ```
-
-The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20250717.0840.raw.gz)
 
   > **Important:** These steps are manually executed by the user to put the desired image
   > into the 5th partition before [deploying the edge node](#step-2-deploy-edge-node).
