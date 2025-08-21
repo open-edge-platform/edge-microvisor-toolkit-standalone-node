@@ -76,10 +76,13 @@ Logs located at:
 For k3s logs run:
         sudo journalctl -fu k3s
 
+IP address of the Node:
+	$IP - Ensure IP address is persistent across the reboot!
+
 To access and view the cluster's pods run:
         source /etc/environment
-        export KUBECONFIG
-        kubectl get pods -A
+        source /home/<default-user>/.bashrc
+        k get pods -A
 
 KUBECONFIG available at:
         /etc/rancher/k3s/k3s.yaml
