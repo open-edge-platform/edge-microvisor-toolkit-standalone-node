@@ -24,7 +24,6 @@ extensions, which enables deployment of both cloud-native and legacy VM-based ap
   the capabilities of Edge AI solutions, which is beneficial for deployments of
   use-case specific applications and potential scale outs.
 
-
 ## System Requirements
 
 The Edge Microvisor Toolkit Standalone Node solution is engineered to support a diverse
@@ -38,7 +37,6 @@ detailed summary of the supported processor families and system requirements:
 | **Intel Atom® Processors**  | Intel® Atom® X Series                                                           |
 | **Intel® Core™ Processors** | 12th Gen Intel® Core™, 13th Gen Intel® Core™, Intel® Core™ Ultra (Series 1)     |
 | **Intel® Xeon® Processors** | 5th Gen Intel® Xeon® SP, 4th Gen Intel® Xeon® SP, 3rd Gen Intel® Xeon® SP       |
-
 
 ### Memory, Storage and Networking Requirements
 
@@ -92,7 +90,16 @@ repositories using standard tools like `helm`.
 Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the
 latest Intel® kernel to ensure all features are exposed and available for application and workloads.
 
-![How it works](standalone-node/images/howitworks.png)
+![How it works](standalone-node/images/Demo-presentation.gif)
+
+**Links in the above demo-presentation**
+
+- [User guide](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/get-started-guide.md)
+- [Immutable split A/B update](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/emt-update-guide.md)
+- [Preloading user apps](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/pre-loading-user-apps.md)
+- [Desktop virtualization image](https://github.com/open-edge-platform/edge-microvisor-toolkit-standalone-node/blob/main/standalone-node/docs/user-guide/desktop-virtualization-image-guide.md)
+- [Edge AI Suits](https://github.com/open-edge-platform/edge-ai-suites)
+- [Edge AI libraries](https://github.com/open-edge-platform/edge-ai-libraries)
 
 ## Getting Help
 
@@ -127,4 +134,3 @@ Each component of the Edge Microvisor Toolkit Standalone Node is licensed under 
 Last Updated Date: July 14, 2025
 
 [apache-license]: https://www.apache.org/licenses/LICENSE-2.0
-
