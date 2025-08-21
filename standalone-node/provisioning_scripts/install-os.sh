@@ -71,7 +71,7 @@ check_mnt_mount_exist() {
 # Wait for a few seconds for USB emulation as hook OS boots fast
 detect_usb() {
     for _ in {1..15}; do
-        usb_devices=$(lsblk -dn -o NAME,TYPE,SIZE,RM | awk '$2 == "disk" && $4 == 1 && $3 != "0B" {print $1}')
+	usb_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 == "usb" && $3 != "0B" {print $1}')
         # shellcheck disable=SC2086
         for disk_name in $usb_devices; do
             # Bootable USB has 6 partitions,ignore other disks
@@ -129,7 +129,7 @@ get_block_device_details() {
     echo -e "${BLUE}Get the block device for OS installation${NC}" 
 
     # List of block devices attached to the system, ignore USB and loopback devices
-    blk_devices=$(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0) {print $1}}')
+    blk_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 ~ /^(sata|nvme)$/ && $3 != "0B" {print $1}')
     blk_dev_count=$(echo "$blk_devices" | wc -l)
 
     if [ -z "$blk_dev_count" ]; then

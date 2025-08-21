@@ -97,7 +97,10 @@ get_dest_disk()
 {
     disk_device=""
 
-    list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
+    ## $2 represents the disk
+    ## $4 represents sata/nvme
+    ## $3 represents size should be greaterthan 0
+    list_block_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 ~ /^(sata|nvme)$/ && $3 != "0B" {print $1}')
     for block_dev in ${list_block_devices[@]};
     do
 	#if there were any problems when the ubuntu was streamed.
@@ -127,10 +130,10 @@ get_dest_disk()
 # set the single_hdd var to 0 if this is a single HDD else it will keep it unchanged at -1
 is_single_hdd() {
     ret=-1
-    # list_block_devices=($(lsblk -o NAME,TYPE | grep -i disk  | awk  '$1 ~ /sd*|nvme*/ {print $1}'))
-    ## $3 represents the block device size. if 0 omit
-    ## $4 is set to 1 if the device is removable
-    list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
+    ## $2 represents the disk
+    ## $3 represents size should be greaterthan 0
+    ## $4 represents sata/nvme
+    list_block_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 ~ /^(sata|nvme)$/ && $3 != "0B" {print $1}')
 
     count=${#list_block_devices[@]}
 
@@ -358,9 +361,11 @@ create_single_hdd_lvmg() {
 # This logic is needed only if there are heterogeneous block sizes.
 # the output of this function is to update the global var update_sector if needed
 block_disk_phy_block_disk() {
-    # list_block_devices=($(lsblk -o NAME,TYPE | grep -i disk  | awk  '$1 ~ /sd*|nvme*/ {print $1}'))
 
-    list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
+    ## $2 represents the disk
+    ## $3 represents size should be greaterthan 0
+    ## $4 represents sata/nvme
+    list_block_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 ~ /^(sata|nvme)$/ && $3 != "0B" {print $1}')
     list_of_lvmg_part=''
     block_size_4k=0
     block_size_512=0
@@ -463,10 +468,11 @@ partition_other_devices() {
     block_disk_phy_block_disk
     # check all disks
     # list_block_devices=($(lsblk -o NAME,TYPE | grep -i disk  | awk  '$1 ~ /sd*|nvme*/ {print $1}'))
-
-    ## $3 represents the block device size. if 0 omit
-    ## $4 is set to 1 if the device is removable
-    list_block_devices=($(lsblk -o NAME,TYPE,SIZE,RM | grep -i disk | awk '$1 ~ /sd*|nvme*/ {if ($3 !="0B" && $4 ==0)  {print $1}}'))
+    
+    ## $2 represents the disk 
+    ## $4 represents sata/nvme
+    ## $3 represents size should be greaterthan 0 
+    list_block_devices=$(lsblk -dn -o NAME,TYPE,SIZE,TRAN | awk '$2 == "disk" && $4 ~ /^(sata|nvme)$/ && $3 != "0B" {print $1}')
     list_of_lvmg_part=''
     for block_dev in ${list_block_devices[@]};
     do
