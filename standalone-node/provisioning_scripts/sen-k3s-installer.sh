@@ -169,9 +169,6 @@ For k3s logs run:
 
 IP address of the Node:
 	$IP - Ensure IP address is persistent across the reboot!
-        See: https://ranchermanager.docs.rancher.com/getting-started
-	/installation-and-upgrade/installation-requirements#node-ip-
-	addresses
 
 To access and view the cluster's pods run:
   source /home/<default-user>/.bashrc
