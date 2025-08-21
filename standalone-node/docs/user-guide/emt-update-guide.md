@@ -1,4 +1,4 @@
-# Standalone Node A/B Update of Edge Microvisor Toolkit
+# Standalone Node A/B Upgrade of Edge Microvisor Toolkit
 
 ## Get Started
 
