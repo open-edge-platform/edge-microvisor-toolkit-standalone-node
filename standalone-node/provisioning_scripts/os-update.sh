@@ -6,7 +6,7 @@
 # Source the environment variables
 source /etc/environment
 
-set -x
+# set -x
 
 # Function to extract paths under the write_files section
 extract_write_files_paths() {
@@ -368,4 +368,4 @@ bootctl install
 echo "Rebooting the system..."
 reboot
 check_success "Rebooting the system"
-
+sleep 2
