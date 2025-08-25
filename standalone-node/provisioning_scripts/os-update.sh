@@ -6,7 +6,7 @@
 # Source the environment variables
 source /etc/environment
 
-set -x
+# set -x
 
 # Function to extract paths under the write_files section
 extract_write_files_paths() {
@@ -307,13 +307,17 @@ usermod -aG sudo "$user_name"
 bootctl_output=$(bootctl list)
 # Check if linux-2.efi or linux.efi is selected
 # Make the updated image persistent for future boots
-if os-update-tool.sh -c; then
-   echo "Commit update successful."
-else
-   echo "Failed to commit update."
-   exit 1
+if [ "$(cat "/etc/cloud/upgrade_status" 2>/dev/null)" == "true" ]; then
+  if os-update-tool.sh -c; then
+     echo "Commit update successful."
+  else
+     echo "Failed to commit update."
+     exit 1
+  fi
 fi
 
+# After the commit, resetting the upgrade status
+echo "false" | sudo tee /etc/cloud/upgrade_status
 
 # Fetch and echo IMAGE_BUILD_DATE from /etc/image-id
 IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
@@ -368,4 +372,5 @@ bootctl install
 echo "Rebooting the system..."
 reboot
 check_success "Rebooting the system"
-
+echo "true" | sudo tee /etc/cloud/upgrade_status
+sleep 2
