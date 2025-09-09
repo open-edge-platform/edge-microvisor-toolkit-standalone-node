@@ -66,7 +66,7 @@ do
 done
 
 # Print banner
-
+IP="$host_ip"
 banner="
 ===================================================================
 Edge Microvisor Toolkit - cluster bringup complete
