@@ -6,7 +6,7 @@
 # Source the environment variables
 source /etc/environment
 
-set -x
+# set -x
 
 # Function to extract paths under the write_files section
 extract_write_files_paths() {
@@ -282,9 +282,9 @@ if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
 #!/bin/bash
 
 if [ -e /etc/cloud/passwd_backup ] && [ -e /etc/cloud/shadow_backup ]; then
-  mv /etc/cloud/passwd_backup /etc/passwd
-  mv /etc/cloud/shadow_backup /etc/shadow
-  mv /etc/cloud/group_backup /etc/group
+  cp /etc/cloud/passwd_backup /etc/passwd
+  cp /etc/cloud/shadow_backup /etc/shadow
+  cp /etc/cloud/group_backup /etc/group
   # Read paths from the file
   paths_list=$(cat "/etc/cloud/backup/paths_list.txt")
   for file_path in $paths_list; do
@@ -307,13 +307,17 @@ usermod -aG sudo "$user_name"
 bootctl_output=$(bootctl list)
 # Check if linux-2.efi or linux.efi is selected
 # Make the updated image persistent for future boots
-if os-update-tool.sh -c; then
-   echo "Commit update successful."
-else
-   echo "Failed to commit update."
-   exit 1
+if [ "$(cat "/etc/cloud/upgrade_status" 2>/dev/null)" == "true" ]; then
+  if os-update-tool.sh -c; then
+     echo "Commit update successful."
+  else
+     echo "Failed to commit update."
+     exit 1
+  fi
 fi
 
+# After the commit, resetting the upgrade status
+sudo tee /etc/cloud/upgrade_status <<<'false'
 
 # Fetch and echo IMAGE_BUILD_DATE from /etc/image-id
 IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id | cut -d '=' -f2)
@@ -366,6 +370,7 @@ bootctl install
 
 # Reboot the system
 echo "Rebooting the system..."
-reboot
 check_success "Rebooting the system"
-
+sudo tee /etc/cloud/upgrade_status <<<'true'
+sleep 5s
+reboot
