@@ -13,6 +13,9 @@ on:
 env:
   MARKDOWNLINT_CLI_VER: 0.44.0
 
+permissions:
+  contents: read
+
 jobs:
   pre-checks:
     runs-on: ubuntu-latest
