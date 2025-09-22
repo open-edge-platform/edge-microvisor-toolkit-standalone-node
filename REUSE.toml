@@ -3,6 +3,10 @@
 
 version = 1
 
+[exceptions]
+paths = [
+    ".github/**",
+]
 [[annotations]]
 path = [
     "VERSION",

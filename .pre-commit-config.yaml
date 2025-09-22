@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 repos:
 - repo: https://github.com/gitleaks/gitleaks
   rev: v8.16.3
