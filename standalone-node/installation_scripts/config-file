@@ -44,6 +44,25 @@ user_name=""
 # Default value is kubernetes.
 host_type="kubernetes"
 
+#------------------- Static IP Configuration ------------------------------------------------------
+# This section assigns a Static IP address to the Edge Node if no DHCP server is available. 
+#
+# Ensure that the IP address, subnet mask, gateway, and DNS name server values
+#     are correctly configured according to your organization’s network settings.
+#
+## NOTE: 
+#       This configuration is optional.
+#       If a valid IP is obtained from a DHCP server, the static IP configuration
+#       will be skipped, even if the static details are provided below
+# Example:
+# static_ip="192.168.1.24"
+# subnet_mak="24" i.e 192.168.1.24/24
+# dns_name_server="8.8.8.8,4.4.4.4" ## According to your organization's netwrok
+
+static_ip=""
+subnet_mask=""
+defualt_gate_way=""
+dns_name_server=""
 
 # ------------------ LVM partition size ------------------------
 # Set the LVM partition size in GB. This will be used for creating
