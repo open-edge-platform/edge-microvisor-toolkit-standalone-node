@@ -746,6 +746,64 @@ copy_os_update_script() {
     umount /mnt
 }
 
+# Static IP configuration for no dhcp support edge nodes.
+set_static_ip() {
+
+    CONFIG_FILE="/etc/scripts/config-file"
+
+    # get the static ip details from config file
+    ip=$(grep '^static_ip=' "$CONFIG_FILE" | cut -d '=' -f2)
+    net_mask=$(grep '^subnet_mask=' "$CONFIG_FILE" | cut -d '=' -f2) 
+    gate_way=$(grep '^defualt_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
+    dns_server=$(grep '^dns_name_server=' "$CONFIG_FILE" | cut -d '=' -f2)
+
+    # Select the interfce to assign the static ip,ignore loop back interface.
+    IFACE=$(ip -o link show | awk -F': ' '!/lo/ {print $2; exit}')
+
+    # Write the configuration to /etc/netplan/51-cloud-init.yaml
+
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt 
+
+    STATIC_IP_FILE="/mnt/etc/netplan/51-cloud-init.yaml"
+    # Create YAML content
+cat > "$STATIC_IP_FILE" <<EOF
+network:
+  version: 2
+  ethernets:
+    $IFACE:
+      dhcp4: false
+      addresses: [$ip/$net_mask]
+      gateway4: $gate_way
+      nameservers:
+        addresses: [ ${dns_server} ]
+EOF
+    chmod 600 $STATIC_IP_FILE
+    umount /mnt
+}
+
+static_ip_configuration() {
+
+    echo -e "${BLUE}Static IP Configuration!!${NC}"
+
+    # Check if a valiad IP address already assigned to Edge node
+    # If yes , ignore static ip configuration
+    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+
+    # If pub_inerface_name name empty means no ip assigned from dhcp server. 
+    if [ -z "$pub_inerface_name" ]; then
+        set_static_ip
+    else
+        # Check if pub interface configured with loop back ip or vm ip
+        ip_addr=$(ip -4 addr show "$pub_inerface_name" | awk '/inet / {print $2}' | cut -d/ -f1 |grep -Ev '^(127\.|10\.0\.)' | head -1) 
+        # If the ip_addr empty means no valid IP assigned to interface from dhcp server. ignore for vm setup
+	if [ -z "$ip_addr" ] && [ "$deploy_mode" != "ven" ]; then
+	    set_static_ip
+	fi
+    fi
+    return 0    
+}
+
 # Check provision pre-conditions
 system_readiness_check() {
 
@@ -767,12 +825,14 @@ platform_config_manager() {
 
     update_mac_under_dhcp_systemd || return 1
 
+    static_ip_configuration || return 1
+
     boot_order_chage_to_disk || return 1
 }
 
 # Post installation tasks
 system_finalizer() {
-
+    
     dump_logs_to_usb || return 1
 }
 
