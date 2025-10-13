@@ -352,7 +352,6 @@ setup_proxy_settings() {
 update_ssh_settings() {
     echo -e "${BLUE}Updating the SSH Settings!!${NC}" 
 
-    setup_proxy_settings
     # Mount the OS disk
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
@@ -501,6 +500,9 @@ enable_dm_verity() {
 custom_cloud_init_updates() {
     echo -e "${BLUE}Updating the cloud-init file !${NC}"
 
+    # Update the Proxy Settings
+    setup_proxy_settings
+
     # Get the custom details from config-file
     check_mnt_mount_exist
     mount -o ro "${usb_disk}${conf_part}" /mnt
@@ -512,10 +514,12 @@ custom_cloud_init_updates() {
 
     umount /mnt
 
+
     # Check the host type and update cloud-init accordingly
     host_type=$(grep '^host_type=' "$CONFIG_FILE" | cut -d '=' -f2)
     host_type=$(echo "$host_type" | tr -d '"')
     huge_page_size=$(grep '^huge_page_config=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
+    user=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
 
     # Update cloud-init file to start k3s stack installations for hosty type kubernetes
     if [ "$host_type" == "kubernetes" ]; then
@@ -561,10 +565,120 @@ custom_cloud_init_updates() {
         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
 
     elif [ "$host_type" == "container" ]; then 
-         # TODO: will be expand in future
-	 echo "host type is container , docker services will start"
-    fi
+	 # Docker configuration
+         line0="usermod -aG docker $user"
+         line1="systemctl restart docker && systemctl daemon-reload"
+         line2="chmod 666 /var/run/docker.sock"
 
+         awk -v line0="$line0" -v line1="$line1" -v line2="$line2" '
+         BEGIN {
+            runcmd = 0
+            in_block = 0
+         }
+
+         /^runcmd:/ { runcmd = 1 }
+
+         runcmd && /^  - \|/ { in_block = 1 }
+         {
+             print
+         }
+
+         in_block && $0 !~ /^  / {
+            print "    " line0
+            print "    " line1
+            print "    " line2
+            in_block = 0
+            runcmd = 0
+         }
+
+         END {
+            if (in_block) {
+                if (line0 != "") print "    " line0
+                     print "    " line1
+                     print "    " line2
+            }
+         }
+         ' "$CLOUD_INIT_FILE" > "${CLOUD_INIT_FILE}.tmp" && mv "${CLOUD_INIT_FILE}.tmp" "$CLOUD_INIT_FILE"
+         # Update the Docker proxy settings 
+	 # Mount the OS disk
+         check_mnt_mount_exist
+         mount "$os_disk$os_rootfs_part" /mnt
+	 mount --bind /proc /mnt/proc
+         mount --bind /sys /mnt/sys
+	 # Enable the docker service first
+	 chroot /mnt /bin/bash <<EOT
+         set -e
+         systemctl enable docker
+EOT
+         # shellcheck disable=SC2181
+         if [ "$?" -eq 0 ]; then
+	     success "Enabled the docker services"
+	 else
+	     failure "Failed to enable the docker services"
+	     umount  /mnt/proc
+             umount  /mnt/sys
+	     umount /mnt
+	     exit 1
+	 fi
+         umount  /mnt/proc
+	 umount  /mnt/sys
+         export docker_proxy_file=/mnt/etc/systemd/system/docker.service.d/proxy.conf
+	 if [ ! -d $docker_proxy_file ]; then
+               #create the docker service directory
+               mkdir -p /mnt/etc/systemd/system/docker.service.d
+	       http_proxy_val=$(grep -i '^http_proxy=' /mnt/etc/environment | head -n1 | cut -d= -f2- | tr -d '"')
+	       export http_proxy_val
+	       https_proxy_val=$(grep -i '^https_proxy=' /mnt/etc/environment | head -n1 | cut -d= -f2- | tr -d '"')
+	       export https_proxy_val
+	       no_proxy_val=$(grep -i '^no_proxy=' /mnt/etc/environment | head -n1 | cut -d= -f2- | tr -d '"')
+	       export no_proxy_val
+
+	       bash -c 'echo "[Service]" >> $docker_proxy_file'
+	       bash -c 'echo "Environment=\"HTTP_PROXY=${http_proxy_val}\"" >> $docker_proxy_file'
+               bash -c 'echo "Environment=\"HTTPS_PROXY=${https_proxy_val}\"" >> $docker_proxy_file'
+               bash -c 'echo "Environment=\"NO_PROXY=${no_proxy_val}\"" >> $docker_proxy_file'
+         fi
+	 chroot /mnt /bin/bash <<EOT
+         set -e
+         # Configure the docker proxy for the user $user_name
+         su - $user
+         mkdir -p ~/.docker
+         chmod 755 ~/.docker
+         cat <<EOF >> ~/.docker/config.json
+	 {
+	"proxies":
+ {
+  "default":
+  {
+   "httpProxy": "$http_proxy_val",
+   "httpsProxy": "$https_proxy_val",
+    "noProxy": "$no_proxy_val"
+  }
+ }
+}
+EOF
+        chmod 660 ~/.docker/config.json
+        # exit the su - $user
+	exit
+EOT
+        # shellcheck disable=SC2181
+        if [ "$?" -eq 0 ]; then
+            success "docker proxy services updated successfully"
+        else
+            failure "Failed to updated the docker proxy settings"
+            umount /mnt
+            exit 1
+        fi
+        # Update the docker storage path to /op/docker
+        mkdir -p /mnt/opt/docker-data
+	mkdir -p /mnt/etc/docker
+        cat << EOF | sudo tee /mnt/etc/docker/daemon.json
+        {
+         "data-root": "/opt/docker-data"
+        }
+EOF
+        umount /mnt
+    fi
     # Check for the custom cloud-init changes provided by User
     # Since the config-file is mix of bash and yaml,extract yaml text to tmp yaml file
     awk '/^[[:space:]]*(services|write_files|runcmd):/ { in_yaml = 1 }
@@ -815,11 +929,11 @@ system_readiness_check() {
 # Configure the system with username/proxy/cloud-init files
 platform_config_manager() {
 
+    create_user || return 1
+
     install_cloud_init_file || return 1
 
     copy_os_update_script || return 1
-
-    create_user || return 1
 
     update_ssh_settings || return 1
 
