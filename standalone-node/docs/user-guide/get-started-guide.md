@@ -340,45 +340,9 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 ## Step 4: Install Sample Application
 
-Install a WordPress application as a test application, using `helm`.
+1. Install a Sample applications like WordPress or NGinx, using `helm`.
 
-1. Add the `bitnami` repository:
-
-   ```bash
-   helm repo add bitnami https://charts.bitnami.com/bitnami
-   ```
-
-2. Create a values override file `values-wp.yaml`, replace the `<pass>` with a password and install WordPress:
-
-   ```yaml
-   mariadb:
-     primary:
-       persistence:
-         enabled: false
-     auth:
-       password: <pass>
-       rootPassword: <pass>
-   wordpressUsername: admin
-   wordpressPassword: <pass>
-   persistence:
-     enabled: false
-   resources:
-     requests:
-       cpu: 0m
-       memory: 0Mi
-   service:
-     type: ClusterIP
-     annotations:
-       service-proxy.app.orchestrator.io/ports: "80"
-       external-dns.alpha.kubernetes.io/hostname: "wordpress.example.org"
-   ```
-
-   ```bash
-   helm install my-wordpress bitnami/wordpress --namespace wordpress \
-     --create-namespace -f values-wp.yaml --version 19.4.3
-   ```
-
-3. View the running pods:
+2. View the running pods:
 
    ```bash
    kubectl get pods -n wordpress
@@ -387,15 +351,15 @@ Install a WordPress application as a test application, using `helm`.
    my-wordpress-mariadb-0         1/1     Running   0              10m
    ```
 
-4. Forward the port to get access to WP:
+3. Forward the port to get access to WP:
 
    ```bash
    kubectl port-forward --namespace wordpress svc/my-wordpress 8080:80
    ```
 
-5. Access the WP blog from browser using `http://localhost:8080/admin` URL.
+4. Access the WP blog from browser using `http://localhost:8080/admin` URL.
 
-6. Login, using the `admin` (login) and `password` (`<pass>`) credentials
+5. Login, using the `admin` (login) and `password` (`<pass>`) credentials
 
 > **Note:** Edge AI applications from the Edge Software Catalog can be installed using `helm` and
   evaluated using similar steps.
