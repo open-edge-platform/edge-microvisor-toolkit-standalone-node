@@ -178,6 +178,8 @@ download_idv_device_plugins_images_and_manifests () {
 # Install required packages for download the images
 install_pkgs () {
     sudo apt update
+    sudo apt install -y passwd=1:4.13+dfsg1-1+deb12u1
+	apt-get install -y libudev1=252.38-1deb12u1
     sudo apt install -y docker.io
 }
 
