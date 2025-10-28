@@ -11,7 +11,7 @@ set -x
 # COMPLETE_DMVERITY set to true default
 COMPLETE_DMVERITY=true
 
-# Test flag for enabling DM-verity on B part aswell.
+# Test flag for enabling DM-verity on B part as well.
 TEST_ENABLE_DM_ON_ROOTFSB=false
 
 # Test flag for only partition
@@ -19,7 +19,7 @@ TEST_ON_ONLY_ONE_PART=false
 ####
 ####
 #####################################################################################
-# Patition information
+# Partition information
 boot_partition=1
 rootfs_partition=2
 emt_persistent_partition=3
@@ -153,7 +153,7 @@ is_single_hdd() {
 }
 
 #####################################################################################
-# pass value to parted via sector number insted of start size in MB.
+# pass value to parted via sector number instead of start size in MB.
 
 convert_mb_to_sectors() {
     local size_in_mb=$1
@@ -185,7 +185,7 @@ make_partition() {
 	# limit swap size to sqrt of ramsize link https://help.ubuntu.com/community/SwapFaq
 	#
 	# this is to reconcile the requirement where we have a upper limit of 100GB for
-	# all partitions apart from lvm we cant risk exceeding the swap size.
+	# all partitions apart from lvm we can't risk exceeding the swap size.
 	swap_size=$(echo "$ram_size" | awk '{printf ("%.0f\n", sqrt($1))}')
     fi
 

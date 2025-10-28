@@ -59,7 +59,7 @@ pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
 host_ip=$(ifconfig "${pub_interface_name}" | grep 'inet ' | awk '{print $2}')
 
 
-# Create the vitrual usb disk
+# Create the virtual usb disk
 if [ -e usb-disk ]; then
     rm -rf usb-disk
 fi

@@ -759,7 +759,7 @@ write_custom_files_to_disk () {
 # Add custom cloud-init services based on user inputs
 build_runcmd_lines () {
     
-    # Apend the content to lines for adding to cloud-init file
+    # Append the content to lines for adding to cloud-init file
     lines=""
 
     # Enable custom services if provided
@@ -1001,7 +1001,7 @@ main() {
 
     # Case the deployment for Virtual edgenode or Real hardware
     if [ "$deploy_mode" == "ven" ]; then
-        # Step 4: Enable OS-Partitions on the platfoem 
+        # Step 4: Enable OS-Partitions on the platform
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable OS-Partitions on Platform"
         if ! create_os-partition  >> "$LOG_FILE" 2>&1; then
@@ -1009,7 +1009,7 @@ main() {
             exit 1
         fi
     else
-        # Step 4: Enable DM Verity on the platfoem
+        # Step 4: Enable DM Verity on the platform
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
         if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
