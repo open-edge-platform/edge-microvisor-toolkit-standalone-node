@@ -33,8 +33,8 @@ download-tvm() {
 
 pushd ../host_os > /dev/null || return 1
 
-chmod +x download_tmv.sh
-if bash download_tmv.sh; then
+chmod +x download_embootkit.sh
+if bash download_embootkit.sh; then
     echo "Microvisor Image downloaded successfully!!"
     os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
     mv "$os_filename" ../installation_scripts/
