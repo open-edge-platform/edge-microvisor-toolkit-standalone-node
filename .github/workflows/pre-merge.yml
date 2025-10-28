@@ -29,18 +29,18 @@ jobs:
       GITHUB_ACTIONS: true
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a  # v2.13.1
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
         with:
           persist-credentials: false
       - name: "Verify Branch Name"
-        uses: open-edge-platform/orch-ci/verify-branch-name@e4fa54613527cfaad83ba8b625fd845a4ab8409d  # 0.1.53
+        uses: open-edge-platform/orch-ci/verify-branch-name@cf81328e4c9526e579181efb1f609af06071889b  # 0.1.55
       - name: "Discover Changed Subfolders"
         id: discover-changes
-        uses: open-edge-platform/orch-ci/discover-changed-subfolders@e4fa54613527cfaad83ba8b625fd845a4ab8409d  # 0.1.53
+        uses: open-edge-platform/orch-ci/discover-changed-subfolders@cf81328e4c9526e579181efb1f609af06071889b  # 0.1.55
       - name: "Filter Out Unwanted Changed Subfolders"
         id: filter-changes
         env:
@@ -61,25 +61,25 @@ jobs:
       contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a  # v2.13.1
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903  # v6.0.0
         with:
           node-version: '18'
       - run: |
           npm install -g \
           "markdownlint-cli@${{ env.MARKDOWNLINT_CLI_VER }}"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c  # v6.0.0
         id: setup_python
         with:
           python-version: '3.13'
       - name: Restore cached virtualenv
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4.3.0
         with:
           key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
           path: venv_infra
@@ -96,7 +96,7 @@ jobs:
       fail-fast: false
       matrix:
         project_folder: ${{ fromJson(needs.pre-checks.outputs.filtered_projects) }}
-    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.53
+    uses: open-edge-platform/orch-ci/.github/workflows/pre-merge.yml@0.1.55
     with:
       run_security_scans: false
       run_version_check: true
@@ -111,7 +111,7 @@ jobs:
       artifacts_path: "standalone-node/shellcheck_report.txt"
       prefix_tag_separator: "/"
       project_folder: ${{ matrix.project_folder }}
-      trivy_image_skip:  "postgres:16.4"
+      trivy_image_skip: "postgres:16.4"
       trivy_config_path: ${{ matrix.project_folder }}/trivy.yaml
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
@@ -124,7 +124,7 @@ jobs:
       needs: [pre-merge-root, pre-merge-pipeline]
       steps:
         - name: Harden the runner (Audit all outbound calls)
-          uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+          uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a  # v2.13.1
           with:
             egress-policy: audit
 
@@ -135,7 +135,7 @@ jobs:
           run: |
             results=("pre_merge_root_pipeline" "pre_merge_pipeline")
             status="OK"
-            
+
             for result in "${results[@]}"; do
               pipeline_result=$(eval echo \$$result)
               echo "${result} result: $pipeline_result"
@@ -143,7 +143,7 @@ jobs:
                 status="KO"
               fi
             done
-            
+
             if [[ "$status" == "OK" ]]; then
               echo "Pre-merge check passed successfully."
             else
