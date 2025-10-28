@@ -118,7 +118,7 @@ sudo -E qemu-system-x86_64  \
   -device e1000,netdev=net0
 # shellcheck disable=SC2181
 if [ "$?" -ne 0 ]; then
-    echo "Intallation VM launch Failed,Please check!!"
+    echo "Installation VM launch Failed,Please check!!"
 fi
 
 trap 'killall --quiet standalone-vm-launch.sh || true' EXIT 

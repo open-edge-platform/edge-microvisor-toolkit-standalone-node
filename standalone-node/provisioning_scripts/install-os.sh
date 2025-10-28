@@ -987,7 +987,7 @@ main() {
     PROVISION_STEP=2
     show_progress_bar "$PROVISION_STEP" "OS Setup "
     if ! install_os_on_disk >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more deatisl,Aborting.${NC}" | tee /dev/tty1
+        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -1005,7 +1005,7 @@ main() {
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable OS-Partitions on Platform"
         if ! create_os-partition  >> "$LOG_FILE" 2>&1; then
-            echo -e "${RED}\nERROR:OS-Partitions Creatation Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+            echo -e "${RED}\nERROR:OS-Partitions Creation Failed on platform,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
             exit 1
         fi
     else
@@ -1013,7 +1013,7 @@ main() {
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
         if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
-            echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+            echo -e "${RED}\nERROR:DM Verity Enablement Failed on platform,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
            exit 1
         fi
     fi
