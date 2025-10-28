@@ -89,7 +89,7 @@ if [[ "$rootfs" == "$USB_DEVICE" ]] || echo "$rootfs" | grep -q "$1"; then
     exit 1
 fi
 
-# Check proxy,ssh_key && credentails
+# Check proxy,ssh_key && credentials
 if [ -z "$http_proxy" ] && [ -z "$https_proxy" ] && [ -z "$no_proxy" ] && [ -z "$HTTP_PROXY" ] && [ -z "$HTTPS_PROXY" ] && [ -z "$NO_PROXY" ]; then
     read -rp "No proxy settings found. Do you want to continue? (y/n): " ANSWER
     [[ "$ANSWER" != "y" && "$ANSWER" != "Y" ]] && exit 1
@@ -117,14 +117,14 @@ read -r password
 stty echo
 echo 
 
-# Store the password in hidden file and delete onces it copied to USB
+# Store the password in hidden file and delete once it copied to USB
 echo "passwd=$password" > "$(pwd)/.psswd"
 chmod 600 "$(pwd)/.psswd"
 
 # Validate the custom-cloud-init section
 if ! dpkg -s python3 > /dev/null 2>&1; then
     if ! apt install -y python3 > /dev/null 2>&1; then
-        echo "Pyhon installation failed,please check!!"
+        echo "Python installation failed, please check!!"
     fi
 fi
 CONFIG_FILE="config-file"
@@ -351,7 +351,7 @@ copy_user_apps() {
         fi
         check_mnt_mount_exist
         mount "${USB_DEVICE}${USER_APPS_PART}" /mnt
-        # Use rsync for fater copr
+        # Use rsync for faster copy
         if dpkg -s rsync; then
             if rsync -ah --inplace user-apps /mnt/; then 
                 echo "user-apps data copied successfully"
@@ -401,7 +401,7 @@ main() {
         echo -e "${RED}\nWARNING: Flashing ISO image failed, but main process completed.${NC}"
     fi
 
-    # Step 4: Create the USB partitions for storing OS && K8S scripst 
+    # Step 4: Create the USB partitions for storing OS && K8S scripts 
     USB_PREPARE_STEP=4
     show_progress_bar "$USB_PREPARE_STEP" "Creating USB Partitions"
         if ! partitions_setup  >> "$LOG_FILE" 2>&1; then 
