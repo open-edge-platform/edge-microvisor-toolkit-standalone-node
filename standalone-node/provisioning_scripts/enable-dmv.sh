@@ -257,11 +257,11 @@ make_partition() {
 
     if $COMPLETE_DMVERITY;
     then
-	#this cmd only resizes parition. if there is an error this should handle it.
+	#this cmd only resizes partition. if there is an error this should handle it.
 	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	check_return_value $? "Failed to resize emt persistent paritions"
+	check_return_value $? "Failed to resize emt persistent partitions"
 
 	#this cmd only creates new partitions.
 	parted -s ${DEST_DISK} \
@@ -273,7 +273,7 @@ make_partition() {
 	       mkpart reserved ext4   "$(convert_mb_to_sectors "${reserved_start}" 0)"s       "$(convert_mb_to_sectors "${total_size_disk}" 1)"s
 
 
-	check_return_value $? "Failed to create paritions"
+	check_return_value $? "Failed to create partitions"
     else
 	parted -s ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
@@ -282,7 +282,7 @@ make_partition() {
 	       mkpart tep ext4 "${tep_start}MB"  "${reserved_start}MB" \
 	       mkpart reserved ext4 "${reserved_start}MB"  "${total_size_disk}MB"
 
-	check_return_value $? "Failed to create paritions"
+	check_return_value $? "Failed to create partitions"
     fi
 
     # Create LVM for single_hdd only when user chooses
@@ -291,7 +291,7 @@ make_partition() {
 	parted -s ${DEST_DISK} \
 	       mkpart lvm ext4 "$(convert_mb_to_sectors "${total_size_disk}" 0)"s 100%
 
-	check_return_value $? "Failed to create lvm parition"
+	check_return_value $? "Failed to create lvm partition"
     fi
 
 

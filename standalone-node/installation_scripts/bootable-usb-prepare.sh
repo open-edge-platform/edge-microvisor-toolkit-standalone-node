@@ -390,7 +390,7 @@ main() {
     USB_PREPARE_STEP=2
     show_progress_bar "$USB_PREPARE_STEP" "Wipeoff the USB device "
     if ! wipe_disk  >> "$LOG_FILE" 2>&1; then 
-        echo -e "${RED}\nERROR: Wipeoff USB device faild. Aborting.${NC}"
+        echo -e "${RED}\nERROR: Wipeoff USB device failed. Aborting.${NC}"
         exit 1
     fi
 

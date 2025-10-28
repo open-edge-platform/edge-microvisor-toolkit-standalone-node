@@ -387,7 +387,7 @@ update_ssh_settings() {
 $ssh_key
 EOF
         chmod 600 ~/.ssh/authorized_keys
-        # export the /etc/enviroment values to .bashrc
+        # export the /etc/environment values to .bashrc
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
@@ -900,7 +900,7 @@ static_ip_configuration() {
 
     echo -e "${BLUE}Static IP Configuration!!${NC}"
 
-    # Check if a valiad IP address already assigned to Edge node
+    # Check if a valid IP address already assigned to Edge node
     # If yes , ignore static ip configuration
     pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
 

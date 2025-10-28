@@ -39,19 +39,19 @@ swapon "/dev/${os_disk}${swap_part}"
 #get the UUID
 uuid=$(blkid | grep swap | grep primary | awk '{print $2}'|awk -F= '{print $2}'|tr -d '"')
 if [ -z "$uuid" ]; then
-    echo "Faild to create the swap partiton!!!!"
+    echo "Failed to create the swap partition!!!!"
     exit 1
 else
     #add entry for swap partition in fstab
    
-    #Before mouting the file system check if the file system exist or not from user space, if not wait for few seconds
+    #Before mounting the file system check if the file system exist or not from user space, if not wait for few seconds
     count=0
     partprobe "${disk}" 
     while [ ! -b "$rootfs_partition_disk" ] && [ "$count" -le 9 ]; do
 	    sleep 1 && count=$((count+1))
     done
     if [ "$count" -ge 10 ]; then 
-        echo "Faild to mount the root file system for for swap entry update $disk"
+        echo "Failed to mount the root file system for swap entry update $disk"
         exit 1
     fi
     mount $rootfs_partition_disk /mnt
@@ -64,7 +64,7 @@ else
     if [ "$status" -ge 1 ]; then
         echo "Successfully created the swap partition for the disk $disk"
     else
-	echo "Faild to update swap partition in /etc/fstab for the disk $disk"
+	echo "Failed to update swap partition in /etc/fstab for the disk $disk"
 	exit 1
     fi	
     #unmount the partitions
