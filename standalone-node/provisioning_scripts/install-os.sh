@@ -262,7 +262,7 @@ install_cloud_init_file() {
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     if cp /etc/scripts/cloud-init.yaml /mnt/etc/cloud/cloud.cfg.d/installer.cfg && chmod +x /mnt/etc/cloud/cloud.cfg.d/installer.cfg; then
-        success "Successfuly copied the cloud-init file"
+        success "Successfully copied the cloud-init file"
     else
         failure "Fail to copy the cloud-init file,please check!!!"
         umount /mnt
@@ -472,8 +472,8 @@ update_mac_under_dhcp_systemd() {
 
     CONFIG_FILE="/mnt/etc/systemd/network/99-dhcp-en.network"
 
-    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
-    mac=$(cat /sys/class/net/"$pub_inerface_name"/address)
+    pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+    mac=$(cat /sys/class/net/"$pub_interface_name"/address)
 
     # Update the mac
     sed -i "s/Name=.*/MACAddress=$mac/" $CONFIG_FILE
@@ -751,7 +751,7 @@ write_custom_files_to_disk () {
     echo "$content" > "/mnt/$path"
     chmod "$perms" "/mnt/$path"
   done
-  echo "All custome files written successfully to disk"
+  echo "All custom files written successfully to disk"
   umount /mnt
 }
 
@@ -827,7 +827,7 @@ copy_user_apps() {
     check_mnt_mount_exist
 
     if mount "$os_disk$os_data_part" /mnt && cp -r /mnt2/user-apps/ /mnt/; then
-        success "Successfuly copied the user-apps on the disk"
+        success "Successfully copied the user-apps on the disk"
     else
         failure "Fail to copy user-apps on the disk,please check!!!"
 	umount /mnt2
@@ -868,10 +868,10 @@ set_static_ip() {
     # get the static ip details from config file
     ip=$(grep '^static_ip=' "$CONFIG_FILE" | cut -d '=' -f2)
     net_mask=$(grep '^subnet_mask=' "$CONFIG_FILE" | cut -d '=' -f2) 
-    gate_way=$(grep '^defualt_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
+    gate_way=$(grep '^default_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
     dns_server=$(grep '^dns_name_server=' "$CONFIG_FILE" | cut -d '=' -f2)
 
-    # Select the interfce to assign the static ip,ignore loop back interface.
+    # Select the interface to assign the static ip,ignore loop back interface.
     IFACE=$(ip -o link show | awk -F': ' '!/lo/ {print $2; exit}')
 
     # Write the configuration to /etc/netplan/51-cloud-init.yaml
@@ -902,14 +902,14 @@ static_ip_configuration() {
 
     # Check if a valiad IP address already assigned to Edge node
     # If yes , ignore static ip configuration
-    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+    pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
 
-    # If pub_inerface_name name empty means no ip assigned from dhcp server. 
-    if [ -z "$pub_inerface_name" ]; then
+    # If pub_interface_name name empty means no ip assigned from dhcp server. 
+    if [ -z "$pub_interface_name" ]; then
         set_static_ip
     else
         # Check if pub interface configured with loop back ip or vm ip
-        ip_addr=$(ip -4 addr show "$pub_inerface_name" | awk '/inet / {print $2}' | cut -d/ -f1 |grep -Ev '^(127\.|10\.0\.)' | head -1) 
+        ip_addr=$(ip -4 addr show "$pub_interface_name" | awk '/inet / {print $2}' | cut -d/ -f1 |grep -Ev '^(127\.|10\.0\.)' | head -1) 
         # If the ip_addr empty means no valid IP assigned to interface from dhcp server. ignore for vm setup
 	if [ -z "$ip_addr" ] && [ "$deploy_mode" != "ven" ]; then
 	    set_static_ip

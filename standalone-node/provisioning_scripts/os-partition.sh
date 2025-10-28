@@ -62,7 +62,7 @@ else
     echo "UUID=$uuid swap swap default 0 2" >> /mnt/etc/fstab
     status=$(cat "/mnt/etc/fstab" | grep -c "swap")
     if [ "$status" -ge 1 ]; then
-        echo "Successfuly created the swap partition for the disk $disk"
+        echo "Successfully created the swap partition for the disk $disk"
     else
 	echo "Faild to update swap partition in /etc/fstab for the disk $disk"
 	exit 1

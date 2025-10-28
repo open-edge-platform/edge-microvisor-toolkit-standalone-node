@@ -61,7 +61,7 @@ host_type="kubernetes"
 
 static_ip=""
 subnet_mask=""
-defualt_gate_way=""
+default_gate_way=""
 dns_name_server=""
 
 # ------------------ LVM partition size ------------------------
