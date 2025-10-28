@@ -11,11 +11,11 @@ host_prev_ip=$(cat "$IPCHECK")
 # Get the system ip
 while [ true ]
 do
-    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
-    if [ -z "$pub_inerface_name" ]; then
+    pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+    if [ -z "$pub_interface_name" ]; then
         sleep 3
     else
-        host_ip=$(ifconfig "${pub_inerface_name}" | grep 'inet ' | awk '{print $2}')
+        host_ip=$(ifconfig "${pub_interface_name}" | grep 'inet ' | awk '{print $2}')
 	break
     fi
 done

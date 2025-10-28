@@ -79,7 +79,7 @@ cp ../provisioning_scripts/*.yaml initramfs_extract/rootfs-tmp/etc/scripts/
 cp ../provisioning_scripts/start-provision.service initramfs_extract/rootfs-tmp/etc/systemd/system/
 
 # Copy the custom provision script to rootfs
-pushd initramfs_extract/rootfs-tmp/ || exita
+pushd initramfs_extract/rootfs-tmp/ || exit
 
 # Create the service script to start the provision service
 mkdir -p etc/systemd/system/default.target.wants
@@ -102,7 +102,7 @@ find . |sudo cpio -o -H newc | gzip -9 > ../initramfs-x86_64 || { echo "Failed t
 popd || exit
 sudo rm -rf initramfs_extract
 
-echo "Successully injected the custom provision scripts to initramfs"
+echo "Successfully injected the custom provision scripts to initramfs"
 
 
 
