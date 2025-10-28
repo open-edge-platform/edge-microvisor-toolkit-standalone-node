@@ -17,8 +17,8 @@ download-uOS() {
 echo "Started the download!!,it will take some time"
 
 pushd ../emt_uos/ || return 1
-chmod +x download_emt_ous_with_custom_scripts.sh
-if bash download_emt_ous_with_custom_scripts.sh; then
+chmod +x download_emt_uos_with_custom_scripts.sh
+if bash download_emt_uos_with_custom_scripts.sh; then
     echo "emt-uOS kernel && initramfs files downloaded successfully"
 else
     echo "emt-uOS kernel && initramfs files downloaded Failed,Please check!!"
