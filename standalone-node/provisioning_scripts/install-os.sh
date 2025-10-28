@@ -409,7 +409,7 @@ EOT
 }
 
 # Change the boot order to disk
-boot_order_chage_to_disk() {
+boot_order_change_to_disk() {
     echo -e "${BLUE}Changing the Boot order to disk!!${NC}"
 
     # Delete the pile up Ubuntu/Emt partitions from BIOS bootMenu
@@ -941,7 +941,7 @@ platform_config_manager() {
 
     static_ip_configuration || return 1
 
-    boot_order_chage_to_disk || return 1
+    boot_order_change_to_disk || return 1
 }
 
 # Post installation tasks
