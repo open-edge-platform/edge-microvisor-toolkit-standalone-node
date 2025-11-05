@@ -54,7 +54,7 @@ image:
 	@# Help: Runs build stage
 	@echo "---MAKEFILE BUILD---"
 	echo $@
-	cd host_os && ./download_embootkit.sh && cd ..
+	cd host_os && ./download_emt.sh && cd ..
 	@echo "---END MAKEFILE Build---"
 
 dependency-check:
