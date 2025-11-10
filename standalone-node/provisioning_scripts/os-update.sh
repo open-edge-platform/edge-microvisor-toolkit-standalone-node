@@ -45,6 +45,79 @@ convert_to_epoch() {
     date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
 }
 
+# detect current emt type (RT or Non-RT)
+detect_current_emt_type() {
+    local uname_output
+    uname_output=$(uname -a)
+
+    if echo "$uname_output" | grep -q "PREEMPT_RT"; then
+        echo "RT"
+    elif echo "$uname_output" | grep -q "PREEMPT_DYNAMIC"; then
+        echo "NON_RT"
+    else
+        # If neither PREEMPT_RT nor PREEMPT_DYNAMIC is found
+        echo "UNKNOWN"
+    fi
+}
+
+# detect image type from filename
+detect_image_type() {
+    local image_path="$1"
+    local image_filename
+    image_filename=$(basename "$image_path")
+
+    if echo "$image_filename" | grep -q "edge-readonly-rt-"; then
+        echo "RT"
+    elif echo "$image_filename" | grep -q "edge-readonly-" && ! echo "$image_filename" | grep -q "edge-readonly-rt-"; then
+        echo "NON_RT"
+    else
+        echo "UNKNOWN"
+    fi
+}
+
+# validate RT/Non-RT compatibility
+validate_emt_compatibility() {
+    local image_path="$1"
+    local current_emt_type
+    local image_type
+
+    current_emt_type=$(detect_current_emt_type)
+    image_type=$(detect_image_type "$image_path")
+
+    echo "Current EMT type: $current_emt_type"
+    echo "Image type: $image_type"
+
+    # Check if types are known
+    if [ "$current_emt_type" = "UNKNOWN" ]; then
+        echo "Warning: Unable to determine current EMT type from uname output: $(uname -a)"
+        echo "Proceeding with update without RT/Non-RT validation..."
+        return 0
+    fi
+
+    if [ "$image_type" = "UNKNOWN" ]; then
+        echo "Warning: Unable to determine EMT type from filename: $(basename "$image_path")"
+        echo "Proceeding with update without RT/Non-RT validation..."
+        return 0
+    fi
+
+    # Validate compatibility
+    if [ "$current_emt_type" != "$image_type" ]; then
+        if [ "$current_emt_type" = "RT" ] && [ "$image_type" = "NON_RT" ]; then
+            echo "Error: RT EMT detected, but Non-RT image provided."
+            echo "Please provide an RT upgrade version instead."
+            echo "Current EMT: $(uname -a)"
+            exit 1
+        elif [ "$current_emt_type" = "NON_RT" ] && [ "$image_type" = "RT" ]; then
+            echo "Error: Non-RT EMT detected, but RT image provided."
+            echo "Please provide a Non-RT upgrade version instead."
+            echo "Current EMT: $(uname -a)"
+            exit 1
+        fi
+    else
+        echo "EMT compatibility validated: $current_emt_type EMT with $image_type image"
+    fi
+}
+
 # Specify the configuration file
 config_file="/etc/cloud/config-file"
 
@@ -71,6 +144,9 @@ error_exit() {
 # Function to perform before update 
 perform_update_check() {
     local image_path="$1"
+
+    # Validate RT/Non-RT emt compatibility
+    validate_emt_compatibility "$image_path"
 
     # Mandatory checks before the update
 
