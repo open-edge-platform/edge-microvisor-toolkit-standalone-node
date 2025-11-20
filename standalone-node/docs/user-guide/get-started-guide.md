@@ -167,6 +167,10 @@ cd edge-microvisor-toolkit-standalone-node
   - **SSH key:** Provide the public SSH key (typically your
   `id_rsa.pub`) from your Linux development system to enable passwordless SSH access to the edge node.
   - **User credentials:** Define the username and password for the primary user account on the edge node.
+  - **host_type:** Choose the deployment type by providing the `host_type` input as `kubernetes` or `container`
+    - If `host_type` is set to `kubernetes`, k3s will be installed on the EMT after successful provisioning
+    - If `host_type` is set to `container`, Docker will be installed on the EMT after successful provisioning
+    - Both cannot co-exist on the provisioned EMT image
   - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations for advanced setup requirements.
     - For the default EMT non-RT image, a basic
       Kubernetes installation will be performed automatically.
