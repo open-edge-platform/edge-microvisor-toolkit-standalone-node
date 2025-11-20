@@ -45,15 +45,6 @@ convert_to_epoch() {
     date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
 }
 
-# Specify the configuration file
-config_file="/etc/cloud/config-file"
-
-# Check if the file exists
-if [[ ! -f "$config_file" ]]; then
-  echo "Configuration file not found: $config_file"
-  exit 1
-fi
-
 # Function to check the last command's exit status
 check_success() {
     if [ "$?" -ne 0 ]; then
@@ -130,6 +121,7 @@ show_help() {
     echo "  -v <version>   Build version"
     echo "  -i <image>     Direct path to Microvisor image"
     echo "  -c <checksum>  Path to checksum file"
+    echo "  -o             OXM mode"
     echo "  -h             Display this help message"
     exit 0
 }
@@ -148,13 +140,14 @@ check_success "Creating temporary directory"
 
 # Initialize variables
 URL_MODE=false
+OXM_MODE=false
 IMAGE_BASE_URL=""
 IMG_VER=""
 IMAGE_BUILD=""
 IMAGE_PATH=""
 SHA_FILE=""
 
-while getopts ":u:r:v:i:c:h" opt; do
+while getopts ":u:r:v:i:c:oh" opt; do
     case $opt in
         u)
             URL_MODE=true
@@ -172,6 +165,9 @@ while getopts ":u:r:v:i:c:h" opt; do
         c)
             SHA_FILE="$OPTARG"
             ;;
+        o)
+            OXM_MODE=true
+            ;;
         h)
             show_help
             ;;
@@ -183,6 +179,19 @@ while getopts ":u:r:v:i:c:h" opt; do
             ;;
     esac
 done
+
+# Specify the configuration file based on mode
+if $OXM_MODE; then
+    config_file="/etc/cloud/cloud.cfg.d/99_infra.cfg"
+else
+    config_file="/etc/cloud/config-file"
+fi
+
+# Check if the file exists
+if [[ ! -f "$config_file" ]]; then
+  echo "Configuration file not found: $config_file"
+  exit 1
+fi
 
 # URL mode
 if $URL_MODE; then
@@ -198,7 +207,7 @@ if $URL_MODE; then
     elif [[ "$IMAGE_BASE_URL" == *"af01p-png.devtools.intel.com"* ]]; then
         IMAGE_URL="${IMAGE_BASE_URL}/${IMG_VER}/${IMAGE_BUILD}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
     else
-        error_exit "Unsupported domain in URL: $IMAGE_BASE_URL"
+	error_exit "Unsupported domain in URL: $IMAGE_BASE_URL"
     fi
 
     echo "Constructed IMAGE URL: $IMAGE_URL"
@@ -328,8 +337,8 @@ EOF
     chmod +x "$COMMIT_UPDATE_SCRIPT"
 fi
 
-# Check if installer.cfg exists and update it if necessary
-if [ -f "$INSTALLER_CFG" ]; then
+# Check if installer.cfg exists and update it if necessary (skip in OXM mode)
+if [ "$OXM_MODE" = false ] && [ -f "$INSTALLER_CFG" ]; then
     # Check if the commit_update.sh entry is already present
     if ! grep -q "bash $COMMIT_UPDATE_SCRIPT" "$INSTALLER_CFG"; then
         # Use awk to find the end of the runcmd block and append new content
@@ -362,8 +371,12 @@ if [ -f "$INSTALLER_CFG" ]; then
         echo "Entry for commit_update.sh already exists in installer.cfg."
     fi
 else
-    echo "Error: installer.cfg not found."
-    exit 1
+    if [ "$OXM_MODE" = false ]; then
+        echo "Error: installer.cfg not found."
+        exit 1
+    else
+        echo "OXM mode: Skipping installer.cfg check."
+    fi
 fi
 
 bootctl install
