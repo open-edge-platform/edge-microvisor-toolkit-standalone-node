@@ -12,7 +12,8 @@ on:
     paths:
       - "standalone-node/**"
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   post-merge-pipeline:
