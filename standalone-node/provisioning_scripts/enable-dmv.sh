@@ -273,7 +273,7 @@ make_partition() {
 	       mkpart reserved ext4   "$(convert_mb_to_sectors "${reserved_start}" 0)"s       "$(convert_mb_to_sectors "${total_size_disk}" 1)"s
 
 
-	check_return_value $? "Failed to create partitionss"
+	check_return_value $? "Failed to create partitions"
     else
 	parted -s ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
@@ -282,7 +282,7 @@ make_partition() {
 	       mkpart tep ext4 "${tep_start}MB"  "${reserved_start}MB" \
 	       mkpart reserved ext4 "${reserved_start}MB"  "${total_size_disk}MB"
 
-	check_return_value $? "Failed to create partitionss"
+	check_return_value $? "Failed to create partitions"
     fi
 
     # Create LVM for single_hdd only when user chooses
