@@ -261,7 +261,7 @@ make_partition() {
 	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	check_return_value $? "Failed to resize emt persistent partitionss"
+	check_return_value $? "Failed to resize emt persistent partitions"
 
 	#this cmd only creates new partitions.
 	parted -s ${DEST_DISK} \
