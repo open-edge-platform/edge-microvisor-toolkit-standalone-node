@@ -7,7 +7,7 @@ LOCAL_OUTPUT_DIR="$(pwd)/remote_logs"
 REMOTE_CMDS="cd /etc/cloud/; sudo chmod +x collect-logs.sh; bash collect-logs.sh"
 REMOTE_FILE_PATH="/var/log/edge_node_logs/edge_node_logs.tar.gz"
 
-# This Script is to collect the Edgenode logs for debuging
+# This Script is to collect the Edgenode logs for debugging
 
 # Usage info for user
 usage() {
@@ -47,9 +47,9 @@ if ssh -T -o ConnectTimeout=10 "$user_name"@"$ip_address" "bash -c '$REMOTE_CMDS
         echo "Successfully Collected the Edge node logs and save under $LOCAL_OUTPUT_DIR"
         mv "${LOCAL_OUTPUT_DIR}/edge_node_logs.tar.gz" "${LOCAL_OUTPUT_DIR}/$(date +'%Y-%m-%d_%H-%M-%S')-edge_node_logs.tar.gz"
     else
-        echo "Failed to collect the Edge node logs,please check and re-run the script!!!"
+        echo "Failed to collect the Edge node logs, please check and re-run the script!!!"
         exit 1
     fi
 else
-    echo "Not able to collet the logs,please check the Edgenode up & Running or incorrect user name or ip address!!"
+    echo "Not able to collect the logs, please ensure the Edgenode is Running or incorrect user name or ip address!!"
 fi
