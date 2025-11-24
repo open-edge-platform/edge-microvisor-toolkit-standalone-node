@@ -11,7 +11,7 @@ set -x
 # COMPLETE_DMVERITY set to true default
 COMPLETE_DMVERITY=true
 
-# Test flag for enabling DM-verity on B part aswell.
+# Test flag for enabling DM-verity on B part as well.
 TEST_ENABLE_DM_ON_ROOTFSB=false
 
 # Test flag for only partition
@@ -19,7 +19,7 @@ TEST_ON_ONLY_ONE_PART=false
 ####
 ####
 #####################################################################################
-# Patition information
+# Partition information
 boot_partition=1
 rootfs_partition=2
 emt_persistent_partition=3
@@ -153,7 +153,7 @@ is_single_hdd() {
 }
 
 #####################################################################################
-# pass value to parted via sector number insted of start size in MB.
+# pass value to parted via sector number instead of start size in MB.
 
 convert_mb_to_sectors() {
     local size_in_mb=$1
@@ -185,7 +185,7 @@ make_partition() {
 	# limit swap size to sqrt of ramsize link https://help.ubuntu.com/community/SwapFaq
 	#
 	# this is to reconcile the requirement where we have a upper limit of 100GB for
-	# all partitions apart from lvm we cant risk exceeding the swap size.
+	# all partitions apart from lvm we can't risk exceeding the swap size.
 	swap_size=$(echo "$ram_size" | awk '{printf ("%.0f\n", sqrt($1))}')
     fi
 
@@ -257,11 +257,11 @@ make_partition() {
 
     if $COMPLETE_DMVERITY;
     then
-	#this cmd only resizes parition. if there is an error this should handle it.
+	#this cmd only resizes partitions. if there is an error this should handle it.
 	printf 'Fix\n' | parted ---pretend-input-tty ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "$(convert_mb_to_sectors "${emt_persistent_end}" 1)"s
 
-	check_return_value $? "Failed to resize emt persistent paritions"
+	check_return_value $? "Failed to resize emt persistent partitionss"
 
 	#this cmd only creates new partitions.
 	parted -s ${DEST_DISK} \
@@ -273,7 +273,7 @@ make_partition() {
 	       mkpart reserved ext4   "$(convert_mb_to_sectors "${reserved_start}" 0)"s       "$(convert_mb_to_sectors "${total_size_disk}" 1)"s
 
 
-	check_return_value $? "Failed to create paritions"
+	check_return_value $? "Failed to create partitionss"
     else
 	parted -s ${DEST_DISK} \
 	       resizepart $emt_persistent_partition "${emt_persistent_end}MB" \
@@ -282,7 +282,7 @@ make_partition() {
 	       mkpart tep ext4 "${tep_start}MB"  "${reserved_start}MB" \
 	       mkpart reserved ext4 "${reserved_start}MB"  "${total_size_disk}MB"
 
-	check_return_value $? "Failed to create paritions"
+	check_return_value $? "Failed to create partitionss"
     fi
 
     # Create LVM for single_hdd only when user chooses
@@ -291,7 +291,7 @@ make_partition() {
 	parted -s ${DEST_DISK} \
 	       mkpart lvm ext4 "$(convert_mb_to_sectors "${total_size_disk}" 0)"s 100%
 
-	check_return_value $? "Failed to create lvm parition"
+	check_return_value $? "Failed to create lvm partitions"
     fi
 
 

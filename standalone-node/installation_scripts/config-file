@@ -56,12 +56,12 @@ host_type="kubernetes"
 #       will be skipped, even if the static details are provided below
 # Example:
 # static_ip="192.168.1.24"
-# subnet_mak="24" i.e 192.168.1.24/24
-# dns_name_server="8.8.8.8,4.4.4.4" ## According to your organization's netwrok
+# subnet_mask="24" i.e 192.168.1.24/24
+# dns_name_server="8.8.8.8,4.4.4.4" ## According to your organization's network
 
 static_ip=""
 subnet_mask=""
-defualt_gate_way=""
+default_gate_way=""
 dns_name_server=""
 
 # ------------------ LVM partition size ------------------------

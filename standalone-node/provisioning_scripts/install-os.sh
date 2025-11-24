@@ -262,7 +262,7 @@ install_cloud_init_file() {
     check_mnt_mount_exist
     mount "$os_disk$os_rootfs_part" /mnt
     if cp /etc/scripts/cloud-init.yaml /mnt/etc/cloud/cloud.cfg.d/installer.cfg && chmod +x /mnt/etc/cloud/cloud.cfg.d/installer.cfg; then
-        success "Successfuly copied the cloud-init file"
+        success "Successfully copied the cloud-init file"
     else
         failure "Fail to copy the cloud-init file,please check!!!"
         umount /mnt
@@ -387,7 +387,7 @@ update_ssh_settings() {
 $ssh_key
 EOF
         chmod 600 ~/.ssh/authorized_keys
-        # export the /etc/enviroment values to .bashrc
+        # export the /etc/environment values to .bashrc
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
@@ -409,7 +409,7 @@ EOT
 }
 
 # Change the boot order to disk
-boot_order_chage_to_disk() {
+boot_order_change_to_disk() {
     echo -e "${BLUE}Changing the Boot order to disk!!${NC}"
 
     # Delete the pile up Ubuntu/Emt partitions from BIOS bootMenu
@@ -472,8 +472,8 @@ update_mac_under_dhcp_systemd() {
 
     CONFIG_FILE="/mnt/etc/systemd/network/99-dhcp-en.network"
 
-    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
-    mac=$(cat /sys/class/net/"$pub_inerface_name"/address)
+    pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+    mac=$(cat /sys/class/net/"$pub_interface_name"/address)
 
     # Update the mac
     sed -i "s/Name=.*/MACAddress=$mac/" $CONFIG_FILE
@@ -751,7 +751,7 @@ write_custom_files_to_disk () {
     echo "$content" > "/mnt/$path"
     chmod "$perms" "/mnt/$path"
   done
-  echo "All custome files written successfully to disk"
+  echo "All custom files written successfully to disk"
   umount /mnt
 }
 
@@ -827,7 +827,7 @@ copy_user_apps() {
     check_mnt_mount_exist
 
     if mount "$os_disk$os_data_part" /mnt && cp -r /mnt2/user-apps/ /mnt/; then
-        success "Successfuly copied the user-apps on the disk"
+        success "Successfully copied the user-apps on the disk"
     else
         failure "Fail to copy user-apps on the disk,please check!!!"
 	umount /mnt2
@@ -868,10 +868,10 @@ set_static_ip() {
     # get the static ip details from config file
     ip=$(grep '^static_ip=' "$CONFIG_FILE" | cut -d '=' -f2)
     net_mask=$(grep '^subnet_mask=' "$CONFIG_FILE" | cut -d '=' -f2) 
-    gate_way=$(grep '^defualt_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
+    gate_way=$(grep '^default_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
     dns_server=$(grep '^dns_name_server=' "$CONFIG_FILE" | cut -d '=' -f2)
 
-    # Select the interfce to assign the static ip,ignore loop back interface.
+    # Select the interface to assign the static ip,ignore loop back interface.
     IFACE=$(ip -o link show | awk -F': ' '!/lo/ {print $2; exit}')
 
     # Write the configuration to /etc/netplan/51-cloud-init.yaml
@@ -902,14 +902,14 @@ static_ip_configuration() {
 
     # Check if a valiad IP address already assigned to Edge node
     # If yes , ignore static ip configuration
-    pub_inerface_name=$(route | grep '^default' | grep -o '[^ ]*$')
+    pub_interface_name=$(route | grep '^default' | grep -o '[^ ]*$')
 
-    # If pub_inerface_name name empty means no ip assigned from dhcp server. 
-    if [ -z "$pub_inerface_name" ]; then
+    # If pub_interface_name name empty means no ip assigned from dhcp server. 
+    if [ -z "$pub_interface_name" ]; then
         set_static_ip
     else
         # Check if pub interface configured with loop back ip or vm ip
-        ip_addr=$(ip -4 addr show "$pub_inerface_name" | awk '/inet / {print $2}' | cut -d/ -f1 |grep -Ev '^(127\.|10\.0\.)' | head -1) 
+        ip_addr=$(ip -4 addr show "$pub_interface_name" | awk '/inet / {print $2}' | cut -d/ -f1 |grep -Ev '^(127\.|10\.0\.)' | head -1) 
         # If the ip_addr empty means no valid IP assigned to interface from dhcp server. ignore for vm setup
 	if [ -z "$ip_addr" ] && [ "$deploy_mode" != "ven" ]; then
 	    set_static_ip
@@ -941,7 +941,7 @@ platform_config_manager() {
 
     static_ip_configuration || return 1
 
-    boot_order_chage_to_disk || return 1
+    boot_order_change_to_disk || return 1
 }
 
 # Post installation tasks
@@ -987,7 +987,7 @@ main() {
     PROVISION_STEP=2
     show_progress_bar "$PROVISION_STEP" "OS Setup "
     if ! install_os_on_disk >> "$LOG_FILE" 2>&1; then
-        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more deatisl,Aborting.${NC}" | tee /dev/tty1
+        echo -e "${RED}\nERROR:OS Installation failed,Please check $LOG_FILE for more details,Aborting.${NC}" | tee /dev/tty1
         exit 1
     fi
 
@@ -1001,11 +1001,11 @@ main() {
 
     # Case the deployment for Virtual edgenode or Real hardware
     if [ "$deploy_mode" == "ven" ]; then
-        # Step 4: Enable OS-Partitions on the platfoem 
+        # Step 4: Enable OS-Partitions on the platform 
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable OS-Partitions on Platform"
         if ! create_os-partition  >> "$LOG_FILE" 2>&1; then
-            echo -e "${RED}\nERROR:OS-Partitions Creatation Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+            echo -e "${RED}\nERROR:OS-Partitions Creation Failed on platform,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
             exit 1
         fi
     else
@@ -1013,7 +1013,7 @@ main() {
         PROVISION_STEP=4
         show_progress_bar "$PROVISION_STEP" "Enable DM Verity on Platform"
         if ! enable_dm_verity  >> "$LOG_FILE" 2>&1; then
-            echo -e "${RED}\nERROR:DM Verity Enablement Failed on platfrom,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
+            echo -e "${RED}\nERROR:DM Verity Enablement Failed on platform,please check $LOG_FILE for more details,Aborting.${NC}"| tee /dev/tty1
            exit 1
         fi
     fi
