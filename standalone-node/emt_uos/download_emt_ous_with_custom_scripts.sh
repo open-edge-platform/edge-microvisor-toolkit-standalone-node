@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Download the Edge Microvisor Toolkit from open source no-auth file server
+# Download the Edge Microvisor Toolkit uOS(EMB) from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
 
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
@@ -58,7 +58,6 @@ mv initramfs_extract/rootfs.tar initramfs_extract/rootfs-tmp
 # Copy the provision scripts for EMT-S installation
 mkdir -p initramfs_extract/rootfs-tmp/etc/scripts
 mkdir -p initramfs_extract/rootfs-tmp/etc/systemd/system
-
 
 cp ../provisioning_scripts/*.sh initramfs_extract/rootfs-tmp/etc/scripts/
 cp ../provisioning_scripts/*.yaml initramfs_extract/rootfs-tmp/etc/scripts/
