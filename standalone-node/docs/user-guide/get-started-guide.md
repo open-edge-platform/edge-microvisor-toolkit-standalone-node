@@ -19,8 +19,8 @@ Kubernetes web dashboard.
 
 ### Create a Bootable USB Drive Using Source Code
 
-A bootable USB drive can be created using the source code and your chosen version of the Edge Microvisor Toolkit Standalone Node.
-This process works for deployments using either kubernetes or container host_type configurations.
+A bootable USB drive can be created using the source code and your chosen version of the Edge Microvisor
+Toolkit Standalone Node. This process works for deployments using either kubernetes or container host_type configurations.
 
 - Edge Microvisor Toolkit Non-RT (standard kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
@@ -344,8 +344,8 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 ## Step 4: Installing tools
 
-When tools are not included in EMT (NRT/DV) immutable images, they can be installed on the Standalone edge Node using the following commands.
-Make sure to update the environment variables as needed.
+When tools are not included in EMT (NRT/DV) immutable images, they can be installed on theStandalone edge Node using
+the following commands. Make sure to update the environment variables as needed.
 
   ```bash
   # Install required tools like git, wget etc.
