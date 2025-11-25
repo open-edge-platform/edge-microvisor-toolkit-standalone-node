@@ -342,7 +342,23 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
-## Step 4: Install Sample Application
+## Step 4: Installing tools
+
+When tools are not included in EMT (NRT/DV) immutable images, they can be installed on the Standalone edge Node using the following commands. Make sure to update the environment variables as needed.
+
+  ```bash
+  # Install required tools like git, wget etc.
+  sudo http_proxy=http://<proxy-server>:<port> https_proxy=http://<proxy-server>:<port> dnf --installroot=/opt/user-apps/tools/ -y install git wget
+
+  # export environment variable
+  export PATH=$PATH:/opt/user-apps/tools/usr/bin:/opt/user-apps/tools/usr/sbin
+
+  # Check the installation:
+  user@EdgeMicrovisorToolkit [ ~ ]$ git --version
+  git version 2.45.4
+  ```
+
+## Step 5: Install Sample Application
 
 1. Install a Sample applications like WordPress or NGinx, using `helm`.
 
