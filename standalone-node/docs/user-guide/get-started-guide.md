@@ -391,7 +391,7 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
   evaluated using similar steps.
 
 ### 2. Deploying container application for host_type=container
-1. Install pre-requisite tools as explained in "Step 4: Installing tools"
+1. Install pre-requisite tools as explained in [Installing tool](#Step 4: Installing tools)
 
 2. Install a Sample application like Pallet Defect Detection
 
