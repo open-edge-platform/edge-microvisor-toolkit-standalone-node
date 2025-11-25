@@ -364,6 +364,7 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
   ```
 
 ## Step 5: Install Sample Application
+### 1. Deploy kubernetes application for host_type=container
 
 1. Install a Sample applications like WordPress or NGinx, using `helm`.
 
@@ -388,6 +389,13 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
 
 > **Note:** Edge AI applications from the Edge Software Catalog can be installed using `helm` and
   evaluated using similar steps.
+
+### 2. Deploying container application for host_type=container
+1. Install pre-requisite tools as explained in "Step 4: Installing tools"
+
+2. Install a Sample application like Pallet Defect Detection
+
+Refer to get started document https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-vision/docs/user-guide/pallet-defect-detection/get-started.md
 
 ## Step 6: Upgrade to the EMT
 
