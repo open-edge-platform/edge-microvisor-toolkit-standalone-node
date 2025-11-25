@@ -148,6 +148,5 @@ jobs:
               echo "Pre-merge check passed successfully."
             else
               echo "All pre-merge checks failed or were skipped. PR can't get merged"
-              status="KO"
               exit 1
             fi
