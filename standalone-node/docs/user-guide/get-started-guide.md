@@ -350,8 +350,13 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
   # Install required tools like git, wget etc.
   sudo http_proxy=http://<proxy-server>:<port> https_proxy=http://<proxy-server>:<port> dnf --installroot=/opt/user-apps/tools/ -y install git wget
 
-  # export environment variable
+  # export environment variable needed by the tools
   export PATH=$PATH:/opt/user-apps/tools/usr/bin:/opt/user-apps/tools/usr/sbin
+  export GIT_EXEC_PATH=/opt/user-apps/tools/usr/libexec/git-core
+  export GIT_TEMPLATE_DIR=/opt/user-apps/tools/usr/share/git-core/templates
+
+  # Example git clone 
+  http_proxy=http://<proxy-server>:<port> https_proxy=http://<proxy-server>:<port> git clone https://github.com/open-edge-platform/edge-ai-suites.git
 
   # Check the installation:
   user@EdgeMicrovisorToolkit [ ~ ]$ git --version
