@@ -364,7 +364,7 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
   ```
 
 ## Step 5: Install Sample Application
-### 1. Deploy kubernetes application for host_type=container
+### 1. Deploy kubernetes application for host_type=kubernetes
 
 1. Install a Sample applications like WordPress or NGinx, using `helm`.
 
