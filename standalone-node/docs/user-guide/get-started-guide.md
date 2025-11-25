@@ -19,8 +19,8 @@ Kubernetes web dashboard.
 
 ### Create a Bootable USB Drive Using Source Code
 
-You can create a bootable USB drive using source code and a selected version of
-Edge Microvisor Toolkit Standalone Node:
+A bootable USB drive can be created using the source code and your chosen version of the Edge Microvisor
+Toolkit Standalone Node. This process works for deployments using either kubernetes or container host_type configurations.
 
 - Edge Microvisor Toolkit Non-RT (standard kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
@@ -342,7 +342,31 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
    ./get_helm.sh
    ```
 
-## Step 4: Install Sample Application
+## Step 4: Installing tools
+
+When tools are not included in EMT (NRT/DV) immutable images, they can be installed on theStandalone edge Node using
+the following commands. Make sure to update the environment variables as needed.
+
+  ```bash
+  # Install required tools like git, wget etc.
+  sudo http_proxy=http://<proxy-server>:<port> https_proxy=http://<proxy-server>:<port> dnf --installroot=/opt/user-apps/tools/ -y install git wget
+
+  # export environment variable needed by the tools
+  export PATH=$PATH:/opt/user-apps/tools/usr/bin:/opt/user-apps/tools/usr/sbin
+  export GIT_EXEC_PATH=/opt/user-apps/tools/usr/libexec/git-core
+  export GIT_TEMPLATE_DIR=/opt/user-apps/tools/usr/share/git-core/templates
+
+  # Example git clone 
+  http_proxy=http://<proxy-server>:<port> https_proxy=http://<proxy-server>:<port> git clone https://github.com/open-edge-platform/edge-ai-suites.git
+
+  # Check the installation:
+  user@EdgeMicrovisorToolkit [ ~ ]$ git --version
+  git version 2.45.4
+  ```
+
+## Step 5: Install Sample Application
+
+### 1. Deploy kubernetes application for host_type=kubernetes
 
 1. Install a Sample applications like WordPress or NGinx, using `helm`.
 
@@ -368,7 +392,15 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 > **Note:** Edge AI applications from the Edge Software Catalog can be installed using `helm` and
   evaluated using similar steps.
 
-## Step 5: Upgrade to the EMT
+### 2. Deploying container application for host_type=container
+
+1. Install pre-requisite tools as explained in section "Installing tools"
+
+2. Install a Sample application like Pallet Defect Detection
+
+Refer to get started document [Get-Started Pallet Defect Detection](https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-vision/docs/user-guide/pallet-defect-detection/get-started.md)
+
+## Step 6: Upgrade to the EMT
 
 Edge Microvisor Toolkit Standalone Node supports upgrading to a newer version
 of EMT image via split A/B immutable update mechanism. For detailed instruction
