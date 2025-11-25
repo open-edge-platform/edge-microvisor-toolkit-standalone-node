@@ -140,13 +140,14 @@ jobs:
               pipeline_result=$(eval echo \$$result)
               echo "${result} result: $pipeline_result"
                 if [[ "$pipeline_result" != "success" && "$pipeline_result" != "skipped" ]]; then
-                status="KO"
-              fi
+                  status="KO"
+                fi
             done
 
             if [[ "$status" == "OK" ]]; then
               echo "Pre-merge check passed successfully."
             else
               echo "All pre-merge checks failed or were skipped. PR can't get merged"
+              status="KO"
               exit 1
             fi
