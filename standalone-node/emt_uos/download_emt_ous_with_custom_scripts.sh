@@ -7,11 +7,13 @@
 # The file server URL is defined in FILE_RS_URL
 
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
-EMT_BUILD_DATE=20251023
+EMT_BUILD_DATE=20251113
 EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
+set -x
 curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
+set +x
 
 echo "Current working directory is: $PWD"
 
