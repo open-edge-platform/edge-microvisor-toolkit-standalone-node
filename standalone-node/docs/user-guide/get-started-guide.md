@@ -395,7 +395,7 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
 
 2. Install a Sample application like Pallet Defect Detection
 
-Refer to get started document https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-vision/docs/user-guide/pallet-defect-detection/get-started.md
+Refer to get started document [Get-Started Pallet Defect Detection](https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-vision/docs/user-guide/pallet-defect-detection/get-started.md)
 
 ## Step 6: Upgrade to the EMT
 
