@@ -384,7 +384,7 @@ When tools are not included in EMT (NRT/DV) immutable images, they can be instal
 > **Note:** Edge AI applications from the Edge Software Catalog can be installed using `helm` and
   evaluated using similar steps.
 
-## Step 5: Upgrade to the EMT
+## Step 6: Upgrade to the EMT
 
 Edge Microvisor Toolkit Standalone Node supports upgrading to a newer version
 of EMT image via split A/B immutable update mechanism. For detailed instruction
