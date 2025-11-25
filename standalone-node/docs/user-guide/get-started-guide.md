@@ -19,8 +19,7 @@ Kubernetes web dashboard.
 
 ### Create a Bootable USB Drive Using Source Code
 
-You can create a bootable USB drive using source code and a selected version of
-Edge Microvisor Toolkit Standalone Node:
+A bootable USB drive can be created using the source code and your chosen version of the Edge Microvisor Toolkit Standalone Node. This process works for deployments using either kubernetes or container host_type configurations.
 
 - Edge Microvisor Toolkit Non-RT (standard kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
