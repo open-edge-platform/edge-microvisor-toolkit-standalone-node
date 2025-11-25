@@ -141,7 +141,7 @@ jobs:
               echo "${result} result: $pipeline_result"
                 if [[ "$pipeline_result" != "success" && "$pipeline_result" != "skipped" ]]; then
                 status="KO"
-               fi
+              fi
             done
 
             if [[ "$status" == "OK" ]]; then
