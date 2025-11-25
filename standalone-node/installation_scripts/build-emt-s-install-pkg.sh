@@ -14,7 +14,7 @@ instll-dep-pks() {
 # Download the generate kernel && initramfs file
 download-uOS() {
 
-echo "Started the ld!!,it will take some time"
+echo "Started the download!!,it will take some time"
 
 pushd ../emt_uos/ || return 1
 chmod +x download_emt_ous_with_custom_scripts.sh
@@ -35,11 +35,11 @@ pushd ../host_os > /dev/null || return 1
 
 chmod +x download_tmv.sh
 if bash download_tmv.sh; then
-    echo "Microvisor  Image downloaded successfuly!!"
+    echo "Microvisor  Image downloaded successfully!!"
     os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
     mv "$os_filename" ../installation_scripts/
 else
-    echo "Microvisor Image download failed,please chheck!!!"
+    echo "Microvisor Image download failed,please check!!!"
     popd || return 1
     exit 1
 fi
@@ -131,7 +131,7 @@ if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename"  $checksum_file
         echo "##############################################################################################"
         echo "                                                                                              "
         echo "                                                                              "
-        echo "Standalone Installation files--> standalone-installation-files.tar.gz created successfuly, under $(pwd)"
+        echo "Standalone Installation files--> standalone-installation-files.tar.gz created successfully, under $(pwd)"
         echo "                                                                                              "
         echo "                                                                                              "
         echo "###############################################################################################"
@@ -141,7 +141,7 @@ if tar -czf usb-bootable-files.tar.gz emt-uos.iso "$os_filename"  $checksum_file
 	exit 1
     fi
 else
-    echo "usb-bootable-files.tar.gz not created,please checke!!!"
+    echo "usb-bootable-files.tar.gz not created,please check!!!"
     popd || return 1
     exit 1
 fi
