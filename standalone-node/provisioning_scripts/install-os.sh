@@ -877,7 +877,7 @@ set_static_ip() {
     dns_list=$(echo "$dns_server" | tr ',' '\n' | sed 's/^/          - /')
 
     # Select the interface to assign the static ip,ignore loop back interface.
-    IFACE=$(ip -o link show | awk '!/lo/ && /LOWER_UP/ {print $2; exit}') 
+    IFACE=$(ip -o link show | awk '!/lo/ && /LOWER_UP/ {print $2; exit}')
 
     # Write the configuration to /etc/netplan/51-cloud-init.yaml
 
