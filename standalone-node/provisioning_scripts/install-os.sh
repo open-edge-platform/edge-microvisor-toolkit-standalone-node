@@ -891,7 +891,7 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    $IFACE 
+    $IFACE
       dhcp4: false
       addresses:
         - $ip/$net_mask 
