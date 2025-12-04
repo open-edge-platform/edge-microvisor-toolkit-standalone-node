@@ -5,11 +5,12 @@
 
 ## Overview
 
-The Edge Microvisor Toolkit Standalone Node solution is designed to empower developers and
-enterprise customers by allowing for efficient trials and evaluation of Edge AI applications
-on Intel Architecture-based platforms. This comprehensive solution stack includes the
-edge-optimized immutable Edge Microvisor Toolkit integrated with K3s Kubernetes and foundational
-extensions, which enables deployment of both cloud-native and legacy VM-based applications.
+The Edge Microvisor Toolkit Standalone Node solution provides developers and enterprise
+customers with a powerful platform for testing and evaluating Edge AI applications on
+Intel Architecture systems. This complete solution includes an edge-optimized, immutable
+Edge Microvisor Toolkit that integrates seamlessly with K3s Kubernetes and essential
+extensions. The platform offers flexible deployment options, supporting cloud-native
+applications, traditional VM-based workloads, and Docker container-based deployments.
 
 ### Key Features
 
@@ -20,6 +21,8 @@ extensions, which enables deployment of both cloud-native and legacy VM-based ap
   cloud-native tools.
 - **Foundational Extensions:** These extensions support the deployment of diverse application
   types, including both modern cloud-native as well as traditional VM-based applications.
+- **Docker Containers:** Deploy Docker containers independently as an alternative to
+- Kubernetes-based orchestration.
 - **Easy Evaluation:** The Edge Microvisor Standalone Node allows for critical insights into
   the capabilities of Edge AI solutions, which is beneficial for deployments of
   use-case specific applications and potential scale outs.
@@ -66,26 +69,24 @@ The repository comprises the following components.
   for the Edge Microvisor Toolkit, as well as the installation and configuration of the K3s Kubernetes
   cluster with its extensions.
 
-  > **Note** The 3.1 version does not support updating from 3.0 due to the change in
-    kubernetes distribution.
-
-For more details refer to [Get Started Guide](standalone-node/docs/user-guide/get-started-guide.md).
+  For more details refer to [Get Started Guide](standalone-node/docs/user-guide/get-started-guide.md).
 
 ## How It Works
 
 To start the evaluation process, the customer compiles the Edge Microvisor Toolkit Standalone
 Node source code to create a USB bootable installer image for the edge node intended for evaluation.
-At this stage, the customer has the option to configure settings like proxy and user credentials.
+At this stage, the customer has the option to configure settings like proxy, user credentials,
+host type, IP address type etc.
 
-Next, the customer runs the automated installer, which generates a bootable USB drive. This USB
-drive is self-contained and includes all the necessary software components to install the
-Edge Microvisor Toolkit, Kubernetes, foundational Kubernetes extensions, and the Kubernetes Dashboard.
+Next, the customer launches the automated installer, which creates a bootable USB drive containing
+all essential software components. The USB drive provides a complete installation package for the
+Edge Microvisor Toolkit with the user's selected deployment option—either Kubernetes or Docker containers.
 
 With the bootable USB drive prepared, the customer can proceed to install it on the edge node.
 
 Once the edge node is up and running, the customer evaluates various Edge AI applications,
 pipelines, and microservices available from the Intel Edge services catalog and open-source
-repositories using standard tools like `helm`.
+repositories using standard tools like `helm` or `docker`.
 
 Edge Microvisor Toolkit Standalone Node is designed to support all Intel® platforms with the
 latest Intel® kernel to ensure all features are exposed and available for application and workloads.

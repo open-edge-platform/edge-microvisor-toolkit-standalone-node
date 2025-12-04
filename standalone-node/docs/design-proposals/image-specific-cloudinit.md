@@ -10,9 +10,10 @@ The Edge Microvisor Toolkit Standalone Node (EMT-S) ensures simplified edge node
 There are use cases where customers would like their own custom image of EMT to be deployed and
 configured as part of the provisioning.
 
-To accommodate this use case, the EMT-S installer will include a configuration section for
-users to update before creating a bootable USB drive. The configuration section will be used to update the
-`cloud-init` template for the specific EMT image. The configuration can span across OS and Kubernetes.
+The EMT-S installer includes a pre-installation configuration interface to address this requirement.
+Users can modify settings before creating the bootable USB drive, which updates the cloud-init
+template for the target EMT image. Configuration options cover both OS-level and containerization
+settings, whether using Kubernetes or direct container deployment.
 
 ## Proposal
 
