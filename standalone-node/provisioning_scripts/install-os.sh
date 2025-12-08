@@ -867,12 +867,17 @@ set_static_ip() {
 
     # get the static ip details from config file
     ip=$(grep '^static_ip=' "$CONFIG_FILE" | cut -d '=' -f2)
-    net_mask=$(grep '^subnet_mask=' "$CONFIG_FILE" | cut -d '=' -f2) 
-    gate_way=$(grep '^default_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2) 
+    ip=${ip#\"}; ip=${ip%\"}
+    net_mask=$(grep '^subnet_mask=' "$CONFIG_FILE" | cut -d '=' -f2)
+    net_mask=${net_mask#\"}; net_mask=${net_mask%\"}
+    gate_way=$(grep '^default_gate_way=' "$CONFIG_FILE" | cut -d '=' -f2)
+    gate_way=${gate_way#\"}; gate_way=${gate_way%\"}
     dns_server=$(grep '^dns_name_server=' "$CONFIG_FILE" | cut -d '=' -f2)
+    dns_server=${dns_server#\"}; dns_server=${dns_server%\"}
+    dns_list=$(echo "$dns_server" | tr ',' '\n' | sed 's/^/          - /')
 
     # Select the interface to assign the static ip,ignore loop back interface.
-    IFACE=$(ip -o link show | awk -F': ' '!/lo/ {print $2; exit}')
+    IFACE=$(ip -o link show | awk '!/lo/ && /LOWER_UP/ {print $2; exit}')
 
     # Write the configuration to /etc/netplan/51-cloud-init.yaml
 
@@ -884,13 +889,16 @@ set_static_ip() {
 cat > "$STATIC_IP_FILE" <<EOF
 network:
   version: 2
+  renderer: networkd
   ethernets:
-    $IFACE:
+    $IFACE
       dhcp4: false
-      addresses: [$ip/$net_mask]
-      gateway4: $gate_way
+      addresses:
+        - $ip/$net_mask 
+      gateway4: $gate_way 
       nameservers:
-        addresses: [ ${dns_server} ]
+        addresses:
+$dns_list 
 EOF
     chmod 600 $STATIC_IP_FILE
     umount /mnt
