@@ -7,7 +7,7 @@
 # The file server URL is defined in FILE_RS_URL
 
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
-EMT_BUILD_DATE=20251126
+EMT_BUILD_DATE=20251204
 EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"
 EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
 
