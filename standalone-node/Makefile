@@ -50,7 +50,7 @@ build: configure
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-emt-s-install-pkg.sh $(INSTALL_TYPE) && cd ..
+	cd installation_scripts && ./build-emt-s-install-pkg.sh "$(INSTALL_TYPE)" && cd ..
 	@echo "---END MAKEFILE Build---"
 	
 image:
