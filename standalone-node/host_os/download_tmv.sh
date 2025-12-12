@@ -6,7 +6,7 @@
 # The file server URL is defined in FILE_RS_URL
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
 
-INSTALL_TYPE="${1:-NRT}"
+export INSTALL_TYPE="${1:-NRT}"
 
 if [ "$INSTALL_TYPE" == "DV" ]; then
 	# EMTS build with DV image
