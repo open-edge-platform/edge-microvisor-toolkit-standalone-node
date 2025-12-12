@@ -5,7 +5,7 @@
 #set -x
 
 os_filename=""
-INSTALL_TYPE="${1:-NRT}"
+export INSTALL_TYPE="${1:-NRT}"
 
 # Install system dependent packages
 instll-dep-pks() {
