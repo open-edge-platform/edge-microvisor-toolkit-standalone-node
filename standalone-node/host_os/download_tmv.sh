@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-FileCopyrightText: (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-set -x
+
 # Download the Edge Microvisor Toolkit from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
