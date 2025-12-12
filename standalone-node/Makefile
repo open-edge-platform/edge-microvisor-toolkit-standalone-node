@@ -28,7 +28,7 @@ IMG_VERSION   ?= $(VERSION)
 GIT_COMMIT    ?= $(shell git rev-parse HEAD)
 
 # Define variable NRT or DV based on the build; default is NRT
-INSTALL_TYPE  ?= NRT 
+INSTALL_TYPE  ?= NRT
 
 # Yamllint variables
 YAML_FILES           := $(shell find . -path './venv_$(PROJECT_NAME)' -path './vendor' -prune -o -type f \( -name '*.yaml' -o -name '*.yml' \) -print )
