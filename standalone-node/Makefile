@@ -27,6 +27,9 @@ IMG_NAME      ?= ${PROJECT_NAME}
 IMG_VERSION   ?= $(VERSION)
 GIT_COMMIT    ?= $(shell git rev-parse HEAD)
 
+# Define variable NRT or DV based on the build; default is NRT
+INSTALL_TYPE  ?= NRT
+
 # Yamllint variables
 YAML_FILES           := $(shell find . -path './venv_$(PROJECT_NAME)' -path './vendor' -prune -o -type f \( -name '*.yaml' -o -name '*.yml' \) -print )
 YAML_IGNORE          := vendor, .github/workflows
@@ -47,7 +50,7 @@ build: configure
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-emt-s-install-pkg.sh && cd ..
+	cd installation_scripts && ./build-emt-s-install-pkg.sh "$(INSTALL_TYPE)" && cd ..
 	@echo "---END MAKEFILE Build---"
 	
 image:

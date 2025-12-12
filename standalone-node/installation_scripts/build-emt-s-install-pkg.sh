@@ -5,6 +5,7 @@
 #set -x
 
 os_filename=""
+INSTALL_TYPE="${1:-NRT}"
 
 # Install system dependent packages
 instll-dep-pks() {
@@ -34,12 +35,12 @@ download-tvm() {
 pushd ../host_os > /dev/null || return 1
 
 chmod +x download_tmv.sh
-if bash download_tmv.sh; then
-    echo "Microvisor  Image downloaded successfully!!"
+if bash download_tmv.sh "$INSTALL_TYPE" ; then
+    echo "Microvisor Image downloaded successfully!!"
     os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
     mv "$os_filename" ../installation_scripts/
 else
-    echo "Microvisor Image download failed,please check!!!"
+    echo "Microvisor Image download failed,please check!!!" "$(INSTALL_TYPE)"
     popd || return 1
     exit 1
 fi
@@ -168,4 +169,4 @@ create-standalone-installer-pkg
 
 ######@main#####
 main
-                
+
