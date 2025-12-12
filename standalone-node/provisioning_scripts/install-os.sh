@@ -893,6 +893,7 @@ network:
   ethernets:
     $IFACE
       dhcp4: false
+      ignore-carrier: true
       addresses:
         - $ip/$net_mask 
       gateway4: $gate_way 
