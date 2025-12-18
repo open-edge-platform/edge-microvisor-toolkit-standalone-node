@@ -31,7 +31,7 @@ initramfs_file=$(find uOS -maxdepth 1 -type f -name 'initramfs*' -printf '%f\n' 
 cp uOS/"$vmlinuz_file"  vmlinuz-x86_64 || { echo "download of vmlinuz-x86_64"; exit 1; } 
 cp uOS/"$initramfs_file" initramfs-x86_64 || { echo "download of initramfs-x86_64"; exit 1; } 
 
-echo "Successfully Downloaded emt-ous initramfs && vmlinux files"
+echo "Successfully Downloaded emt-uOS initramfs && vmlinux files"
 
 # cleanup the files
 rm -rf uos.tar.gz uOS/*
