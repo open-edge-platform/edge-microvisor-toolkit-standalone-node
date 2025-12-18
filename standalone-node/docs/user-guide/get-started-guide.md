@@ -70,14 +70,15 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.2: Create the Standalone Installer
 
-- To create the standalone installation tar file with all required files for preparing a bootable USB
-  device, run the following command
+- To create the standalone installation tar file with Non RT (NRT) image creating the files for preparing a
+  bootable USB device, run the following command
 
    ```bash
    sudo make build
    ```
-- To create the standalone installation tar file with Display Virtualization (DV) for preparing a bootable USB. The below procedure will integrate the DV image instead of NonRT image creating teh USB installer file, this will avoid manual steps to replace the nonRT with DV image.
-  device, run the following command
+- To create the standalone installation tar file with Display Virtualization (DV) for preparing a bootable USB.
+  The below procedure will integrate the DV image instead of Non RT image creating the USB installer file, this
+  will avoid manual steps to replace the nonRT with DV image.
 
    ```bash
    sudo make build INSTALL_TYPE=DV
