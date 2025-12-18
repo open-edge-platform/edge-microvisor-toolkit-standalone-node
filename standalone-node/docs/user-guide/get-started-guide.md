@@ -68,7 +68,7 @@ git clone https://github.com/open-edge-platform/edge-microvisor-toolkit-standalo
 cd edge-microvisor-toolkit-standalone-node
 ```
 
-#### 1.2: Create the Standalone Installer
+#### 1.2: Create the Standalone Installer with NRT or DV image
 
 - To create a standalone installation tar file using a Non-RT (NRT) image and generate the necessary
   files for preparing a bootable USB device, run the following command
