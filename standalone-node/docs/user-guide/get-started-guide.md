@@ -76,7 +76,7 @@ cd edge-microvisor-toolkit-standalone-node
    ```bash
    sudo make build
    ```
-   
+
 - To create a standalone installation tar file with Display Virtualization (DV) for bootable USB
   preparation, follow the procedure below. This process integrates the DV image directly instead
   of the Non-RT image, eliminating the need for manual steps to replace the Non-RT image with the DV image.
