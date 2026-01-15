@@ -13,12 +13,18 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: write      # needed so the action can apply labels to PRs
+  issues: write             # needed so the action can apply labels to Issues
 
 jobs:
   label:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
+    # Only run for PRs from the main repository (skip forks like Dependabot)
+    if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76  # v2.14.0
