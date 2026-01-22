@@ -748,6 +748,11 @@ write_custom_files_to_disk () {
       continue
     fi
     echo "Writing $path with permissions $perms"
+    # Check if the destination path exist, if not create it
+    dir="$(dirname "$path")"
+
+    # Create directory if it does not exist
+    [ -d "/mnt/$dir" ] || mkdir -p "/mnt/$dir"
     echo "$content" > "/mnt/$path"
     chmod "$perms" "/mnt/$path"
   done
