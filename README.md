@@ -53,6 +53,7 @@ detailed summary of the supported processor families and system requirements:
 ## Get Started
 
 The repository comprises the following components.
+BLAA
 
 - [**Edge Microvisor Bootkit**](standalone-node/emt_uos): Includes scripts for downloading the minimal
   build of the Edge Microvisor Toolkit, which acts as an installation environment for bare-metal systems.
