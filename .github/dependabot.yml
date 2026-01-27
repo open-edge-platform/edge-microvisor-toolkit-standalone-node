@@ -5,18 +5,12 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directories:
-      - "/"  # this enables searching only in /.github/workflows directory
+    directory: "/"  # this enables searching only in /.github/workflows directory
     schedule:
       interval: daily
     open-pull-requests-limit: 10
     commit-message:
       prefix: "[gha] "
-
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: daily
 
   - package-ecosystem: pip
     directory: /
