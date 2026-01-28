@@ -3,8 +3,8 @@
 
 
 # license checking
-reuse==5.0.2
+reuse==6.2.0
 flake8==7.1.2
-yamllint~=1.27.1
+yamllint~=1.38.0
 hypothesis==6.103.0
 termcolor==3.3.0
