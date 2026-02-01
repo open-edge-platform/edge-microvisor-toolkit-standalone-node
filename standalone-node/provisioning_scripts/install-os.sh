@@ -910,6 +910,37 @@ EOF
     umount /mnt
 }
 
+custom_ntp_server_configuration() {
+    
+    echo -e "${BLUE}Custom NTP Server Configuration!!${NC}"
+    # Check if Custom NTP Server configuration provided as input
+    # ignore if not provide
+    CONFIG_FILE="/etc/scripts/config-file"
+
+    ntp_server=$(grep '^USER_CUSTOM_NTP_SERVERS=' "$CONFIG_FILE" \
+    | cut -d '=' -f2- \
+    | sed 's/^"//;s/"$//')
+
+    ntp_yaml=$(printf '%s\n' "$ntp_server" \
+    | tr ',' '\n' \
+    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+    | sed '/^$/d' \
+    | sed 's/^/    - /')
+
+    if [ -n "$ntp_server" ]; then
+	check_mnt_mount_exist
+        mount "$os_disk$os_rootfs_part" /mnt
+	sed -i "/^[[:space:]]*-[[:space:]]*time\.google\.com[[:space:]]*$/{
+        s|.*||
+        r /dev/stdin
+        d
+    }" /mnt/etc/cloud/cloud.cfg.d/installer.cfg <<EOF
+$ntp_yaml
+EOF
+     umount /mnt
+     fi 
+}
+
 static_ip_configuration() {
 
     echo -e "${BLUE}Static IP Configuration!!${NC}"
@@ -954,6 +985,8 @@ platform_config_manager() {
     update_mac_under_dhcp_systemd || return 1
 
     static_ip_configuration || return 1
+    
+    custom_ntp_server_configuration || return 1
 
     boot_order_change_to_disk || return 1
 }

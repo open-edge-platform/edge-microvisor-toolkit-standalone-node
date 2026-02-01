@@ -187,6 +187,9 @@ cd edge-microvisor-toolkit-standalone-node
       This document provides `cloud-init` configurations that can be
       tailored to your specific deployment needs.
   - **Hugepages configuration:** Set hugepages parameters if your workloads require them.
+  - **NTP Configuration:** By default, NTP is configured with `time.google.com` in the `cloud-init` config file.
+    - To use a custom NTP server, set the `USER_CUSTOM_NTP_SERVERS` variable in the `config-file` with comma-separated
+      ( for more than one NTP address ) NTP server addresses.
 
 - Run the preparation script to create the bootable USB drive:
 
