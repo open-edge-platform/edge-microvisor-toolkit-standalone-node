@@ -87,6 +87,16 @@ lvm_size_ingb="0"
 
 huge_page_config=""
 
+# -------------------- Custom NTP Server Configuration --------------------
+# Configure NTP server settings according to your organization's requirements.
+# This configuration is optional and should only be set if required.
+#
+# Example:
+#   USER_CUSTOM_NTP_SERVERS="pool.ntp.org"
+#   For multiple servers: USER_CUSTOM_NTP_SERVERS="pool1.ntp.org,pool2.ntp.org"
+
+USER_CUSTOM_NTP_SERVERS=""
+
 # -------------------Custom cloud-init Config file---------------------
 # This section is to customize the cloud-init config file as per User Wish
 
