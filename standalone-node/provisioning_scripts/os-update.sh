@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Source the environment variables
+# shellcheck disable=SC1091 source=/etc/environment
 source /etc/environment
 
 # set -x
