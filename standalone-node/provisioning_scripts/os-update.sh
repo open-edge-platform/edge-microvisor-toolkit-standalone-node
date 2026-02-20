@@ -23,7 +23,6 @@ extract_write_files_paths() {
       [[ "$line" =~ ^[^[:space:]] ]] && in_section=false
     fi
   done < "$config_file"
-
   echo "${paths[@]}"
 }
 
@@ -33,52 +32,177 @@ convert_to_epoch() {
     date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
 }
 
-# detect current emt type (RT or Non-RT)
+# Detection state holders for image type and source
+DETECTED_IMAGE_TYPE="UNKNOWN"
+IMAGE_TYPE_SOURCE="unknown"
+
+# infer image type from a name/path/content string
+detect_emt_type_from_string() {
+  local input_string
+  input_string=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+
+  case "$input_string" in
+    *edge-readonly-dv-*|*/dv/*|*-dv-*|*_dv_*) echo "DV" ;;
+    *edge-readonly-rt-*|*/rt/*|*-rt-*) echo "RT" ;;
+    *edge-readonly-*|*/non-rt/*|*/non_rt/*|*non-rt*|*non_rt*) echo "NON_RT" ;;
+    *) echo "UNKNOWN" ;;
+  esac
+}
+
+# detect current emt type (RT, NON_RT, or DV)
 detect_current_emt_type() {
-    local uname_output
-    uname_output=$(uname -a)
+  local detected_type
+  local uname_output
 
-    case "$uname_output" in
-        *PREEMPT_RT*) echo "RT" ;;
-        *PREEMPT_DYNAMIC*) echo "NON_RT" ;;
-        *) echo "UNKNOWN" ;;
-    esac
+  # Primary source: image metadata from provisioned image
+  if [ -r "/etc/image-id" ]; then
+    detected_type=$(detect_emt_type_from_string "$(cat /etc/image-id 2>/dev/null)")
+    if [ "$detected_type" != "UNKNOWN" ]; then
+      echo "$detected_type"
+      return
+    fi
+  fi
+
+  # Secondary source: desktop virtualization user-space components
+  if [ -d "/usr/bin/idv" ] || [ -x "/usr/bin/idv/launcher/start_vm.sh" ]; then
+    echo "DV"
+    return
+  fi
+
+  # Fallback: kernel flavor
+  uname_output=$(uname -a)
+  case "$uname_output" in
+    *PREEMPT_RT*) echo "RT" ;;
+    *PREEMPT_DYNAMIC*) echo "NON_RT" ;;
+    *) echo "UNKNOWN" ;;
+  esac
 }
 
-# detect image type from filename
+# detect image type by inspecting update image partition content
+detect_image_type_from_partition() {
+  local image_partition="$1"
+  local mount_dir="/tmp/emt-image-inspect"
+  local detected_type="UNKNOWN"
+  local detection_source="unknown"
+  local kernel_release=""
+  local kernel_config=""
+
+  mkdir -p "$mount_dir" 2>/dev/null || {
+    DETECTED_IMAGE_TYPE="UNKNOWN"
+    IMAGE_TYPE_SOURCE="partition mount failed"
+    return
+  }
+
+  if mount -o ro "$image_partition" "$mount_dir" 2>/dev/null; then
+    if [ -r "$mount_dir/etc/image-id" ]; then
+      detected_type=$(detect_emt_type_from_string "$(cat "$mount_dir/etc/image-id" 2>/dev/null)")
+      if [ "$detected_type" != "UNKNOWN" ]; then
+        detection_source="partition metadata"
+      fi
+    fi
+
+    if [ "$detected_type" = "UNKNOWN" ] && [ -d "$mount_dir/usr/bin/idv" ]; then
+      detected_type="DV"
+      detection_source="partition dv marker"
+    fi
+
+    if [ "$detected_type" = "UNKNOWN" ] && [ -x "$mount_dir/usr/bin/idv/launcher/start_vm.sh" ]; then
+      detected_type="DV"
+      detection_source="partition dv launcher"
+    fi
+
+    # Fallback for generic/misnamed images: infer from installed kernel metadata
+    if [ "$detected_type" = "UNKNOWN" ] && [ -d "$mount_dir/lib/modules" ]; then
+      kernel_release=$(find "$mount_dir/lib/modules" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | head -n 1)
+
+      if [ -n "$kernel_release" ]; then
+        if [[ "$kernel_release" == *rt* ]]; then
+          detected_type="RT"
+          detection_source="kernel release"
+        fi
+      fi
+    fi
+
+    if [ "$detected_type" = "UNKNOWN" ] && [ -d "$mount_dir/boot" ]; then
+      kernel_config=$(find "$mount_dir/boot" -maxdepth 1 -type f -name 'config-*' | head -n 1)
+
+      if [ -n "$kernel_config" ] && [ -r "$kernel_config" ]; then
+        if grep -q '^CONFIG_PREEMPT_RT=y' "$kernel_config" 2>/dev/null; then
+          detected_type="RT"
+          detection_source="kernel config"
+        elif grep -q '^CONFIG_PREEMPT_DYNAMIC=y' "$kernel_config" 2>/dev/null; then
+          detected_type="NON_RT"
+          detection_source="kernel config"
+        fi
+      fi
+    fi
+
+    umount "$mount_dir" 2>/dev/null
+  fi
+
+  rmdir "$mount_dir" 2>/dev/null
+  DETECTED_IMAGE_TYPE="$detected_type"
+  IMAGE_TYPE_SOURCE="$detection_source"
+}
+
+# detect image type from image content first, then filename/path fallback
 detect_image_type() {
-    local image_filename
-    image_filename=$(basename "$1")
+  local image_path="$1"
+  local image_partition="${2:-}"
+  local detected_type="UNKNOWN"
+  local detection_source="unknown"
+  local lowered_path
 
-    case "$image_filename" in
-        *edge-readonly-rt-*) echo "RT" ;;
-        *edge-readonly-*) echo "NON_RT" ;;
-        *) echo "UNKNOWN" ;;
-    esac
+  lowered_path=$(echo "$image_path" | tr '[:upper:]' '[:lower:]')
+
+  if [ -n "$image_partition" ]; then
+    detect_image_type_from_partition "$image_partition"
+    detected_type="$DETECTED_IMAGE_TYPE"
+    detection_source="$IMAGE_TYPE_SOURCE"
+  fi
+
+  if [ "$detected_type" = "UNKNOWN" ]; then
+    detected_type=$(detect_emt_type_from_string "$image_path")
+
+    if [ "$detected_type" != "UNKNOWN" ]; then
+      case "$lowered_path" in
+        */dv/*|*/rt/*|*/non-rt/*|*/non_rt*) detection_source="path" ;;
+        *) detection_source="filename" ;;
+      esac
+    fi
+  fi
+
+  DETECTED_IMAGE_TYPE="$detected_type"
+  IMAGE_TYPE_SOURCE="$detection_source"
 }
 
-# validate RT/Non-RT compatibility
+# validate RT/NON_RT/DV compatibility
 validate_emt_compatibility() {
     local image_path="$1"
+    local image_partition="${2:-}"
     local current_emt_type
     local image_type
+  local image_type_source
 
     current_emt_type=$(detect_current_emt_type)
-    image_type=$(detect_image_type "$image_path")
+  detect_image_type "$image_path" "$image_partition"
+  image_type="$DETECTED_IMAGE_TYPE"
+  image_type_source="$IMAGE_TYPE_SOURCE"
 
     echo "Current EMT type: $current_emt_type"
     echo "Image type: $image_type"
+  echo "Image type source: $image_type_source"
 
     # Check if types are known
     if [ "$current_emt_type" = "UNKNOWN" ]; then
         echo "Warning: Unable to determine current EMT type from uname output: $(uname -a)"
-        echo "Proceeding with update without RT/Non-RT validation..."
+      echo "Proceeding with update without EMT type validation..."
         return 0
     fi
 
     if [ "$image_type" = "UNKNOWN" ]; then
-        echo "Warning: Unable to determine EMT type from filename: $(basename "$image_path")"
-        echo "Proceeding with update without RT/Non-RT validation..."
+        echo "Warning: Unable to determine EMT type from image metadata or filename: $(basename "$image_path")"
+      echo "Proceeding with update without EMT type validation..."
         return 0
     fi
 
@@ -87,10 +211,11 @@ validate_emt_compatibility() {
         echo "Error: $current_emt_type EMT detected, but $image_type image provided."
         echo "Please provide a $current_emt_type upgrade version instead."
         echo "Current EMT: $(uname -a)"
-        exit 1
+      return 1
     fi
 
     echo "EMT compatibility validated: $current_emt_type EMT with $image_type image"
+    return 0
 }
 
 # Specify the configuration file
@@ -108,6 +233,28 @@ check_success() {
 error_exit() {
     echo "Error: $1"
     exit 1
+}
+
+# Extract SHA256 checksum safely from checksum file
+extract_sha256_checksum() {
+  local checksum_file="$1"
+  local sha_id=""
+
+  [ ! -r "$checksum_file" ] && error_exit "Checksum file is not readable: $checksum_file"
+
+  # Prefer strict sha256sum line format: <64-hex> [whitespace] <filename>
+  sha_id=$(grep -aEom1 '^[[:space:]]*[0-9a-fA-F]{64}([[:space:]]+|$)' "$checksum_file" | awk '{print $1}' | tr '[:upper:]' '[:lower:]')
+
+  # Fallback: accept a file containing only the 64-hex digest
+  if [ -z "$sha_id" ]; then
+    sha_id=$(grep -aEom1 '[0-9a-fA-F]{64}' "$checksum_file" | tr '[:upper:]' '[:lower:]')
+  fi
+
+  if [ -z "$sha_id" ]; then
+    error_exit "Invalid checksum file: $checksum_file. Provide a valid .sha256sum file (not a raw image)."
+  fi
+
+  echo "$sha_id"
 }
 
 # Function for consistent status logging
@@ -166,9 +313,7 @@ restore_file() {
 # Function to perform before update 
 perform_update_check() {
     local image_path="$1"
-
-    # Validate RT/Non-RT emt compatibility
-    validate_emt_compatibility "$image_path"
+    local loopdevice
 
     # Mandatory checks before the update
     # Decompress the image
@@ -176,6 +321,13 @@ perform_update_check() {
 
     # Set up the loop device with the decompressed image
     loopdevice=$(losetup --find --partscan --show /etc/cloud/update.raw)
+
+    # Validate EMT compatibility using actual image content
+    if ! validate_emt_compatibility "$image_path" "$loopdevice"p2; then
+      losetup -d "$loopdevice" 2>/dev/null
+      rm -f /etc/cloud/update.raw
+      exit 1
+    fi
 
     # Extract UUID from the loop device partition
     local uuid
@@ -192,7 +344,7 @@ perform_update_check() {
     # Check #1 Compare UUIDs
     if [ "$uuid" = "$boot_uuid" ]; then
         echo "UUID of update image and provisioned image are the same"
-	losetup -d "$loopdevice"
+        losetup -d "$loopdevice"
         exit 1
     fi
 
@@ -237,7 +389,6 @@ if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root."
     exit 1
 fi
-
 
 # Temporary directory for downloads
 TEMP_DIR="/tmp/microvisor-update"
@@ -322,7 +473,7 @@ if $URL_MODE; then
     curl -k "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
 
     # Extract the SHA256 checksum
-    SHA_ID=$(awk '{print $1}' "$SHA_FILE")
+    SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
     echo "Extracted SHA256 checksum: $SHA_ID"
 else
     # Direct path mode - validate required arguments
@@ -332,8 +483,14 @@ else
     [ ! -f "$IMAGE_PATH" ] && error_exit "Microvisor image file not found at $IMAGE_PATH"
     [ ! -f "$SHA_FILE" ] && error_exit "SHA256 checksum file not found at $SHA_FILE"
 
+    case "$SHA_FILE" in
+      *.raw|*.raw.gz|*.img|*.img.gz)
+        error_exit "Checksum file appears to be an image: $SHA_FILE. Please provide a .sha256sum file with -c."
+        ;;
+    esac
+
     # Extract the SHA256 checksum
-    SHA_ID=$(awk '{print $1}' "$SHA_FILE")
+    SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
     echo "Extracted SHA256 checksum: $SHA_ID"
 fi
 
@@ -497,6 +654,7 @@ echo "Validating Backup Files"
 echo "========================================"
 
 missing_backups=0
+credential_backups_available=true
 for required_file in passwd_backup shadow_backup; do
   backup_path="/etc/cloud/$required_file"
   if [ ! -e "$backup_path" ]; then
@@ -512,16 +670,18 @@ done
 
 if [ $missing_backups -gt 0 ]; then
   echo "========================================"
-  echo "CRITICAL ERROR: $missing_backups required backup file(s) missing or invalid"
-  echo "Expected files:"
+  echo "WARNING: $missing_backups required backup file(s) missing or invalid"
+  echo "Expected backup files:"
   echo "  - /etc/cloud/passwd_backup"
   echo "  - /etc/cloud/shadow_backup"
-  echo "Cannot proceed - update may leave system in inconsistent state!"
+  echo "Continuing without credential restore for this boot."
   echo "========================================"
-  exit 1
+  credential_backups_available=false
 fi
 
-log_status success "All required backup files validated"
+if [ "$credential_backups_available" = true ]; then
+  log_status success "All required backup files validated"
+fi
 echo "========================================"
 
 # Restore user credentials
@@ -529,54 +689,59 @@ echo "========================================"
 echo "Restoring user credentials..."
 echo "========================================"
 
-credential_restore_failed=0
-for cred_file in passwd shadow group; do
-  src="/etc/cloud/${cred_file}_backup"
-  dest="/etc/$cred_file"
+if [ "$credential_backups_available" = true ]; then
+  credential_restore_failed=0
+  for cred_file in passwd shadow group; do
+    src="/etc/cloud/${cred_file}_backup"
+    dest="/etc/$cred_file"
 
-  if [ ! -f "$src" ]; then
-    log_status warning "$cred_file backup not found at $src"
-    ((credential_restore_failed++))
-    continue
-  fi
+    if [ ! -f "$src" ]; then
+      log_status warning "$cred_file backup not found at $src"
+      ((credential_restore_failed++))
+      continue
+    fi
 
-  # Verify source file is readable and non-empty
-  if [ ! -r "$src" ]; then
-    log_status error "$cred_file backup not readable: $src"
-    ((credential_restore_failed++))
-    continue
-  fi
+    # Verify source file is readable and non-empty
+    if [ ! -r "$src" ]; then
+      log_status error "$cred_file backup not readable: $src"
+      ((credential_restore_failed++))
+      continue
+    fi
 
-  src_size=$(stat -c%s "$src" 2>/dev/null || echo "0")
-  if [ "$src_size" -eq 0 ]; then
-    log_status error "$cred_file backup is empty (0 bytes)"
-    ((credential_restore_failed++))
-    continue
-  fi
+    src_size=$(stat -c%s "$src" 2>/dev/null || echo "0")
+    if [ "$src_size" -eq 0 ]; then
+      log_status error "$cred_file backup is empty (0 bytes)"
+      ((credential_restore_failed++))
+      continue
+    fi
 
-  # Backup existing file before overwriting and restore
-  [ -f "$dest" ] && cp "$dest" "${dest}.pre-update" 2>/dev/null
+    # Backup existing file before overwriting and restore
+    [ -f "$dest" ] && cp "$dest" "${dest}.pre-update" 2>/dev/null
 
-  # Restore with verification
-  if cp "$src" "$dest" 2>/dev/null && [ -f "$dest" ]; then
-    if dest_size=$(stat -c%s "$dest" 2>/dev/null) && [ "$dest_size" -eq "$src_size" ]; then
-      log_status success "$cred_file restored and verified ($dest_size bytes)"
+    # Restore with verification
+    if cp "$src" "$dest" 2>/dev/null && [ -f "$dest" ]; then
+      if dest_size=$(stat -c%s "$dest" 2>/dev/null) && [ "$dest_size" -eq "$src_size" ]; then
+        log_status success "$cred_file restored and verified ($dest_size bytes)"
+      else
+        log_status error "$cred_file size mismatch (expected: $src_size, got: ${dest_size:-unknown})"
+        ((credential_restore_failed++))
+      fi
     else
-      log_status error "$cred_file size mismatch (expected: $src_size, got: ${dest_size:-unknown})"
+      log_status error "Failed to restore $cred_file (check permissions)"
       ((credential_restore_failed++))
     fi
-  else
-    log_status error "Failed to restore $cred_file (check permissions)"
-    ((credential_restore_failed++))
-  fi
-done
+  done
 
-if [ $credential_restore_failed -gt 0 ]; then
-  echo "========================================"
-  echo "ERROR: Failed to restore $credential_restore_failed credential file(s)"
-  echo "System may be in an inconsistent state!"
-  echo "Manual intervention may be required."
-  echo "========================================"
+  if [ $credential_restore_failed -gt 0 ]; then
+    echo "========================================"
+    echo "ERROR: Failed to restore $credential_restore_failed credential file(s)"
+    echo "System may be in an inconsistent state!"
+    echo "Manual intervention may be required."
+    echo "========================================"
+  fi
+else
+  echo "Multi-upgrade mode: credential restore skipped"
+  log_status warning "Credential backups unavailable - skipping credential restore"
 fi
 
 # Read paths from the file
