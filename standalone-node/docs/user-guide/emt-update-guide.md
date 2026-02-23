@@ -20,9 +20,11 @@ Note #2: Updates are supported only with Edge Microvisor Toolkit(EMT) images, wh
 using the most recent EMT image versions. Users should regularly check for new EMT image releases to plan their
 updates, as reverting to older images is not supported.
 
-Note #3: The Edge Microvisor Toolkit allows updates solely within its specific image types, such as DV or non-RT.
-This means that systems initially set up with a particular EMT image type, like non-RT, can only be updated using
-images of the same type.
+Note #3: The Edge Microvisor Toolkit allows updates only within the same EMT image family: DV, RT, or NON_RT.
+This means DV → DV, RT → RT, and NON_RT → NON_RT updates are supported, while cross-family updates are blocked.
+
+Note #4: Image type validation is content-first. During update, the script inspects the mounted update image
+partition to detect type. Filename/path is only used as a fallback if content-based detection is unavailable.
 
 #### 1.1: Prepare the USB Drive
 
@@ -103,6 +105,10 @@ images of the same type.
   sudo ./os-update.sh -i /mnt/edge-readonly-3.0.20250718.0822.raw.gz -c /mnt/edge-readonly-3.0.20250718.0822.raw.gz.sha256sum
   ```
 
+- For `-c`, provide only a checksum file (`.sha256sum`).
+
+  > **Important:** Passing an image file (`.raw`, `.raw.gz`, `.img`, `.img.gz`) to `-c` is rejected.
+
 #### Step 2.2 URL Mode
 
 - Initiate the microvisor update by running the script with these options:
@@ -117,6 +123,56 @@ images of the same type.
   sudo ./os-update.sh -u https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/non_rt -r 3.0 -v 20250718.0822
   ```
 
+### Step 2.3 EMT Image Type Detection and Validation Flow
+
+Before applying the update, the script validates compatibility between the currently running EMT image and
+the new update image.
+
+Detection flow for the update image:
+
+1. Decompress update image and mount the update partition in read-only mode.
+2. Detect image type from image content (priority order):
+   - `/etc/image-id` in update image (`partition metadata`)
+   - DV markers (`/usr/bin/idv` or DV launcher in image)
+   - kernel release metadata (`/lib/modules/...`)
+   - kernel config (`/boot/config-*`)
+3. If still not detected, fallback to path/filename parsing.
+
+The script prints these lines during validation:
+
+```text
+Current EMT type: <DV|RT|NON_RT|UNKNOWN>
+Image type: <DV|RT|NON_RT|UNKNOWN>
+Image type source: <source>
+```
+
+`Image type source` values:
+
+- `partition metadata`, `partition dv marker`, `partition dv launcher`, `kernel release`, `kernel config`:
+  content-derived detection (preferred).
+- `path`, `filename`:
+  fallback detection when content-based signals are unavailable.
+
+Mismatch behavior:
+
+```text
+Error: <current_type> EMT detected, but <image_type> image provided.
+Please provide a <current_type> upgrade version instead.
+```
+
+Example:
+
+- Current EMT type: DV
+- Image type: RT
+- Image type source: kernel config
+- Result: update blocked due to family mismatch.
+
+Rename test behavior:
+
+- If a DV image file is renamed to look like RT/NON_RT, content-based detection still classifies it as DV when
+  metadata/markers are present in the image.
+- Filename/path naming affects result only when content-based detection cannot determine the type.
+
 ### Automatic Reboot
 
 - Once the update has completed, the EMT provisioned node will automatically reboot into the updated EMT image.
@@ -125,6 +181,19 @@ images of the same type.
   
   ```bash
   sudo bootctl list
+  ```
+
+### Multi-upgrade Behavior and Commit Script Handling
+
+- `commit_update.sh` is recreated on each update run so the latest logic is always used.
+- Installer hook insertion is idempotent:
+  if the `commit_update.sh` entry already exists in `installer.cfg`, it is reused and not duplicated.
+- In repeated upgrades, if credential backup files are not available at commit time, the script logs warnings and
+  skips credential restore for that boot instead of hard-failing the full commit flow.
+- Commit stage logs are written to:
+
+  ```text
+  /var/log/os-update-commit.log
   ```
 
 ### Review the specifics of the updated image
