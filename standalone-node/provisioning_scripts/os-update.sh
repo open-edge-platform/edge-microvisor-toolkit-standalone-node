@@ -16,20 +16,24 @@ extract_write_files_paths() {
   local paths=()
 
   while IFS= read -r line; do
-    [[ "$line" =~ ^write_files: ]] && { in_section=true; continue; }
+    [[ "$line" =~ ^write_files: ]] && {
+      in_section=true
+      continue
+    }
 
     if $in_section; then
       [[ "$line" =~ path:\ (\/[^ ]+) ]] && paths+=("${BASH_REMATCH[1]}")
       [[ "$line" =~ ^[^[:space:]] ]] && in_section=false
     fi
-  done < "$config_file"
+  done <"$config_file"
+
   echo "${paths[@]}"
 }
 
 # Function to convert date string to seconds since epoch
 convert_to_epoch() {
-    local date_string="$1"
-    date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
+  local date_string="$1"
+  date -d "${date_string:0:8} ${date_string:8:2}:${date_string:10:2}:${date_string:12:2}" +%s
 }
 
 # Detection state holders for image type and source
@@ -42,9 +46,9 @@ detect_emt_type_from_string() {
   input_string=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
   case "$input_string" in
-    *edge-readonly-dv-*|*/dv/*|*-dv-*|*_dv_*) echo "DV" ;;
-    *edge-readonly-rt-*|*/rt/*|*-rt-*) echo "RT" ;;
-    *edge-readonly-*|*/non-rt/*|*/non_rt/*|*non-rt*|*non_rt*) echo "NON_RT" ;;
+    *edge-readonly-dv-* | */dv/* | *-dv-* | *_dv_*) echo "DV" ;;
+    *edge-readonly-rt-* | */rt/* | *-rt-*) echo "RT" ;;
+    *edge-readonly-* | */non-rt/* | */non_rt/* | *non-rt* | *non_rt*) echo "NON_RT" ;;
     *) echo "UNKNOWN" ;;
   esac
 }
@@ -166,7 +170,7 @@ detect_image_type() {
 
     if [ "$detected_type" != "UNKNOWN" ]; then
       case "$lowered_path" in
-        */dv/*|*/rt/*|*/non-rt/*|*/non_rt*) detection_source="path" ;;
+        */dv/* | */rt/* | */non-rt/* | */non_rt*) detection_source="path" ;;
         *) detection_source="filename" ;;
       esac
     fi
@@ -178,61 +182,58 @@ detect_image_type() {
 
 # validate RT/NON_RT/DV compatibility
 validate_emt_compatibility() {
-    local image_path="$1"
-    local image_partition="${2:-}"
-    local current_emt_type
-    local image_type
+  local image_path="$1"
+  local image_partition="${2:-}"
+  local current_emt_type
+  local image_type
   local image_type_source
 
-    current_emt_type=$(detect_current_emt_type)
+  current_emt_type=$(detect_current_emt_type)
   detect_image_type "$image_path" "$image_partition"
   image_type="$DETECTED_IMAGE_TYPE"
   image_type_source="$IMAGE_TYPE_SOURCE"
 
-    echo "Current EMT type: $current_emt_type"
-    echo "Image type: $image_type"
+  echo "Current EMT type: $current_emt_type"
+  echo "Image type: $image_type"
   echo "Image type source: $image_type_source"
 
-    # Check if types are known
-    if [ "$current_emt_type" = "UNKNOWN" ]; then
-        echo "Warning: Unable to determine current EMT type from uname output: $(uname -a)"
-      echo "Proceeding with update without EMT type validation..."
-        return 0
-    fi
+  # Check if types are known
+  if [ "$current_emt_type" = "UNKNOWN" ]; then
+    echo "Error: Unable to determine current EMT type from uname output: $(uname -a)"
+    echo "Update blocked: current EMT type must be determinable (DV/RT/NON_RT)."
+    return 1
+  fi
 
-    if [ "$image_type" = "UNKNOWN" ]; then
-        echo "Warning: Unable to determine EMT type from image metadata or filename: $(basename "$image_path")"
-      echo "Proceeding with update without EMT type validation..."
-        return 0
-    fi
+  if [ "$image_type" = "UNKNOWN" ]; then
+    echo "Error: Unable to determine EMT type from image metadata/path/filename: $(basename "$image_path")"
+    echo "Update blocked: upgrade image type must be determinable (DV/RT/NON_RT)."
+    return 1
+  fi
 
-    # Validate compatibility
-    if [ "$current_emt_type" != "$image_type" ]; then
-        echo "Error: $current_emt_type EMT detected, but $image_type image provided."
-        echo "Please provide a $current_emt_type upgrade version instead."
-        echo "Current EMT: $(uname -a)"
-      return 1
-    fi
+  # Validate compatibility
+  if [ "$current_emt_type" != "$image_type" ]; then
+    echo "Error: $current_emt_type EMT detected, but $image_type image provided."
+    echo "Please provide a $current_emt_type upgrade version instead."
+    echo "Current EMT: $(uname -a)"
+    return 1
+  fi
 
-    echo "EMT compatibility validated: $current_emt_type EMT with $image_type image"
-    return 0
+  echo "EMT compatibility validated: $current_emt_type EMT with $image_type image"
+  return 0
 }
-
-# Specify the configuration file
-config_file="/etc/cloud/config-file"
-
-# Validate configuration file exists
-[[ ! -f "$config_file" ]] && { echo "Configuration file not found: $config_file"; exit 1; }
 
 # Function to check the last command's exit status
 check_success() {
-    [ "$?" -ne 0 ] && { echo "Error: $1 failed."; exit 1; }
+  [ "$?" -ne 0 ] && {
+    echo "Error: $1 failed."
+    exit 1
+  }
 }
 
 # Function to exit with an error message
 error_exit() {
-    echo "Error: $1"
-    exit 1
+  echo "Error: $1"
+  exit 1
 }
 
 # Extract SHA256 checksum safely from checksum file
@@ -259,135 +260,130 @@ extract_sha256_checksum() {
 
 # Function for consistent status logging
 log_status() {
-    local status="$1"
-    local message="$2"
-    case "$status" in
-        success) echo "  ✓ $message" ;;
-        error) echo "  ✗ $message" ;;
-        warning) echo "  ⚠ $message" ;;
-        info) echo "  • $message" ;;
-        skip) echo "  ⊘ $message" ;;
-    esac
+  local status="$1"
+  local message="$2"
+  case "$status" in
+    success) echo "  ✓ $message" ;;
+    error) echo "  ✗ $message" ;;
+    warning) echo "  ⚠ $message" ;;
+    info) echo "  • $message" ;;
+    skip) echo "  ⊘ $message" ;;
+  esac
 }
+
+# Print a section banner
+print_section() {
+  echo "========================================"
+  [ -n "$1" ] && echo "$1"
+  echo "========================================"
+}
+
+# Credential files managed during backup/restore
+CREDENTIAL_FILES=(passwd shadow group)
 
 # Function to backup a single file
 backup_file() {
-    local src="$1"
-    local dest="$2"
-    local desc="${3:-$(basename "$src")}"
+  local src="$1"
+  local dest="$2"
+  local desc="${3:-$(basename "$src")}"
 
-    if [ ! -f "$src" ]; then
-        log_status warning "$desc not found, skipping"
-        return 1
-    fi
+  if [ ! -f "$src" ]; then
+    log_status warning "$desc not found, skipping"
+    return 1
+  fi
 
-    if cp -f "$src" "$dest"; then
-        log_status success "$desc backed up"
-        return 0
-    else
-        log_status error "Failed to backup $desc"
-        return 1
-    fi
+  if cp -f "$src" "$dest"; then
+    log_status success "$desc backed up"
+    return 0
+  else
+    log_status error "Failed to backup $desc"
+    return 1
+  fi
 }
 
-# Function to restore a single file
-restore_file() {
-    local src="$1"
-    local dest="$2"
-    local desc="${3:-$(basename "$dest")}"
-
-    if [ ! -f "$src" ]; then
-        log_status error "Backup file $desc not found"
-        return 1
-    fi
-
-    if cp "$src" "$dest"; then
-        log_status success "$desc restored"
-        return 0
-    else
-        log_status error "Failed to restore $desc"
-        return 1
-    fi
-}
-
-# Function to perform before update 
+# Function to perform before update
 perform_update_check() {
-    local image_path="$1"
-    local loopdevice
+  local image_path="$1"
+  local loopdevice
+  local mounted_check=false
 
-    # Mandatory checks before the update
-    # Decompress the image
-    gunzip -c "$image_path" > /etc/cloud/update.raw
-
-    # Set up the loop device with the decompressed image
-    loopdevice=$(losetup --find --partscan --show /etc/cloud/update.raw)
-
-    # Validate EMT compatibility using actual image content
-    if ! validate_emt_compatibility "$image_path" "$loopdevice"p2; then
-      losetup -d "$loopdevice" 2>/dev/null
-      rm -f /etc/cloud/update.raw
-      exit 1
+  cleanup_update_check() {
+    if $mounted_check; then
+      umount /mnt 2>/dev/null
     fi
+    [ -n "$loopdevice" ] && losetup -d "$loopdevice" 2>/dev/null
+    rm -f /etc/cloud/input.txt /etc/cloud/update.raw
+  }
 
-    # Extract UUID from the loop device partition
-    local uuid
-    uuid=$(lsblk -no UUID "$loopdevice"p2)
+  trap cleanup_update_check EXIT
 
-    # Get boot UUID from bootctl list
-    bootctl list | grep -E 'default|boot_uuid' > /etc/cloud/input.txt
-    local boot_uuid
-    boot_uuid=$(awk '/\(default\)/ {getline; if ($0 ~ /options/) {match($0, /boot_uuid=([a-f0-9-]+)/, arr); print arr[1]; exit}}' /etc/cloud/input.txt)
+  # Mandatory checks before the update
+  # Decompress the image
+  gunzip -c "$image_path" >/etc/cloud/update.raw
 
-    # Clean up temporary files
-    rm -rf /etc/cloud/input.txt /etc/cloud/update.raw
+  # Set up the loop device with the decompressed image
+  loopdevice=$(losetup --find --partscan --show /etc/cloud/update.raw)
 
-    # Check #1 Compare UUIDs
-    if [ "$uuid" = "$boot_uuid" ]; then
-        echo "UUID of update image and provisioned image are the same"
-        losetup -d "$loopdevice"
-        exit 1
-    fi
+  # Validate EMT compatibility using actual image content
+  if ! validate_emt_compatibility "$image_path" "${loopdevice}p2"; then
+    exit 1
+  fi
 
-    # Check #2 Upgrades only with future dates
-    # Convert both dates to seconds since epoch
-    mount "$loopdevice"p2 /mnt
-    IMAGE_BUILD_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /etc/image-id)
-    FUTURE_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /mnt/etc/image-id)
-    image_build_epoch=$(convert_to_epoch "$IMAGE_BUILD_DATE")
-    upgrade_image_date_epoch=$(convert_to_epoch "$FUTURE_DATE")
-    umount /mnt
+  # Extract UUID from the loop device partition
+  local uuid
+  uuid=$(lsblk -no UUID "${loopdevice}p2")
 
-    if [ "$upgrade_image_date_epoch" -lt "$image_build_epoch" ]; then
-       echo "Downgrades are not supported. Only upgrades with images having a future build date are allowed."
-       losetup -d "$loopdevice"
-       exit 1 
-    else
-       echo "The image build date is on or after the future date."
-    fi
+  # Get boot UUID from bootctl list
+  bootctl list | grep -E 'default|boot_uuid' >/etc/cloud/input.txt
+  local boot_uuid
+  boot_uuid=$(awk '/\(default\)/ {getline; if ($0 ~ /options/) {match($0, /boot_uuid=([a-f0-9-]+)/, arr); print arr[1]; exit}}' /etc/cloud/input.txt)
 
-    # Detach the loop device
-    losetup -d "$loopdevice"
+  # Check #1 Compare UUIDs
+  if [ "$uuid" = "$boot_uuid" ]; then
+    echo "UUID of update image and provisioned image are the same"
+    exit 1
+  fi
+
+  # Check #2 Upgrades only with future dates
+  # Convert both dates to seconds since epoch
+  mount "${loopdevice}p2" /mnt
+  mounted_check=true
+  IMAGE_BUILD_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /etc/image-id)
+  FUTURE_DATE=$(sed -n 's/^IMAGE_BUILD_DATE=//p' /mnt/etc/image-id)
+  image_build_epoch=$(convert_to_epoch "$IMAGE_BUILD_DATE")
+  upgrade_image_date_epoch=$(convert_to_epoch "$FUTURE_DATE")
+  umount /mnt
+  mounted_check=false
+
+  if [ "$upgrade_image_date_epoch" -le "$image_build_epoch" ]; then
+    echo "Downgrades and same-build updates are not supported. Only strictly newer images are allowed."
+    exit 1
+  else
+    echo "The upgrade image build date is strictly newer than the provisioned image."
+  fi
+
+  trap - EXIT
+  cleanup_update_check
 }
-
 
 # Function to display usage information
 show_help() {
-    echo "Usage: $0 [options]"
-    echo "Options:"
-    echo "  -u <URL>       URL to Microvisor image base"
-    echo "  -r <release>   Release version"
-    echo "  -v <version>   Build version"
-    echo "  -i <image>     Direct path to Microvisor image"
-    echo "  -c <checksum>  Path to checksum file"
-    echo "  -o             OXM mode"
-    echo "  -h             Display this help message"
-    exit 0
+  echo "Usage: $0 [options]"
+  echo "Options:"
+  echo "  -u <URL>       URL to Microvisor image base"
+  echo "  -r <release>   Release version"
+  echo "  -v <version>   Build version"
+  echo "  -i <image>     Direct path to Microvisor image"
+  echo "  -c <checksum>  Path to checksum file"
+  echo "  -o             OXM mode"
+  echo "  -h             Display this help message"
+  exit 0
 }
 
 # Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
-    echo "This script must be run as root."
-    exit 1
+  echo "This script must be run as root."
+  exit 1
 fi
 
 # Temporary directory for downloads
@@ -405,93 +401,109 @@ IMAGE_PATH=""
 SHA_FILE=""
 
 while getopts ":u:r:v:i:c:oh" opt; do
-    case $opt in
-        u)
-            URL_MODE=true
-            IMAGE_BASE_URL="$OPTARG"
-            ;;
-        r)
-            IMG_VER="$OPTARG"
-            ;;
-        v)
-            IMAGE_BUILD="$OPTARG"
-            ;;
-        i)
-            IMAGE_PATH="$OPTARG"
-            ;;
-        c)
-            SHA_FILE="$OPTARG"
-            ;;
-        o)
-            OXM_MODE=true
-            ;;
-        h)
-            show_help
-            ;;
-        \?)
-            error_exit "Invalid option: -$OPTARG"
-            ;;
-        :)
-            error_exit "Option -$OPTARG requires an argument."
-            ;;
-    esac
+  case $opt in
+    u)
+      URL_MODE=true
+      IMAGE_BASE_URL="$OPTARG"
+      ;;
+    r)
+      IMG_VER="$OPTARG"
+      ;;
+    v)
+      IMAGE_BUILD="$OPTARG"
+      ;;
+    i)
+      IMAGE_PATH="$OPTARG"
+      ;;
+    c)
+      SHA_FILE="$OPTARG"
+      ;;
+    o)
+      OXM_MODE=true
+      ;;
+    h)
+      show_help
+      ;;
+    \?)
+      error_exit "Invalid option: -$OPTARG"
+      ;;
+    :)
+      error_exit "Option -$OPTARG requires an argument."
+      ;;
+  esac
 done
 
 # Specify the configuration file based on mode
-config_file=$( $OXM_MODE && echo "/etc/cloud/cloud.cfg.d/99_infra.cfg" || echo "/etc/cloud/config-file" )
+config_file=$($OXM_MODE && echo "/etc/cloud/cloud.cfg.d/99_infra.cfg" || echo "/etc/cloud/config-file")
 
 # Validate configuration file exists
-[[ ! -f "$config_file" ]] && { echo "Configuration file not found: $config_file"; exit 1; }
+[[ ! -f "$config_file" ]] && {
+  echo "Configuration file not found: $config_file"
+  exit 1
+}
+
+# Validate configured user before preparing update (non-OXM mode)
+if [ "$OXM_MODE" = false ]; then
+  configured_user=$(grep '^user_name=' "$config_file" 2>/dev/null | cut -d '=' -f2 | tr -d '"')
+  [ -z "$configured_user" ] && error_exit "user_name not found in $config_file. Cannot proceed with update."
+  id "$configured_user" >/dev/null 2>&1 || error_exit "Configured user '$configured_user' does not exist. Cannot proceed with update."
+  log_status success "Pre-update user validation passed for '$configured_user'"
+else
+  log_status info "OXM mode: skipping pre-update user validation"
+fi
 
 # URL mode
 if $URL_MODE; then
-    # Validate required arguments
-    [ -z "$IMAGE_BASE_URL" ] || [ -z "$IMG_VER" ] || [ -z "$IMAGE_BUILD" ] && \
-        error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> -r <release> -v <build_version>"
+  # Validate required arguments
+  [ -z "$IMAGE_BASE_URL" ] || [ -z "$IMG_VER" ] || [ -z "$IMAGE_BUILD" ] &&
+    error_exit "Usage: $0 -u <URL_to_Microvisor_image_base> -r <release> -v <build_version>"
 
-    # Check the domain and construct the IMAGE_URL
-    case "$IMAGE_BASE_URL" in
-        *files-rs.edgeorchestration.intel.com*)
-            IMAGE_URL="${IMAGE_BASE_URL}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz" ;;
-        *af01p-png.devtools.intel.com*)
-            IMAGE_URL="${IMAGE_BASE_URL}/${IMG_VER}/${IMAGE_BUILD}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz" ;;
-        *)
-            error_exit "Unsupported domain in URL: $IMAGE_BASE_URL" ;;
-    esac
+  # Check the domain and construct the IMAGE_URL
+  case "$IMAGE_BASE_URL" in
+    *files-rs.edgeorchestration.intel.com*)
+      IMAGE_URL="${IMAGE_BASE_URL}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
+      ;;
+    *af01p-png.devtools.intel.com*)
+      IMAGE_URL="${IMAGE_BASE_URL}/${IMG_VER}/${IMAGE_BUILD}/edge-readonly-${IMG_VER}.${IMAGE_BUILD}-signed.raw.gz"
+      ;;
+    *)
+      error_exit "Unsupported domain in URL: $IMAGE_BASE_URL"
+      ;;
+  esac
 
-    echo "Constructed IMAGE URL: $IMAGE_URL"
+  echo "Constructed IMAGE URL: $IMAGE_URL"
 
-    # Download the Microvisor image
-    IMAGE_PATH="$TEMP_DIR/edge_microvisor_toolkit.raw.gz"
-    echo "Downloading microvisor image from $IMAGE_URL..."
-    curl -k "$IMAGE_URL" -o "$IMAGE_PATH" || error_exit "Failed to download microvisor image"
+  # Download the Microvisor image
+  IMAGE_PATH="$TEMP_DIR/edge_microvisor_toolkit.raw.gz"
+  echo "Downloading microvisor image from $IMAGE_URL..."
+  curl -k "$IMAGE_URL" -o "$IMAGE_PATH" || error_exit "Failed to download microvisor image"
 
-    # Download the SHA256 checksum file
-    SHA_FILE="$TEMP_DIR/edge_microvisor_readonly.sha256sum"
-    SHA_URL="${IMAGE_URL}.sha256sum"
-    echo "Downloading SHA256 checksum from $SHA_URL..."
-    curl -k "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
+  # Download the SHA256 checksum file
+  SHA_FILE="$TEMP_DIR/edge_microvisor_readonly.sha256sum"
+  SHA_URL="${IMAGE_URL}.sha256sum"
+  echo "Downloading SHA256 checksum from $SHA_URL..."
+  curl -k "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
 
-    # Extract the SHA256 checksum
-    SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
-    echo "Extracted SHA256 checksum: $SHA_ID"
+  # Extract the SHA256 checksum
+  SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
+  echo "Extracted SHA256 checksum: $SHA_ID"
 else
-    # Direct path mode - validate required arguments
-    [ -z "$IMAGE_PATH" ] || [ -z "$SHA_FILE" ] && error_exit "Usage: $0 -i <Direct_path_to_Microvisor_image> -c <Checksum_file>"
+  # Direct path mode - validate required arguments
+  [ -z "$IMAGE_PATH" ] || [ -z "$SHA_FILE" ] && error_exit "Usage: $0 -i <Direct_path_to_Microvisor_image> -c <Checksum_file>"
 
-    # Verify that the files exist
-    [ ! -f "$IMAGE_PATH" ] && error_exit "Microvisor image file not found at $IMAGE_PATH"
-    [ ! -f "$SHA_FILE" ] && error_exit "SHA256 checksum file not found at $SHA_FILE"
+  # Verify that the files exist
+  [ ! -f "$IMAGE_PATH" ] && error_exit "Microvisor image file not found at $IMAGE_PATH"
+  [ ! -f "$SHA_FILE" ] && error_exit "SHA256 checksum file not found at $SHA_FILE"
 
-    case "$SHA_FILE" in
-      *.raw|*.raw.gz|*.img|*.img.gz)
-        error_exit "Checksum file appears to be an image: $SHA_FILE. Please provide a .sha256sum file with -c."
-        ;;
-    esac
+  case "$SHA_FILE" in
+    *.raw | *.raw.gz | *.img | *.img.gz)
+      error_exit "Checksum file appears to be an image: $SHA_FILE. Please provide a .sha256sum file with -c."
+      ;;
+  esac
 
-    # Extract the SHA256 checksum
-    SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
-    echo "Extracted SHA256 checksum: $SHA_ID"
+  # Extract the SHA256 checksum
+  SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
+  echo "Extracted SHA256 checksum: $SHA_ID"
 fi
 
 # Call the function with the path to the image
@@ -512,12 +524,10 @@ TMP_DIR="/etc/cloud"
 COMMIT_UPDATE_SCRIPT="$TMP_DIR/commit_update.sh"
 
 # Backup user credentials with error handling
-echo "========================================="
-echo "Backing up user credentials..."
-echo "========================================="
+print_section "Backing up user credentials..."
 
 credential_backup_failed=0
-for cred_file in passwd shadow group; do
+for cred_file in "${CREDENTIAL_FILES[@]}"; do
   if ! backup_file "/etc/$cred_file" "/etc/cloud/${cred_file}_backup" "$cred_file"; then
     ((credential_backup_failed++))
   fi
@@ -528,30 +538,28 @@ if [ "$credential_backup_failed" -gt 0 ]; then
 fi
 
 echo "User credentials backed up successfully."
-echo "========================================="
+print_section
 
 # Extract paths under write_files and store them in a list
-echo "========================================"
-echo "Starting Backup Process"
-echo "========================================"
+print_section "Starting Backup Process"
 
 if paths_list=$(extract_write_files_paths "$config_file"); then
-    if [ -z "$paths_list" ]; then
-        echo "WARNING: No paths extracted from config file"
+  if [ -z "$paths_list" ]; then
+    echo "WARNING: No paths extracted from config file"
+  else
+    if path_count=$(echo "$paths_list" | wc -w); then
+      echo "Extracted $path_count paths from config file"
     else
-        if path_count=$(echo "$paths_list" | wc -w); then
-            echo "Extracted $path_count paths from config file"
-        else
-            echo "WARNING: Could not count extracted paths"
-        fi
+      echo "WARNING: Could not count extracted paths"
     fi
+  fi
 else
-    error_exit "Failed to extract paths from config file: $config_file"
+  error_exit "Failed to extract paths from config file: $config_file"
 fi
 
 # Create backup directory with error handling
 if ! mkdir -p /etc/cloud/backup; then
-    error_exit "Failed to create backup directory /etc/cloud/backup"
+  error_exit "Failed to create backup directory /etc/cloud/backup"
 fi
 
 paths_file="/etc/cloud/backup/paths_list.txt"
@@ -561,7 +569,10 @@ backup_fail_count=0
 # Backup files from write_files section
 echo "Backing up files from write_files section..."
 for path in $paths_list; do
-  [ ! -e "$path" ] && { log_status skip "$(basename "$path") - not found"; continue; }
+  [ ! -e "$path" ] && {
+    log_status skip "$(basename "$path") - not found"
+    continue
+  }
 
   echo "  Backing up: $path"
   if cp -rf "$path" "/etc/cloud/backup/"; then
@@ -596,15 +607,15 @@ done
 
 # Save paths to a file with error handling
 echo "----------------------------------------"
-if echo "$paths_list" > "$paths_file" 2>/dev/null; then
-    if [ -f "$paths_file" ]; then
-        file_size=$(stat -c%s "$paths_file" 2>/dev/null || echo "0")
-        echo "✓ Paths list saved to $paths_file (size: $file_size bytes)"
-    else
-        error_exit "Paths file created but cannot be verified: $paths_file"
-    fi
+if echo "$paths_list" >"$paths_file" 2>/dev/null; then
+  if [ -f "$paths_file" ]; then
+    file_size=$(stat -c%s "$paths_file" 2>/dev/null || echo "0")
+    echo "✓ Paths list saved to $paths_file (size: $file_size bytes)"
+  else
+    error_exit "Paths file created but cannot be verified: $paths_file"
+  fi
 else
-    error_exit "Failed to save paths list to $paths_file (check disk space and permissions)"
+  error_exit "Failed to save paths list to $paths_file (check disk space and permissions)"
 fi
 
 # Verify backup directory and files
@@ -619,14 +630,13 @@ echo "========================================"
 
 # Exit if critical backups failed
 if [ "$backup_fail_count" -gt 0 ]; then
-    echo "WARNING: $backup_fail_count files failed to backup"
-    echo "Review errors above. Continuing with update, but some files may not be restored."
+  echo "WARNING: $backup_fail_count files failed to backup"
+  echo "Review errors above. Continuing with update, but some files may not be restored."
 fi
 
 # Always recreate commit_update.sh to ensure latest logic is used
-echo "========================================="
-echo "Creating commit_update.sh script..."
-if cat << 'EOF' > "$COMMIT_UPDATE_SCRIPT"
+print_section "Creating commit_update.sh script..."
+if cat <<'EOF' >"$COMMIT_UPDATE_SCRIPT"; then
 #!/bin/bash
 
 # Log file for debugging
@@ -639,23 +649,52 @@ echo "========================================"
 
 # Helper function for consistent status logging
 log_status() {
-    local status="$1" message="$2"
-    case "$status" in
-        success) echo "  ✓ $message" ;;
-        error) echo "  ✗ $message" ;;
-        warning) echo "  ⚠ $message" ;;
-        skip) echo "  ⊘ $message" ;;
-    esac
+  local status="$1" message="$2"
+  case "$status" in
+    success) echo "  ✓ $message" ;;
+    error) echo "  ✗ $message" ;;
+    warning) echo "  ⚠ $message" ;;
+    info) echo "  • $message" ;;
+    skip) echo "  ⊘ $message" ;;
+  esac
 }
 
+# Print a section banner
+print_section() {
+  echo "========================================"
+  [ -n "$1" ] && echo "$1"
+  echo "========================================"
+}
+
+# Credential files managed during backup/restore
+CREDENTIAL_FILES=(passwd shadow group)
+
+# Determine if an A/B upgrade commit is pending
+# NOTE: Credential/file restoration and user configuration must run on EVERY boot
+# because the read-only rootfs uses an ephemeral overlay — changes to /etc/passwd,
+# /etc/shadow, /etc/group do NOT persist across reboots.
+# Only the os-update-tool.sh -c commit step is gated by upgrade_pending.
+upgrade_pending=false
+if [ -f "/etc/cloud/upgrade_status" ]; then
+  if upgrade_status=$(cat "/etc/cloud/upgrade_status" 2>/dev/null); then
+    if [ "$upgrade_status" = "true" ]; then
+      upgrade_pending=true
+      log_status info "Pending upgrade detected (upgrade_status=true); will commit after restore"
+    else
+      log_status info "upgrade_status='$upgrade_status' - no pending upgrade commit"
+    fi
+  else
+    log_status warning "Unable to read upgrade_status file"
+  fi
+else
+  log_status info "upgrade_status file not found - no pending upgrade commit"
+fi
+
 # Validate required backup files exist
-echo "========================================"
-echo "Validating Backup Files"
-echo "========================================"
+print_section "Validating Backup Files"
 
 missing_backups=0
-credential_backups_available=true
-for required_file in passwd_backup shadow_backup; do
+for required_file in "${CREDENTIAL_FILES[@]/%/_backup}"; do
   backup_path="/etc/cloud/$required_file"
   if [ ! -e "$backup_path" ]; then
     log_status error "$required_file not found at $backup_path"
@@ -668,89 +707,108 @@ for required_file in passwd_backup shadow_backup; do
   fi
 done
 
+has_credential_backups=true
 if [ $missing_backups -gt 0 ]; then
+  has_credential_backups=false
   echo "========================================"
-  echo "WARNING: $missing_backups required backup file(s) missing or invalid"
+  echo "WARNING: $missing_backups credential backup file(s) missing or invalid"
   echo "Expected backup files:"
   echo "  - /etc/cloud/passwd_backup"
   echo "  - /etc/cloud/shadow_backup"
-  echo "Continuing without credential restore for this boot."
-  echo "========================================"
-  credential_backups_available=false
-fi
-
-if [ "$credential_backups_available" = true ]; then
+  echo "  - /etc/cloud/group_backup"
+  if [ "$upgrade_pending" = true ]; then
+    echo "CRITICAL: Credential backups required for pending upgrade commit."
+    echo "========================================"
+    exit 1
+  else
+    echo "No pending upgrade - skipping credential restore."
+    echo "========================================"
+  fi
+else
   log_status success "All required backup files validated"
 fi
 echo "========================================"
 
-# Restore user credentials
-echo "========================================"
-echo "Restoring user credentials..."
-echo "========================================"
+# Restore user credentials (runs on every boot if backups exist)
+print_section "Restoring user credentials..."
 
-if [ "$credential_backups_available" = true ]; then
-  credential_restore_failed=0
-  for cred_file in passwd shadow group; do
-    src="/etc/cloud/${cred_file}_backup"
-    dest="/etc/$cred_file"
+credential_restore_failed=0
 
-    if [ ! -f "$src" ]; then
-      log_status warning "$cred_file backup not found at $src"
-      ((credential_restore_failed++))
-      continue
-    fi
+if [ "$has_credential_backups" = false ]; then
+  log_status skip "No credential backups available - skipping restore"
+else
 
-    # Verify source file is readable and non-empty
-    if [ ! -r "$src" ]; then
-      log_status error "$cred_file backup not readable: $src"
-      ((credential_restore_failed++))
-      continue
-    fi
+for cred_file in "${CREDENTIAL_FILES[@]}"; do
+  src="/etc/cloud/${cred_file}_backup"
+  dest="/etc/$cred_file"
 
-    src_size=$(stat -c%s "$src" 2>/dev/null || echo "0")
-    if [ "$src_size" -eq 0 ]; then
-      log_status error "$cred_file backup is empty (0 bytes)"
-      ((credential_restore_failed++))
-      continue
-    fi
+  if [ ! -f "$src" ]; then
+    log_status warning "$cred_file backup not found at $src"
+    ((credential_restore_failed++))
+    continue
+  fi
 
-    # Backup existing file before overwriting and restore
-    [ -f "$dest" ] && cp "$dest" "${dest}.pre-update" 2>/dev/null
+  # Verify source file is readable and non-empty
+  if [ ! -r "$src" ]; then
+    log_status error "$cred_file backup not readable: $src"
+    ((credential_restore_failed++))
+    continue
+  fi
 
-    # Restore with verification
-    if cp "$src" "$dest" 2>/dev/null && [ -f "$dest" ]; then
-      if dest_size=$(stat -c%s "$dest" 2>/dev/null) && [ "$dest_size" -eq "$src_size" ]; then
-        log_status success "$cred_file restored and verified ($dest_size bytes)"
-      else
-        log_status error "$cred_file size mismatch (expected: $src_size, got: ${dest_size:-unknown})"
-        ((credential_restore_failed++))
-      fi
+  src_size=$(stat -c%s "$src" 2>/dev/null || echo "0")
+  if [ "$src_size" -eq 0 ]; then
+    log_status error "$cred_file backup is empty (0 bytes)"
+    ((credential_restore_failed++))
+    continue
+  fi
+
+  # Backup existing file before overwriting and restore
+  [ -f "$dest" ] && cp "$dest" "${dest}.pre-update" 2>/dev/null
+
+  # Restore with verification
+  if cp "$src" "$dest" 2>/dev/null && [ -f "$dest" ]; then
+    if dest_size=$(stat -c%s "$dest" 2>/dev/null) && [ "$dest_size" -eq "$src_size" ]; then
+      log_status success "$cred_file restored and verified ($dest_size bytes)"
     else
-      log_status error "Failed to restore $cred_file (check permissions)"
+      log_status error "$cred_file size mismatch (expected: $src_size, got: ${dest_size:-unknown})"
       ((credential_restore_failed++))
     fi
-  done
+  else
+    log_status error "Failed to restore $cred_file (check permissions)"
+    ((credential_restore_failed++))
+  fi
+done
 
-  if [ $credential_restore_failed -gt 0 ]; then
+if [ $credential_restore_failed -gt 0 ]; then
+  echo "========================================"
+  echo "WARNING: Failed to restore $credential_restore_failed credential file(s)"
+  if [ "$upgrade_pending" = true ]; then
+    echo "CRITICAL: Credential restore required for pending upgrade commit."
+    echo "Commit workflow aborted to avoid inconsistent user state."
+    echo "Manual intervention required."
     echo "========================================"
-    echo "ERROR: Failed to restore $credential_restore_failed credential file(s)"
-    echo "System may be in an inconsistent state!"
-    echo "Manual intervention may be required."
+    exit 1
+  else
+    echo "No pending upgrade - continuing despite restore failures."
     echo "========================================"
   fi
-else
-  echo "Multi-upgrade mode: credential restore skipped"
-  log_status warning "Credential backups unavailable - skipping credential restore"
 fi
 
-# Read paths from the file
+fi  # end of has_credential_backups else block
+
+# Restore config files (runs on every boot if backup exists)
 if [ ! -f "/etc/cloud/backup/paths_list.txt" ]; then
   echo "========================================"
-  echo "ERROR: paths_list.txt not found at /etc/cloud/backup/paths_list.txt"
-  echo "File restoration cannot proceed without paths list."
-  echo "This may indicate a backup failure during update preparation."
-  echo "========================================"
+  if [ "$upgrade_pending" = true ]; then
+    echo "CRITICAL ERROR: paths_list.txt not found at /etc/cloud/backup/paths_list.txt"
+    echo "File restoration cannot proceed without paths list."
+    echo "This may indicate a backup failure during update preparation."
+    echo "========================================"
+    exit 1
+  else
+    log_status info "paths_list.txt not found - no config files to restore (normal on non-upgrade boot)"
+    echo "========================================"
+  fi
 else
   echo "========================================"
   echo "Starting File Restoration"
@@ -834,70 +892,52 @@ else
   fi
 fi
 
-# Cleanup backup directory and credential files
-echo "========================================"
-echo "Cleaning up backup directory..."
-
-if [ -d "/etc/cloud/backup" ]; then
-  if backup_files=$(ls -A /etc/cloud/backup 2>/dev/null | wc -l); then
-    echo "Removing $backup_files files/directories from /etc/cloud/backup"
-  fi
-
-  if rm -rf /etc/cloud/backup 2>/dev/null; then
-    log_status success "Backup directory cleaned"
-  else
-    log_status warning "Failed to remove backup directory (non-critical)"
-  fi
-else
-  log_status info "Backup directory does not exist - nothing to clean"
-fi
-
-# Cleanup temporary credential backup files
-echo "Removing temporary credential backups..."
-for cred_file in passwd shadow group; do
-  file="/etc/cloud/${cred_file}_backup"
-  if [ -f "$file" ]; then
-    if rm -f "$file" 2>/dev/null; then
-      log_status success "Removed: $(basename $file)"
-    else
-      log_status warning "Failed to remove $(basename $file) (non-critical)"
-    fi
-  fi
-done
-echo "========================================"
+# Do not delete backup directory or credential backups here.
+# commit_update.sh will clean them up after a successful restore on the next boot.
 
 # Add user to sudo group
-echo "========================================"
-echo "Configuring User Permissions"
-echo "========================================"
+print_section "Configuring User Permissions"
 
 CONFIG_FILE="/etc/cloud/config-file"
-if [ ! -f "$CONFIG_FILE" ]; then
-  log_status error "Config file not found at $CONFIG_FILE"
-else
-  user_name=$(grep '^user_name=' "$CONFIG_FILE" | cut -d '=' -f2 | tr -d '"')
+OXM_CONFIG_FILE="/etc/cloud/cloud.cfg.d/99_infra.cfg"
 
-  if [ -z "$user_name" ]; then
-    log_status error "user_name not found in $CONFIG_FILE"
+if [ -f "$CONFIG_FILE" ]; then
+  ACTIVE_CONFIG_FILE="$CONFIG_FILE"
+elif [ -f "$OXM_CONFIG_FILE" ]; then
+  ACTIVE_CONFIG_FILE="$OXM_CONFIG_FILE"
+else
+  log_status error "No user config file found (checked $CONFIG_FILE and $OXM_CONFIG_FILE)"
+  exit 1
+fi
+
+user_name=$(grep '^user_name=' "$ACTIVE_CONFIG_FILE" 2>/dev/null | cut -d '=' -f2 | tr -d '"')
+
+if [ -z "$user_name" ]; then
+  log_status error "user_name not found in $ACTIVE_CONFIG_FILE"
+  exit 1
+fi
+
+echo "User name: $user_name"
+if id "$user_name" >/dev/null 2>&1; then
+  if usermod -aG sudo "$user_name" 2>/dev/null; then
+    log_status success "User '$user_name' added to sudo group"
   else
-    echo "User name: $user_name"
-    if id "$user_name" >/dev/null 2>&1; then
-      if usermod -aG sudo "$user_name" 2>/dev/null; then
-        log_status success "User '$user_name' added to sudo group"
-      else
-        log_status error "Failed to add user to sudo group"
-      fi
-    else
-      log_status warning "User '$user_name' does not exist"
-    fi
+    log_status error "Failed to add user to sudo group"
+    exit 1
+  fi
+else
+  log_status error "User '$user_name' does not exist after credential restore"
+  if [ "$upgrade_pending" = true ]; then
+    exit 1
   fi
 fi
 echo "========================================"
 
+# Commit the update (ONLY when upgrade is pending)
+if [ "$upgrade_pending" = true ]; then
+
 # Check boot configuration
-echo "========================================"
-echo "Verifying Boot Configuration"
-echo "========================================"
+print_section "Verifying Boot Configuration"
 
 if bootctl list >/dev/null 2>&1; then
   log_status success "Boot configuration verified"
@@ -908,56 +948,32 @@ else
 fi
 echo "========================================"
 
-# Commit the update
-echo "========================================"
-echo "Committing OS Update"
-echo "========================================"
+print_section "Committing OS Update"
 
-if [ ! -f "/etc/cloud/upgrade_status" ]; then
-  log_status error "upgrade_status file not found at /etc/cloud/upgrade_status"
-  echo "Cannot determine if system is ready for commit"
-  exit 1
-fi
+echo "Upgrade status is true, committing update..."
 
-if ! upgrade_status=$(cat "/etc/cloud/upgrade_status" 2>/dev/null); then
-  log_status error "Failed to read upgrade_status file"
-  exit 1
-fi
-
-echo "Current upgrade_status: $upgrade_status"
-
-if [ "$upgrade_status" = "true" ]; then
-  echo "Upgrade status is true, committing update..."
-
-  if os-update-tool.sh -c 2>&1; then
-    log_status success "Commit update successful"
-    commit_success=true
-  else
-    commit_exit_code=$?
-    log_status error "Failed to commit update (exit code: $commit_exit_code)"
-    commit_success=false
-  fi
-
-  if [ "$commit_success" = false ]; then
-    echo "========================================"
-    echo "CRITICAL ERROR: OS update commit failed!"
-    echo "System may be in an inconsistent state."
-    echo "Exit code: ${commit_exit_code:-unknown}"
-    echo "Manual intervention required."
-    echo "========================================"
-    exit 1
-  fi
+if os-update-tool.sh -c 2>&1; then
+  log_status success "Commit update successful"
+  commit_success=true
 else
-  log_status warning "Upgrade status is '$upgrade_status' (expected 'true')"
-  echo "This may indicate an issue with the update process."
-  echo "Skipping commit to prevent potential system corruption."
+  commit_exit_code=$?
+  log_status error "Failed to commit update (exit code: $commit_exit_code)"
+  commit_success=false
+fi
+
+if [ "$commit_success" = false ]; then
+  echo "========================================"
+  echo "CRITICAL ERROR: OS update commit failed!"
+  echo "System may be in an inconsistent state."
+  echo "Exit code: ${commit_exit_code:-unknown}"
+  echo "Manual intervention required."
+  echo "========================================"
+  exit 1
 fi
 echo "========================================"
 
 # Reset upgrade status and verify image build date
-echo "========================================"
-echo "Post-Commit Validation"
-echo "========================================"
+print_section "Post-Commit Validation"
 
 echo "Resetting upgrade status..."
 if sudo tee /etc/cloud/upgrade_status <<<'false' >/dev/null 2>&1; then
@@ -972,6 +988,9 @@ else
   log_status warning "Failed to reset upgrade_status (non-critical)"
 fi
 
+fi  # end of upgrade_pending block
+
+# Always display IMAGE_BUILD_DATE
 echo "----------------------------------------"
 if [ -f "/etc/image-id" ]; then
   IMAGE_BUILD_DATE=$(grep '^IMAGE_BUILD_DATE=' /etc/image-id 2>/dev/null | cut -d '=' -f2)
@@ -989,15 +1008,14 @@ echo "========================================"
 echo "OS Update Commit Script Completed: $(date)"
 echo "========================================"
 EOF
-then
-    log_status success "commit_update.sh script created successfully"
+
+  log_status success "commit_update.sh script created successfully"
 else
-    error_exit "Failed to create commit_update.sh script - update cannot proceed"
+  error_exit "Failed to create commit_update.sh script - update cannot proceed"
 fi
 
 # Validate commit_update.sh was created successfully
-echo "========================================="
-echo "Validating commit_update.sh script..."
+print_section "Validating commit_update.sh script..."
 
 # Check file exists
 if [ ! -f "$COMMIT_UPDATE_SCRIPT" ]; then
@@ -1034,94 +1052,90 @@ fi
 echo "========================================="
 
 # Check if installer.cfg exists and update it if necessary (skip in OXM mode)
-echo "========================================="
-echo "Configuring installer.cfg..."
+print_section "Configuring installer.cfg..."
 
 if [ "$OXM_MODE" = false ]; then
-    if [ ! -f "$INSTALLER_CFG" ]; then
-        error_exit "CRITICAL: installer.cfg not found at $INSTALLER_CFG (required for non-OXM mode)"
-    fi
+  if [ ! -f "$INSTALLER_CFG" ]; then
+    error_exit "CRITICAL: installer.cfg not found at $INSTALLER_CFG (required for non-OXM mode)"
+  fi
 
-    # Check if the commit_update.sh entry is already present
-    if grep -q "bash $COMMIT_UPDATE_SCRIPT" "$INSTALLER_CFG" 2>/dev/null; then
-        log_status success "commit_update.sh entry already exists in installer.cfg"
+  # Check if the commit_update.sh entry is already present
+  if grep -q "bash $COMMIT_UPDATE_SCRIPT" "$INSTALLER_CFG" 2>/dev/null; then
+    log_status success "commit_update.sh entry already exists in installer.cfg"
+  else
+    echo "Adding commit_update.sh to installer.cfg..."
+
+    # Backup installer.cfg before modification
+    if cp "$INSTALLER_CFG" "${INSTALLER_CFG}.backup" 2>/dev/null; then
+      log_status success "Created backup: ${INSTALLER_CFG}.backup"
     else
-        echo "Adding commit_update.sh to installer.cfg..."
-
-        # Backup installer.cfg before modification
-        if cp "$INSTALLER_CFG" "${INSTALLER_CFG}.backup" 2>/dev/null; then
-            log_status success "Created backup: ${INSTALLER_CFG}.backup"
-        else
-            error_exit "Failed to backup installer.cfg before modification"
-        fi
-
-        # Use awk to find the end of the runcmd block and append new content
-        if awk -v script="$COMMIT_UPDATE_SCRIPT" '
-        BEGIN {
-            line = "    bash " script
-            added = 0
-        }
-        /^runcmd:/ { runcmd = 1 }
-
-        runcmd && /source \/etc\/environment/ {
-            print
-            print line
-            added = 1
-            next
-        }
-
-        {
-            print
-        }
-
-        END {
-            if (!added) {
-                print line
-            }
-        }
-        ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" 2>/dev/null; then
-            if [ -s "${INSTALLER_CFG}.tmp" ]; then
-                if mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG" 2>/dev/null; then
-                    log_status success "installer.cfg updated successfully"
-                else
-                    rm -f "${INSTALLER_CFG}.tmp"
-                    error_exit "Failed to replace installer.cfg with updated version"
-                fi
-            else
-                rm -f "${INSTALLER_CFG}.tmp"
-                error_exit "Generated installer.cfg is empty - aborting update"
-            fi
-        else
-            rm -f "${INSTALLER_CFG}.tmp"
-            error_exit "Failed to process installer.cfg with awk"
-        fi
+      error_exit "Failed to backup installer.cfg before modification"
     fi
+
+    # Use awk to find the end of the runcmd block and append new content
+    if awk -v script="$COMMIT_UPDATE_SCRIPT" '
+      BEGIN {
+        line = "    bash " script
+        added = 0
+      }
+      /^runcmd:/ { runcmd = 1 }
+
+      runcmd && /source \/etc\/environment/ {
+        print
+        print line
+        added = 1
+        next
+      }
+
+      {
+        print
+      }
+
+      END {
+        if (!added) {
+          print line
+        }
+      }
+    ' "$INSTALLER_CFG" > "${INSTALLER_CFG}.tmp" 2>/dev/null; then
+      if [ -s "${INSTALLER_CFG}.tmp" ]; then
+        if mv "${INSTALLER_CFG}.tmp" "$INSTALLER_CFG" 2>/dev/null; then
+          log_status success "installer.cfg updated successfully"
+        else
+          rm -f "${INSTALLER_CFG}.tmp"
+          error_exit "Failed to replace installer.cfg with updated version"
+        fi
+      else
+        rm -f "${INSTALLER_CFG}.tmp"
+        error_exit "Generated installer.cfg is empty - aborting update"
+      fi
+    else
+      rm -f "${INSTALLER_CFG}.tmp"
+      error_exit "Failed to process installer.cfg with awk"
+    fi
+  fi
 else
-    log_status info "OXM mode: Skipping installer.cfg configuration"
+  log_status info "OXM mode: Skipping installer.cfg configuration"
 fi
 echo "========================================="
 
 # Install boot loader entries
-echo "========================================="
-echo "Installing boot loader entries..."
+print_section "Installing boot loader entries..."
 
 if bootctl install 2>&1; then
-    log_status success "bootctl install successful"
+  log_status success "bootctl install successful"
 else
-    boot_exit_code=$?
-    if [ $boot_exit_code -eq 1 ]; then
-        log_status warning "bootctl install failed (exit code: $boot_exit_code) - may already be installed"
-    else
-        log_status error "bootctl install failed with exit code: $boot_exit_code"
-        echo "WARNING: Boot loader installation issue detected, but continuing..."
-    fi
+  boot_exit_code=$?
+  if [ $boot_exit_code -eq 1 ]; then
+    log_status warning "bootctl install failed (exit code: $boot_exit_code) - may already be installed"
+  else
+    log_status error "bootctl install failed with exit code: $boot_exit_code"
+    echo "WARNING: Boot loader installation issue detected, but continuing..."
+  fi
 fi
 echo "========================================="
 
 # Set upgrade status and reboot
-echo "========================================="
-echo "Finalizing Update and Preparing Reboot"
-echo "========================================="
+print_section "Finalizing Update and Preparing Reboot"
 
 echo "Setting upgrade status to true..."
 if sudo tee /etc/cloud/upgrade_status <<<'true' >/dev/null 2>&1; then
@@ -1169,13 +1183,36 @@ echo "========================================="
 echo "Performing final pre-reboot validation..."
 validation_errors=0
 
-[ ! -f "$COMMIT_UPDATE_SCRIPT" ] && { log_status error "commit_update.sh missing"; ((validation_errors++)); }
-[ ! -x "$COMMIT_UPDATE_SCRIPT" ] && { log_status error "commit_update.sh not executable"; ((validation_errors++)); }
-[ ! -f /etc/cloud/upgrade_status ] && { log_status error "upgrade_status file missing"; ((validation_errors++)); }
-[ ! -d /etc/cloud/backup ] && { log_status error "backup directory missing"; ((validation_errors++)); }
+[ ! -f "$COMMIT_UPDATE_SCRIPT" ] && {
+  log_status error "commit_update.sh missing"
+  ((validation_errors++))
+}
+[ ! -x "$COMMIT_UPDATE_SCRIPT" ] && {
+  log_status error "commit_update.sh not executable"
+  ((validation_errors++))
+}
+[ ! -f /etc/cloud/upgrade_status ] && {
+  log_status error "upgrade_status file missing"
+  ((validation_errors++))
+}
+[ ! -f /etc/cloud/backup/paths_list.txt ] && {
+  log_status error "paths_list.txt missing"
+  ((validation_errors++))
+}
+[ ! -d /etc/cloud/backup ] && {
+  log_status error "backup directory missing"
+  ((validation_errors++))
+}
+
+for cred_file in "${CREDENTIAL_FILES[@]}"; do
+  [ ! -s "/etc/cloud/${cred_file}_backup" ] && {
+    log_status error "required credential backup missing or empty: /etc/cloud/${cred_file}_backup"
+    ((validation_errors++))
+  }
+done
 
 if [ "$validation_errors" -gt 0 ]; then
-    error_exit "Pre-reboot validation failed with $validation_errors error(s) - aborting reboot"
+  error_exit "Pre-reboot validation failed with $validation_errors error(s) - aborting reboot"
 fi
 
 log_status success "Pre-reboot validation passed"
@@ -1184,8 +1221,8 @@ echo "========================================="
 sleep 5
 
 if reboot; then
-    # This will not execute if reboot is successful
-    :
+  # This will not execute if reboot is successful
+  :
 else
-    error_exit "Reboot command failed - please reboot manually"
+  error_exit "Reboot command failed - please reboot manually"
 fi
