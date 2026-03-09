@@ -80,9 +80,10 @@ cd edge-microvisor-toolkit-standalone-node
 - To create a standalone installation tar file with Display Virtualization (DV) for bootable USB
   preparation, follow the procedure below. This process integrates the DV image directly instead
   of the Non-RT image, eliminating the need for manual steps to replace the Non-RT image with the DV image.
+  Platform types available are PTL: Pantherlake, RPL:Raptorlake/Bartlettlake
 
    ```bash
-   sudo make build INSTALL_TYPE=DV
+   sudo make build INSTALL_TYPE=DV PLATFORM_TYPE=RPL
    ```
 
 > **Note:** This command will generate the `standalone-installation-files.tar.gz` file.
