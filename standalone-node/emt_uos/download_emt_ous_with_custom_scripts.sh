@@ -6,14 +6,29 @@
 # Download the Edge Microvisor Toolkit uOS(EMB) from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
 
-FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
-EMT_BUILD_DATE=20251204
-EMT_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMT_BUILD_DATE}"
-EMT_RAW_GZ="${EMT_FILE_NAME}.tar.gz"
+export PLATFORM_TYPE="${1:-PTL}"
 
-set -x
-curl -k --noproxy '' ${FILE_RS_URL}/${EMT_RAW_GZ} -o uos.tar.gz || { echo "download of uos failed,please check";exit 1;}
-set +x
+FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
+
+# Select the uOS image based on the platform type PTL or RPL/BTL
+if [ "$PLATFORM_TYPE" == "PTL" ]; then
+    # PTL Platform (To be updated with PV release images)
+    # RPL/BTL Platform
+    EMB_BUILD_DATE=20251204
+    EMB_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMB_BUILD_DATE}"
+    EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
+    EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
+    echo "PTL Platform uOS is selected"
+else
+    # RPL/BTL Platform
+    EMB_BUILD_DATE=20251204
+    EMB_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMB_BUILD_DATE}"
+    EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
+    EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
+    echo "RPL/BTL Platform uOS is selected"
+fi
+
+curl -k --noproxy '' ${EMB_IMAGE_URL} -o uos.tar.gz || { echo "download of uos failed, please check";exit 1;}
 
 echo "Current working directory is: $PWD"
 

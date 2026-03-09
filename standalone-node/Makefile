@@ -29,6 +29,8 @@ GIT_COMMIT    ?= $(shell git rev-parse HEAD)
 
 # Define variable NRT or DV based on the build; default is NRT
 INSTALL_TYPE  ?= NRT
+# Define variable RPL/BTL(non-PTL) and PTL based on the platform type; default is PTL
+PLATFORM_TYPE  ?= PTL
 
 # Yamllint variables
 YAML_FILES           := $(shell find . -path './venv_$(PROJECT_NAME)' -path './vendor' -prune -o -type f \( -name '*.yaml' -o -name '*.yml' \) -print )
@@ -50,7 +52,7 @@ build: configure
 	@# Help: Runs build stage
 	@echo "---MAKEFILE ISO BUILD---"
 	echo $@
-	cd installation_scripts && ./build-emt-s-install-pkg.sh "$(INSTALL_TYPE)" && cd ..
+	cd installation_scripts && ./build-emt-s-install-pkg.sh "$(INSTALL_TYPE)" "$(PLATFORM_TYPE)" && cd ..
 	@echo "---END MAKEFILE Build---"
 	
 image:

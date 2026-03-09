@@ -7,20 +7,22 @@
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
 
 export INSTALL_TYPE="${1:-NRT}"
+export PLATFORM_TYPE="${2:-PTL}"
 
 if [ "$INSTALL_TYPE" == "DV" ]; then
-	# EMTS build with DV image
-	EMT_VERSION=3.0
-	EMT_BUILD_DATE=20260211
-	EMT_BUILD_NO=2000
-	EMT_FILE_NAME="edge-readonly-dv-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
-	EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
-	EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
+    # EMTS build with DV image non-PTL (RPL/BTL) platforms
+    EMT_VERSION=3.0
+    EMT_BUILD_DATE=20260211
+    EMT_BUILD_NO=2000
+    EMT_FILE_NAME="edge-readonly-dv-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
+    EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
+    EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+    curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
+    curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
 else
-	# EMTS build with NRT image
+    if [ "$PLATFORM_TYPE" == "PTL" ]; then
+        # EMTS build with NRT image for PTL
 	EMT_VERSION=3.0
 	EMT_BUILD_DATE=20260210
 	EMT_BUILD_NO=2153
@@ -30,6 +32,18 @@ else
 
 	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
 	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+    else
+        # EMTS build with NRT image for RPL/BTL
+	EMT_VERSION=3.0
+	EMT_BUILD_DATE=20260210
+	EMT_BUILD_NO=2153
+	EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
+	EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
+	EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
+
+	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
+	curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+    fi
 fi
 
 # Verify the SHA256 checksum

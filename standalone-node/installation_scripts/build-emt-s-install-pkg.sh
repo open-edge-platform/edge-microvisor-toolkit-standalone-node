@@ -6,6 +6,20 @@
 
 os_filename=""
 INSTALL_TYPE="${1:-NRT}"
+PLATFORM_TYPE="${2:-PTL}"
+
+# Check for unsupported combinations
+if [[ "$INSTALL_TYPE" == "DV" && "$PLATFORM_TYPE" == "PTL" ]]; then
+    echo "Exiting: PTL with DV is not supported (INSTALL_TYPE: $INSTALL_TYPE, PLATFORM_TYPE: $PLATFORM_TYPE)"
+    exit 1
+fi
+
+if [[ ("$INSTALL_TYPE" == "DV" || "$INSTALL_TYPE" == "NRT") && ("$PLATFORM_TYPE" == "RPL" || "$PLATFORM_TYPE" == "PTL") ]]; then
+    echo "Continuing: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
+else
+    echo "Exiting: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
+    exit 1
+fi
 
 # Install system dependent packages
 instll-dep-pks() {
@@ -19,7 +33,7 @@ echo "Started the download!!,it will take some time"
 
 pushd ../emt_uos/ || return 1
 chmod +x download_emt_ous_with_custom_scripts.sh
-if bash download_emt_ous_with_custom_scripts.sh; then
+if bash download_emt_ous_with_custom_scripts.sh "$PLATFORM_TYPE"; then
     echo "emt-uOS kernel && initramfs files downloaded successfully"
 else
     echo "emt-uOS kernel && initramfs files downloaded Failed,Please check!!"
@@ -35,7 +49,7 @@ download-tvm() {
 pushd ../host_os > /dev/null || return 1
 
 chmod +x download_tmv.sh
-if bash download_tmv.sh "$INSTALL_TYPE" ; then
+if bash download_tmv.sh "$INSTALL_TYPE" "$PLATFORM_TYPE"; then
     echo "Microvisor Image downloaded successfully!!"
     os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
     mv "$os_filename" ../installation_scripts/
