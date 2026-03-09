@@ -25,7 +25,7 @@ else
         # EMTS build with NRT image for PTL
 	      EMT_VERSION=3.0
 	      EMT_BUILD_DATE=20260225
-	      EMT_BUILD_NO=2000
+	      EMT_BUILD_NO=0914
 	      EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
