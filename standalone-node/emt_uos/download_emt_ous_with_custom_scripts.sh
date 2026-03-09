@@ -13,7 +13,8 @@ FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/reposi
 # Select the uOS image based on the platform type PTL or RPL/BTL
 if [ "$PLATFORM_TYPE" == "PTL" ]; then
     # PTL Platform (To be updated with PV release images)
-    EMB_BUILD_DATE=20260209
+    # RPL/BTL Platform
+    EMB_BUILD_DATE=20251204
     EMB_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMB_BUILD_DATE}"
     EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
     EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
