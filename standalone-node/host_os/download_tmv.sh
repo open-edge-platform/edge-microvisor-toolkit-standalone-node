@@ -31,8 +31,10 @@ else
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+	      #curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
+	      #curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+	      wget --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/developer-builds/ITEP-88090-runc-next/20260305.0614/edge-readonly-3.0.20260305.0614.raw.gz -O edge_microvisor_toolkit.raw.gz
+	      wget --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/developer-builds/ITEP-88090-runc-next/20260305.0614/edge-readonly-3.0.20260305.0614.raw.gz.sha256sum -O edge_microvisor_toolkit.raw.gz.sha256sum
     else
         # EMTS build with NRT image for RPL/BTL
 	      EMT_VERSION=3.0

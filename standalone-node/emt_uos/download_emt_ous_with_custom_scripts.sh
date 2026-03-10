@@ -28,8 +28,8 @@ else
     echo "RPL/BTL Platform uOS is selected"
 fi
 
-curl -k --noproxy '' ${EMB_IMAGE_URL} -o uos.tar.gz || { echo "download of uos failed, please check";exit 1;}
-
+#curl -k --noproxy '' ${EMB_IMAGE_URL} -o uos.tar.gz || { echo "download of uos failed, please check";exit 1;}
+wget --no-proxy https://af01p-png.devtools.intel.com/artifactory/tiberos-png-local/emt-bootkit/next/20260209.0925/emb_uos_x86_64_20260209.tar.gz -O uos.tar.gz
 echo "Current working directory is: $PWD"
 
 if [ ! -d uOS ]; then
