@@ -21,6 +21,7 @@ sudo journalctl -u k3s* | sudo tee $LOG_DIR/k3s-logs
 
 # Collect pods info
 
+# shellcheck disable=SC1091
 source /etc/environment && export KUBECONFIG
 
 kubectl get pods -A | sudo tee $LOG_DIR/pods-running-state
