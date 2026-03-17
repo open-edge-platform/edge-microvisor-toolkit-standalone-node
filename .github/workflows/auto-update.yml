@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b  # v2.15.0
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc  # v2.15.1
         with:
           egress-policy: audit
 
@@ -40,6 +40,6 @@ jobs:
           persist-credentials: false
 
       - name: Update pull requests
-        uses: open-edge-platform/orch-ci/.github/actions/pr_updater@582cb262491c89e19904164eb24887b01f6925b2  # 2026.0.15
+        uses: open-edge-platform/orch-ci/.github/actions/pr_updater@b5930c48c1fcdb6b34ffbcd465cff96dabfbde70  # 2026.0.17
         with:
           github_token: ${{ secrets.SYS_EMF_GH_TOKEN }}
