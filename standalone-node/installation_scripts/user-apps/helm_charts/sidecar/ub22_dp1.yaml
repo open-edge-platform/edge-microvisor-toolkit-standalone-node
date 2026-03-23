@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sidecar-ub22-dp1
+  namespace: user-apps
+  labels:
+    os: ubuntu
+    type: sidecar-script
+data:
+  my_script.sh: |
+    #!/bin/sh
+    tempFile=`mktemp`
+    echo $4 > $tempFile
+    sed -i "s|/devices>|/devices><qemu:commandline><qemu:arg value='-device'/><qemu:arg value='driver=virtio-vga,max_outputs=1,blob=true,bus=pcie.0,addr=0x3'/> <qemu:arg value='-device'/> <qemu:arg value='qemu-xhci,id=usb-controller,bus=pcie.0,addr=0x14'/> </qemu:commandline>|" $tempFile
+    echo $tempFile > /tmp/t.xml
+    cat $tempFile

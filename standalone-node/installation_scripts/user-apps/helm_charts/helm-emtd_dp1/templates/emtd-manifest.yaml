@@ -1,0 +1,249 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- range .Values.virtualMachines }}
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: emtd-pv
+  namespace: {{ .namespace }}
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /opt/user-apps/emtdvm
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - edgemicrovisortoolkit
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-bootdisk
+  namespace: {{ .namespace }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .storage }}
+  storageClassName: {{ .storageClassName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-rdp
+  namespace: {{ .namespace }}
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: rdp
+    port: {{ .rdpPort }}
+    protocol: TCP
+    targetPort: 3389
+  selector:
+    app/name: {{ .name }}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-ssh
+  namespace: {{ .namespace }}
+spec:
+  ports:
+  - name: ssh
+    port: 22
+    protocol: TCP
+    targetPort: 22
+    nodePort: 30022
+  selector:
+    app/name: {{ .name }}
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: {{ .name }}-vm
+  namespace: {{ .namespace }}
+spec:
+  running: true
+  template:
+    metadata:
+      annotations:
+        hooks.kubevirt.io/hookSidecars: >-
+          [ {"args": ["--version", "v1alpha2"], "configMap": {"name": "sidecar-emtd-dp1", "key": "my_script.sh", "hookPath": "/usr/bin/onDefineDomain"}} ]
+      labels:
+        app/name: {{ .name }}
+    spec:
+      domain:
+        cpu:
+          cores: {{ .cpuCores }}
+          model: host-passthrough
+        devices:
+          autoattachGraphicsDevice: false
+          autoattachPodInterface: true
+          gpus:
+            - deviceName: intel.com/sriov-gpudevice
+              name: gpu1
+          disks:
+            - bootOrder: 1
+              disk:
+                bus: virtio
+              name: bootdisk
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          tpm: {}
+          interfaces:
+            - name: default
+              masquerade: {}
+            - name: secondary-bridge-nic
+              bridge: {}
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: {{ .secureBoot }}
+        machine:
+          type: q35
+        features:
+          acpi:
+            enabled: true
+          apic:
+            enabled: true
+          smm:
+            enabled: true
+        memory:
+          guest: {{ .memory }}
+          hugepages:
+            pageSize: "2Mi"
+        resources:
+          requests:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{ .memory }}
+            ephemeral-storage: "1Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+          limits:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{ .memory }}
+            ephemeral-storage: "2Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+      networks:
+        - name: default
+          pod: {}
+        - name: secondary-bridge-nic
+          multus:
+            networkName: user-apps/my-bridge-network
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: bootdisk
+        persistentVolumeClaim:
+          claimName: {{ .name }}-bootdisk
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            hostname: {{ .name }}
+            manage_etc_hosts: true
+            write_files:
+              - path: /etc/netplan/60-enp2s0-static.yaml
+                permissions: '0644'
+                content: |
+                  network:
+                    version: 2
+                    ethernets:
+                      enp2s0:
+                        dhcp4: no
+                        addresses: [{{ .secondaryNetwork.ip }}{{ .secondaryNetwork.subnetMask }}]
+                        gateway4: {{ .secondaryNetwork.gatewayIp }}
+                        nameservers:
+                          addresses: {{ .secondaryNetwork.nameservers }}
+              - path: /usr/local/bin/setup-secondary-network.sh
+                permissions: '0755'
+                content: |
+                  #!/bin/bash
+                  set -x  # Enable debug output
+                  echo "Setting up secondary network interface via cloud-init script"
+                  sleep 5
+                  
+                  # Find the secondary interface (not eth0)
+                  SECONDARY_IF=$(ip link show | grep -E '^[0-9]+: (eth|ens|enp)' | grep -v eth0 | head -1 | cut -d: -f2 | tr -d ' ')
+                  
+                  if [ -n "$SECONDARY_IF" ]; then
+                    echo "Found secondary interface: $SECONDARY_IF"
+                    # Remove any existing IP addresses
+                    ip addr flush dev $SECONDARY_IF 2>/dev/null || true
+                    # Configure the interface
+                    ip addr add {{ .secondaryNetwork.ip }}{{ .secondaryNetwork.subnetMask }} dev $SECONDARY_IF
+                    ip link set $SECONDARY_IF up
+                    
+                    echo "Secondary interface $SECONDARY_IF configured successfully"
+                    ip addr show $SECONDARY_IF
+                  else
+                    echo "No secondary interface found"
+                    ip link show
+                  fi
+            runcmd:
+              - /usr/local/bin/setup-secondary-network.sh
+              - netplan apply
+              - systemctl restart systemd-networkd
+              - systemctl restart systemd-resolved
+              - sleep 5
+              - ip addr show
+              - ip route show
+              - ping -c 3 {{ .secondaryNetwork.gatewayIp }} || echo "Gateway ping failed"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{ .name }}
+  name: plc
+  namespace: {{ .namespace }}
+spec:
+  ports:
+  - name: plcport1
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30080
+  - name: plcport2
+    port: 5357
+    protocol: TCP
+    targetPort: 5357
+    nodePort: 30357
+  - name: plcport3
+    port: 9867
+    protocol: TCP
+    targetPort: 9867
+    nodePort: 30867
+  selector:
+    app/name: {{ .name }}
+  type: NodePort
+
+{{- end }}

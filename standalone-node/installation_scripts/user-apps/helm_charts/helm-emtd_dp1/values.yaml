@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+virtualMachines:
+  - name: emtd
+    namespace: user-apps
+    storage: 100Gi
+    hostPath: /opt/user-apps/emtdvm
+    storageClassName: local-path
+    cpuCores: 8
+    memory: 16384Mi
+    gpuDeviceName: intel.com/sriov-gpudevice
+    secureBoot: false
+    usePVC: false
+    rdpPort: 3392
+    secondaryNetwork:
+      ip: 199.168.1.10
+      subnetMask: /24
+      gatewayIp: 199.168.1.1
+      nameservers: [8.8.8.8]

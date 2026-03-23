@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+virtualMachines:
+  - name: win11
+    namespace: user-apps
+    storage: 70Gi
+    hostPath: /opt/user-apps/win11vm/
+    storageClassName: local-path
+    cpuCores: 3
+    memory: 8192Mi
+    gpuDeviceName: intel.com/sriov-gpudevice
+    secureBoot: false
+    primaryMacAddress: "02:03:04:05:06:01"
+    secondaryMacAddress: "02:03:04:05:06:02"
+    usePVC: true
+    rdpPort: 3392
+    cdiDv: vm3-win11-image
+    secondaryNetwork:
+      ip: 199.168.1.4
+      subnet: 199.168.1.0/24
+      subnetMask: /24
+      gatewayIp: 199.168.1.1
+      nameservers: [8.8.8.8]
+      bridgeName: br0

@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+virtualMachines:
+  - name: ub22
+    namespace: user-apps
+    storage: 200Gi
+    hostPath: /opt/user-apps/ub22vm
+    storageClassName: local-path
+    cpuCores: 8
+    memory: 16384Mi
+    gpuDeviceName: intel.com/sriov-gpudevice
+    secureBoot: false
+    primaryMacAddress: "02:03:04:05:06:03"
+    secondaryMacAddress: "02:03:04:05:06:04"
+    usePVC: false
+    rdpPort: 3392
+    secondaryNetwork:
+      ip: 199.168.1.10
+      subnetMask: /24
+      gatewayIp: 199.168.1.1
+      nameservers: [8.8.8.8]
