@@ -31,8 +31,8 @@ else
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/next/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
+	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/next/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
     else
         # EMTS build with NRT image for RPL/BTL
 	      EMT_VERSION=3.0
