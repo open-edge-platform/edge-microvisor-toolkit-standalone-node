@@ -157,14 +157,14 @@ cd edge-microvisor-toolkit-standalone-node
 
   This step is done by executing the `./download_images.sh` script. If you are using EMT
   image with desktop virtualization features then use `DV` parameter. For default EMT image,
-  which is a non-RT kernel, use the `NON-RT` parameter.
+  which is a non-RT kernel, use the `NRT` parameter.
 
    ```bash
    sudo ./download_images.sh DV
 
    or
 
-   sudo ./download_images.sh NON-RT
+   sudo ./download_images.sh NRT
    ```
 
 > **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
