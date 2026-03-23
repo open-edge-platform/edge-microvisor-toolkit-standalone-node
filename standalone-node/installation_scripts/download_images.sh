@@ -14,14 +14,14 @@ BINARY_INSTALL=true
 IDV_EXTENSIONS=true
 IDV_KUBEVIRT=true
 IDV_DEVICE_PLUGINS=true
-INSTALL_TYPE="${1:-NON-RT}"
+INSTALL_TYPE="${1:-NRT}"
 
 # Help function
 show_help() {
-    echo "Usage: $0 [DV|NON-RT]"
+    echo "Usage: $0 [DV|NRT]"
     echo "  DV     : Download images and manifests for Desktop Virtualization (kubernetes and addon images and manifest)."
-    echo "  NON-RT  : Download images and manifests for Default EMT image without Desktop Virtualization and Realtime kernel (kubernetes and addon images and manifest). (default)"
-    echo "If no argument is given, NON-RT is used by default."
+    echo "  NRT  : Download images and manifests for Default EMT image without Desktop Virtualization and Realtime kernel (kubernetes and addon images and manifest). (default)"
+    echo "If no argument is given, NRT is used by default."
     exit 0
 }
 
@@ -36,13 +36,13 @@ if [ "$INSTALL_TYPE" == "DV" ]; then
 	IDV_KUBEVIRT=true
 	IDV_DEVICE_PLUGINS=true
 else
-	if [ "$INSTALL_TYPE" == "NON-RT" ]; then
+	if [ "$INSTALL_TYPE" == "NRT" ]; then
 		AIRGAP=true
 		IDV_EXTENSIONS=false
 		IDV_KUBEVIRT=false
 		IDV_DEVICE_PLUGINS=false
 	else
-		echo "Invalid INSTALL_TYPE. Use 'DV' or 'NON-RT'."
+		echo "Invalid INSTALL_TYPE. Use 'DV' or 'NRT'."
 		exit 1
 	fi
 fi
