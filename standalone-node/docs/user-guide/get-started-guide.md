@@ -296,7 +296,7 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
 
-**Note:** If you want to run `kubectl` commands from the edge node you can use the provided ``k`` alias,
+**Note:** If you want to run `kubectl`, commands from the edge node you can use the provided ``k`` alias,
 which is defined in the `.bashrc` of the user defined in your config.
 
 ```bash
