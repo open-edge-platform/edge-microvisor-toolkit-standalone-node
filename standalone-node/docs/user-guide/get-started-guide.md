@@ -157,14 +157,14 @@ cd edge-microvisor-toolkit-standalone-node
 
   This step is done by executing the `./download_images.sh` script. If you are using EMT
   image with desktop virtualization features then use `DV` parameter. For default EMT image,
-  which is a non-RT kernel, use the `NON-RT` parameter.
+  which is a non-RT kernel, use the `NRT` parameter.
 
    ```bash
    sudo ./download_images.sh DV
 
    or
 
-   sudo ./download_images.sh NON-RT
+   sudo ./download_images.sh NRT
    ```
 
 > **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
@@ -236,8 +236,8 @@ there is no need for further image setup. The `usb-bootable-files.tar.gz` instal
 If you need Desktop Virtualization features, follow these steps to replace the default image:
 
 1. Download the desktop virtualization image (DV) from the "no Auth" file server registry.
-   The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260225.2000.raw.gz)
-   Link to the [sha256sum for this image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260225.2000.raw.gz.sha256sum)
+   The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260311.2000.raw.gz)
+   Link to the [sha256sum for this image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260311.2000.raw.gz.sha256sum)
 
    > **Note:** A custom image can be copied locally from your development system to the 5th
    > partition, as shown in **Step 2** below.
@@ -296,7 +296,7 @@ If you need Desktop Virtualization features, follow these steps to replace the d
 Refer to the edge node console output for instructions to verify the kubernetes cluster creation.
 Use the Linux login credentials which was provided while preparing the bootable USB drive.
 
-**Note:** If you want to run `kubectl` commands from the edge node you can use the provided ``k`` alias,
+**Note:** If you want to run `kubectl`, commands from the edge node you can use the provided ``k`` alias,
 which is defined in the `.bashrc` of the user defined in your config.
 
 ```bash
