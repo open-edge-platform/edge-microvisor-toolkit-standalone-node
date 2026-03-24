@@ -24,7 +24,7 @@ to ensure optimal performance and functionality for both Ubuntu and Windows VMs.
 ### Operating Modes
 
 1. **ConfigMap Update Mode** (`-c`) - Updates Kubernetes ConfigMaps and restarts VMs
-2. **File Update Mode** (`-f`) - Updates ConfigMap YAML files stored on disk  
+2. **File Update Mode** (`-f`) - Updates ConfigMap YAML files stored on disk
 3. **Both Modes** (`-a`) - Performs both operations simultaneously
 
 ## Features
@@ -53,7 +53,7 @@ to ensure optimal performance and functionality for both Ubuntu and Windows VMs.
 
 ConfigMaps must have specific labels for identification:
 
-- **Windows ConfigMaps**: `os: win11` or `os: windows`  
+- **Windows ConfigMaps**: `os: win11` or `os: windows`
 - **Ubuntu ConfigMaps**: `os: ubuntu22` or `os: ubuntu`
 
 ### Supported Devices
@@ -134,7 +134,7 @@ sudo ./usb-detect-assign.sh -a /opt/custom/charts/ -n production-vms
 ### Command Options
 
 | Option | Description | Example |
-|--------|-------------|---------|
+| -------- | ----------- | ------- |
 | `-c, --configmap` | Update ConfigMaps and restart VMs | `-c` |
 | `-f, --files [LOCATION]` | Update YAML files | `-f /custom/path/` |
 | `-a, --all [LOCATION]` | Do both operations | `-a` |
@@ -204,7 +204,7 @@ For hub-connected devices, the script resolves proper port paths:
 <qemu:arg value='-device'/>
 <qemu:arg value='usb-host,hostbus=1,hostport=5'/>
 <qemu:arg value='-device'/>
-<qemu:arg value='usb-host,hostbus=1,hostport=6'/>  
+<qemu:arg value='usb-host,hostbus=1,hostport=6'/>
 <qemu:arg value='-device'/>
 <qemu:arg value='usb-host,hostbus=1,hostport=4'/>
 <qemu:arg value='-usb'/>
@@ -290,7 +290,7 @@ data:
 The test suite includes pre-recorded USB device data from different environments:
 
 | Scenario | Description | Test Data |
-|----------|-------------|-----------|
+| ---------- | ----------- | --------- |
 | `production` | Production system with multiple devices | `production_lsusb.txt` |
 | `test` | Test environment setup | `test_lsusb.txt` |
 | `dev` | Development environment | `dev_lsusb.txt` |
@@ -500,7 +500,7 @@ The script includes comprehensive error handling:
 ### Planned Features
 
 1. **Configuration File Support** - YAML/JSON configuration for device assignment rules
-2. **Custom Device Filters** - More sophisticated device selection criteria  
+2. **Custom Device Filters** - More sophisticated device selection criteria
 3. **Multiple VM Support** - Support for more than 2 VMs per assignment
 4. **Real-time Monitoring** - Daemon mode for USB hotplug events
 5. **Web Interface** - GUI for device assignment management
