@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- range .Values.virtualMachines }}
+{{- range .Values.virtualMachines}}
 
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: emtd-pv
-  namespace: {{ .namespace }}
+  namespace: {{.namespace}}
 spec:
   capacity:
     storage: 100Gi
@@ -31,42 +31,42 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app/name: {{ .name }}
-  name: {{ .name }}-bootdisk
-  namespace: {{ .namespace }}
+    app/name: {{.name}}
+  name: {{.name}}-bootdisk
+  namespace: {{.namespace}}
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .storage }}
-  storageClassName: {{ .storageClassName }}
+      storage: {{.storage}}
+  storageClassName: {{.storageClassName}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app/name: {{ .name }}
-  name: {{ .name }}-rdp
-  namespace: {{ .namespace }}
+    app/name: {{.name}}
+  name: {{.name}}-rdp
+  namespace: {{.namespace}}
 spec:
   externalTrafficPolicy: Cluster
   ports:
   - name: rdp
-    port: {{ .rdpPort }}
+    port: {{.rdpPort}}
     protocol: TCP
     targetPort: 3389
   selector:
-    app/name: {{ .name }}
+    app/name: {{.name}}
   type: LoadBalancer
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app/name: {{ .name }}
-  name: {{ .name }}-ssh
-  namespace: {{ .namespace }}
+    app/name: {{.name}}
+  name: {{.name}}-ssh
+  namespace: {{.namespace}}
 spec:
   ports:
   - name: ssh
@@ -75,29 +75,29 @@ spec:
     targetPort: 22
     nodePort: 30022
   selector:
-    app/name: {{ .name }}
+    app/name: {{.name}}
   type: NodePort
 ---
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   labels:
-    app/name: {{ .name }}
-  name: {{ .name }}-vm
-  namespace: {{ .namespace }}
+    app/name: {{.name}}
+  name: {{.name}}-vm
+  namespace: {{.namespace}}
 spec:
   running: true
   template:
     metadata:
       annotations:
         hooks.kubevirt.io/hookSidecars: >-
-          [ {"args": ["--version", "v1alpha2"], "configMap": {"name": "sidecar-emtd-dp1", "key": "my_script.sh", "hookPath": "/usr/bin/onDefineDomain"}} ]
+          [{"args":["--version","v1alpha2"],"configMap":{"name":"sidecar-emtd-dp1","key":"my_script.sh","hookPath":"/usr/bin/onDefineDomain"}}]
       labels:
-        app/name: {{ .name }}
+        app/name: {{.name}}
     spec:
       domain:
         cpu:
-          cores: {{ .cpuCores }}
+          cores: {{.cpuCores}}
           model: host-passthrough
         devices:
           autoattachGraphicsDevice: false
@@ -122,7 +122,7 @@ spec:
         firmware:
           bootloader:
             efi:
-              secureBoot: {{ .secureBoot }}
+              secureBoot: {{.secureBoot}}
         machine:
           type: q35
         features:
@@ -133,7 +133,7 @@ spec:
           smm:
             enabled: true
         memory:
-          guest: {{ .memory }}
+          guest: {{.memory}}
           hugepages:
             pageSize: "2Mi"
         resources:
@@ -141,7 +141,7 @@ spec:
             intel.com/igpu: 1
             intel.com/udma: 1
             intel.com/x11: 1
-            hugepages-2Mi: {{ .memory }}
+            hugepages-2Mi: {{.memory}}
             ephemeral-storage: "1Gi"
             intel.com/usb: 1
             intel.com/vfio: 1
@@ -149,7 +149,7 @@ spec:
             intel.com/igpu: 1
             intel.com/udma: 1
             intel.com/x11: 1
-            hugepages-2Mi: {{ .memory }}
+            hugepages-2Mi: {{.memory}}
             ephemeral-storage: "2Gi"
             intel.com/usb: 1
             intel.com/vfio: 1
@@ -163,12 +163,12 @@ spec:
       volumes:
       - name: bootdisk
         persistentVolumeClaim:
-          claimName: {{ .name }}-bootdisk
+          claimName: {{.name}}-bootdisk
       - name: cloudinitdisk
         cloudInitNoCloud:
           userData: |
             #cloud-config
-            hostname: {{ .name }}
+            hostname: {{.name}}
             manage_etc_hosts: true
             write_files:
               - path: /etc/netplan/60-enp2s0-static.yaml
@@ -179,10 +179,10 @@ spec:
                     ethernets:
                       enp2s0:
                         dhcp4: no
-                        addresses: [{{ .secondaryNetwork.ip }}{{ .secondaryNetwork.subnetMask }}]
-                        gateway4: {{ .secondaryNetwork.gatewayIp }}
+                        addresses: [{{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}}]
+                        gateway4: {{.secondaryNetwork.gatewayIp}}
                         nameservers:
-                          addresses: {{ .secondaryNetwork.nameservers }}
+                          addresses: {{.secondaryNetwork.nameservers}}
               - path: /usr/local/bin/setup-secondary-network.sh
                 permissions: '0755'
                 content: |
@@ -199,7 +199,7 @@ spec:
                     # Remove any existing IP addresses
                     ip addr flush dev $SECONDARY_IF 2>/dev/null || true
                     # Configure the interface
-                    ip addr add {{ .secondaryNetwork.ip }}{{ .secondaryNetwork.subnetMask }} dev $SECONDARY_IF
+                    ip addr add {{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}} dev $SECONDARY_IF
                     ip link set $SECONDARY_IF up
                     
                     echo "Secondary interface $SECONDARY_IF configured successfully"
@@ -216,15 +216,15 @@ spec:
               - sleep 5
               - ip addr show
               - ip route show
-              - ping -c 3 {{ .secondaryNetwork.gatewayIp }} || echo "Gateway ping failed"
+              - ping -c 3 {{.secondaryNetwork.gatewayIp}} || echo "Gateway ping failed"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app/name: {{ .name }}
+    app/name: {{.name}}
   name: plc
-  namespace: {{ .namespace }}
+  namespace: {{.namespace}}
 spec:
   ports:
   - name: plcport1
@@ -243,7 +243,7 @@ spec:
     targetPort: 9867
     nodePort: 30867
   selector:
-    app/name: {{ .name }}
+    app/name: {{.name}}
   type: NodePort
 
-{{- end }}
+{{- end}}

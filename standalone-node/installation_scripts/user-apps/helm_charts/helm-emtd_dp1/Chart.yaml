@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+---
 apiVersion: v2
 name: emtd-virtual-machine
 description: A Helm chart for deploying a EMTD Virtual Machine.
