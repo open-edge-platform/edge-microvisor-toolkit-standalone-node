@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sidecar-win11-dp1
+  namespace: user-apps
+  labels:
+    os: windows
+    type: sidecar-script
+data:
+  my_script.sh: |
+    #!/bin/sh
+    tempFile=`mktemp`
+    echo $4 > $tempFile
+    sed_expr_part1="/devices> <qemu:commandline> <qemu:arg value='-display'/>"
+    sed_expr_part2="<qemu:arg value='gtk,gl=on,full-screen=on,zoom-to-fit=on,"
+    sed_expr_part3="window-close=off,connectors.0=eDP-1,hw-cursor=on'/>"
+    sed_expr_part4="<qemu:env name='DISPLAY' value=':0'/>"
+    sed_expr_part5="<qemu:arg value='-device'/>"
+    sed_expr_part6="<qemu:arg value='driver=virtio-vga,max_outputs=1,blob=true,"
+    sed_expr_part7="render_sync=false,bus=pcie.0,addr=0x3'/>"
+    sed_expr_part8="</qemu:commandline>"
+    replacement="${sed_expr_part1} ${sed_expr_part2}${sed_expr_part3}"
+    replacement="${replacement} ${sed_expr_part4} ${sed_expr_part5}"
+    replacement="${replacement} ${sed_expr_part6}${sed_expr_part7}"
+    replacement="${replacement} ${sed_expr_part8}"
+    sed -i "s|/devices>|${replacement}|" "$tempFile"
+    echo $tempFile > /tmp/t.xml
+    cat $tempFile

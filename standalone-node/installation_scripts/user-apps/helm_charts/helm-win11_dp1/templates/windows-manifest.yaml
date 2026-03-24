@@ -1,0 +1,262 @@
+# yamllint disable-file
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- range .Values.virtualMachines}}
+{{- if .secondaryNetwork}}
+---
+# Per-VM NetworkAttachmentDefinition with static IP from values.yaml.
+# Uses host-local IPAM with rangeStart=rangeEnd=ip to guarantee the
+# exact IP defined in values.yaml is assigned to this VM's secondary
+# interface. The bridge name must match the one created by
+# network_config.sh (default: br0).
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: {{.name}}-bridge-network
+  namespace: {{.namespace}}
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "type": "bridge",
+      "bridge": "{{.secondaryNetwork.bridgeName}}",
+      "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [
+            {
+              "subnet": "{{.secondaryNetwork.subnet}}",
+              "rangeStart": "{{.secondaryNetwork.ip}}",
+              "rangeEnd": "{{.secondaryNetwork.ip}}",
+              "gateway": "{{.secondaryNetwork.gatewayIp}}"
+            }
+          ]
+        ]
+      },
+      "dns": {
+        "nameservers": {{.secondaryNetwork.nameservers | toJson}}
+      }
+    }
+{{- end}}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{.name}}-bootdisk-pv
+  namespace: {{.namespace}}
+spec:
+  capacity:
+    storage: {{.storage}}
+  accessModes:
+    - ReadWriteOnce
+  {{- if .storageClassName}}
+  storageClassName: {{.storageClassName}}
+  {{- end}}
+  hostPath:
+    path: {{.hostPath}}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app/name: {{.name}}
+  name: {{.name}}-bootdisk
+  namespace: {{.namespace}}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{.storage}}
+  {{- if .storageClassName}}
+  storageClassName: {{.storageClassName}}
+  {{- else}}
+  storageClassName: ""
+  {{- end}}
+  volumeName: {{.name}}-bootdisk-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{.name}}
+  name: {{.name}}-rdp
+  namespace: {{.namespace}}
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: rdp
+      port: {{.rdpPort}}
+      protocol: TCP
+      targetPort: 3389
+  selector:
+    app/name: {{.name}}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app/name: {{.name}}
+  name: {{.name}}-ssh
+  namespace: {{.namespace}}
+spec:
+  ports:
+    - name: ssh
+      port: 22
+      protocol: TCP
+      targetPort: 22
+  selector:
+    app/name: {{.name}}
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    app/name: {{.name}}
+  name: {{.name}}-vm
+  namespace: {{.namespace}}
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        hooks.kubevirt.io/hookSidecars: >-
+          [
+            {
+              "args": ["--version", "v1alpha2"],
+              "configMap": {
+                "name": "sidecar-win11-dp1",
+                "key": "my_script.sh",
+                "hookPath": "/usr/bin/onDefineDomain"
+              }
+            }
+          ]
+      labels:
+        app/name: {{.name}}
+    spec:
+      domain:
+        clock:
+          utc: {}
+          timer:
+            hpet:
+              present: false
+            pit:
+              tickPolicy: delay
+            rtc:
+              tickPolicy: catchup
+            hyperv:
+              present: true
+        cpu:
+          cores: {{.cpuCores}}
+          model: host-passthrough
+        devices:
+          autoattachGraphicsDevice: false
+          autoattachPodInterface: true
+          {{- if .gpuDeviceName}}
+          gpus:
+            - deviceName: {{.gpuDeviceName}}
+              name: gpu1
+          {{- end}}
+          disks:
+            - bootOrder: 1
+              disk:
+                bus: sata
+              name: bootdisk
+          tpm: {}
+          interfaces:
+            - name: default
+              masquerade: {}
+              macAddress: {{.primaryMacAddress}}
+            {{- if .secondaryNetwork}}
+            - name: secondary-bridge-nic
+              macAddress: {{.secondaryMacAddress}}
+              bridge: {}
+            {{- end}}
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: {{.secureBoot}}
+        machine:
+          type: q35
+        features:
+          acpi:
+            enabled: true
+          apic:
+            enabled: true
+          smm:
+            enabled: true
+          hyperv:
+            relaxed:
+              enabled: true
+            vapic:
+              enabled: true
+            spinlocks:
+              enabled: true
+              spinlocks: 8191
+            frequencies:
+              enabled: true
+            reenlightenment:
+              enabled: true
+            tlbflush:
+              enabled: true
+            ipi:
+              enabled: true
+            runtime:
+              enabled: true
+            reset:
+              enabled: true
+            synic:
+              enabled: true
+            synictimer:
+              enabled: true
+              direct:
+                enabled: true
+            vpindex:
+              enabled: true
+        memory:
+          guest: {{.memory}}
+          hugepages:
+            pageSize: "2Mi"
+        resources:
+          requests:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{.memory}}
+            ephemeral-storage: "1Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+          limits:
+            intel.com/igpu: 1
+            intel.com/udma: 1
+            intel.com/x11: 1
+            hugepages-2Mi: {{.memory}}
+            ephemeral-storage: "2Gi"
+            intel.com/usb: 1
+            intel.com/vfio: 1
+      networks:
+        - name: default
+          pod: {}
+        {{- if .secondaryNetwork}}
+        - name: secondary-bridge-nic
+          multus:
+            networkName: {{.namespace}}/{{.name}}-bridge-network
+        {{- end}}
+      terminationGracePeriodSeconds: 0
+      volumes:
+        - name: bootdisk
+          {{- if .usePVC}}
+          persistentVolumeClaim:
+            claimName: {{.name}}-bootdisk
+          {{- else if .cdiDv}}
+          dataVolume:
+            name: {{.cdiDv}}
+          {{- else}}
+          persistentVolumeClaim:
+            claimName: {{.name}}-bootdisk
+          {{- end}}
+{{- end}}
+
