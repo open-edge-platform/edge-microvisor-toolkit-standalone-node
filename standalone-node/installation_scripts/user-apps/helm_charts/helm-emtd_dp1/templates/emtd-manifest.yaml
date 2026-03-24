@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+# Helm Chart Template - Range Loop
 {{- range .Values.virtualMachines}}
-
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -21,11 +20,11 @@ spec:
   nodeAffinity:
     required:
       nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - edgemicrovisortoolkit
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - edgemicrovisortoolkit
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -36,7 +35,7 @@ metadata:
   namespace: {{.namespace}}
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: {{.storage}}
@@ -52,10 +51,10 @@ metadata:
 spec:
   externalTrafficPolicy: Cluster
   ports:
-  - name: rdp
-    port: {{.rdpPort}}
-    protocol: TCP
-    targetPort: 3389
+    - name: rdp
+      port: {{.rdpPort}}
+      protocol: TCP
+      targetPort: 3389
   selector:
     app/name: {{.name}}
   type: LoadBalancer
@@ -69,11 +68,11 @@ metadata:
   namespace: {{.namespace}}
 spec:
   ports:
-  - name: ssh
-    port: 22
-    protocol: TCP
-    targetPort: 22
-    nodePort: 30022
+    - name: ssh
+      port: 22
+      protocol: TCP
+      targetPort: 22
+      nodePort: 30022
   selector:
     app/name: {{.name}}
   type: NodePort
@@ -90,8 +89,10 @@ spec:
   template:
     metadata:
       annotations:
-        hooks.kubevirt.io/hookSidecars: >-
-          [{"args":["--version","v1alpha2"],"configMap":{"name":"sidecar-emtd-dp1","key":"my_script.sh","hookPath":"/usr/bin/onDefineDomain"}}]
+        hooks.kubevirt.io/hookSidecars: >
+          [{"args":["--version","v1alpha2"],"configMap":{
+          "name":"sidecar-emtd-dp1","key":"my_script.sh",
+          "hookPath":"/usr/bin/onDefineDomain"}}]
       labels:
         app/name: {{.name}}
     spec:
@@ -161,11 +162,11 @@ spec:
             networkName: user-apps/my-bridge-network
       terminationGracePeriodSeconds: 0
       volumes:
-      - name: bootdisk
-        persistentVolumeClaim:
-          claimName: {{.name}}-bootdisk
-      - name: cloudinitdisk
-        cloudInitNoCloud:
+        - name: bootdisk
+          persistentVolumeClaim:
+            claimName: {{.name}}-bootdisk
+        - name: cloudinitdisk
+          cloudInitNoCloud:
           userData: |
             #cloud-config
             hostname: {{.name}}
@@ -179,7 +180,9 @@ spec:
                     ethernets:
                       enp2s0:
                         dhcp4: no
-                        addresses: [{{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}}]
+                        addresses:
+                          - {{.secondaryNetwork.ip}}
+                            {{.secondaryNetwork.subnetMask}}
                         gateway4: {{.secondaryNetwork.gatewayIp}}
                         nameservers:
                           addresses: {{.secondaryNetwork.nameservers}}
@@ -188,21 +191,28 @@ spec:
                 content: |
                   #!/bin/bash
                   set -x  # Enable debug output
-                  echo "Setting up secondary network interface via cloud-init script"
+                  echo "Setting up secondary network interface via \
+cloud-init script"
                   sleep 5
-                  
+
                   # Find the secondary interface (not eth0)
-                  SECONDARY_IF=$(ip link show | grep -E '^[0-9]+: (eth|ens|enp)' | grep -v eth0 | head -1 | cut -d: -f2 | tr -d ' ')
-                  
+                  SECONDARY_IF=$(ip link show | grep -E \
+'^[0-9]+: (eth|ens|enp)' | grep -v eth0 | head -1 | \
+cut -d: -f2 | tr -d ' ')
+
                   if [ -n "$SECONDARY_IF" ]; then
                     echo "Found secondary interface: $SECONDARY_IF"
                     # Remove any existing IP addresses
-                    ip addr flush dev $SECONDARY_IF 2>/dev/null || true
+                    ip addr flush dev $SECONDARY_IF 2>/dev/null \
+|| true
                     # Configure the interface
-                    ip addr add {{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}} dev $SECONDARY_IF
+                    ip addr add \
+{{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}} \
+dev $SECONDARY_IF
                     ip link set $SECONDARY_IF up
-                    
-                    echo "Secondary interface $SECONDARY_IF configured successfully"
+
+                    echo "Secondary interface $SECONDARY_IF \
+configured successfully"
                     ip addr show $SECONDARY_IF
                   else
                     echo "No secondary interface found"
@@ -216,7 +226,9 @@ spec:
               - sleep 5
               - ip addr show
               - ip route show
-              - ping -c 3 {{.secondaryNetwork.gatewayIp}} || echo "Gateway ping failed"
+              - >-
+                ping -c 3 {{.secondaryNetwork.gatewayIp}} ||
+                echo "Gateway ping failed"
 ---
 apiVersion: v1
 kind: Service
@@ -227,23 +239,22 @@ metadata:
   namespace: {{.namespace}}
 spec:
   ports:
-  - name: plcport1
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
-    nodePort: 30080
-  - name: plcport2
-    port: 5357
-    protocol: TCP
-    targetPort: 5357
-    nodePort: 30357
-  - name: plcport3
-    port: 9867
-    protocol: TCP
-    targetPort: 9867
-    nodePort: 30867
+    - name: plcport1
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 30080
+    - name: plcport2
+      port: 5357
+      protocol: TCP
+      targetPort: 5357
+      nodePort: 30357
+    - name: plcport3
+      port: 9867
+      protocol: TCP
+      targetPort: 9867
+      nodePort: 30867
   selector:
     app/name: {{.name}}
   type: NodePort
-
 {{- end}}
