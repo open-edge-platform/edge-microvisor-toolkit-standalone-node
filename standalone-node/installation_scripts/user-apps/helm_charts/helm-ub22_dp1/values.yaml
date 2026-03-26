@@ -18,6 +18,8 @@ virtualMachines:
     rdpPort: 3392
     secondaryNetwork:
       ip: 199.168.1.10
+      subnet: 199.168.1.0/24
       subnetMask: /24
       gatewayIp: 199.168.1.1
       nameservers: [8.8.8.8]
+      bridgeName: br0

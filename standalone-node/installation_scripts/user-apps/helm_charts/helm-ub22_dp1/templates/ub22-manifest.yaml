@@ -3,6 +3,42 @@
 # SPDX-License-Identifier: Apache-2.0
 
 {{- range .Values.virtualMachines}}
+{{- if .secondaryNetwork}}
+---
+# Per-VM NetworkAttachmentDefinition with static IP from values.yaml.
+# Uses host-local IPAM with rangeStart=rangeEnd=ip to guarantee the
+# exact IP defined in values.yaml is assigned to this VM's secondary
+# interface. The bridge name must match the one created by
+# network_config.sh (default: br0).
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: {{.name}}-bridge-network
+  namespace: {{.namespace}}
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "type": "bridge",
+      "bridge": "{{ .secondaryNetwork.bridgeName }}",
+      "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [
+            {
+              "subnet": "{{ .secondaryNetwork.subnet }}",
+              "rangeStart": "{{ .secondaryNetwork.ip }}",
+              "rangeEnd": "{{ .secondaryNetwork.ip }}",
+              "gateway": "{{ .secondaryNetwork.gatewayIp }}"
+            }
+          ]
+        ]
+      },
+      "dns": {
+        "nameservers": {{ .secondaryNetwork.nameservers | toJson }}
+      }
+    }
+{{- end }}
 
 ---
 apiVersion: v1
@@ -170,7 +206,7 @@ spec:
           pod: {}
         - name: secondary-bridge-nic
           multus:
-            networkName: user-apps/my-bridge-network
+            networkName: {{ .namespace }}/{{ .name }}-bridge-network
       terminationGracePeriodSeconds: 0
       volumes:
         - name: bootdisk
@@ -190,46 +226,12 @@ spec:
                       version: 2
                       ethernets:
                         enp2s0:
-                          dhcp4: no
-                          addresses:
-                            - {{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}}
-                          gateway4: {{.secondaryNetwork.gatewayIp}}
+                          dhcp4: true
+                          dhcp4-overrides:
+                            route-metric: 200
                           nameservers:
                             addresses: {{.secondaryNetwork.nameservers}}
-                - path: /usr/local/bin/setup-secondary-network.sh
-                  permissions: '0755'
-                  content: |
-                    #!/bin/bash
-                    set -x  # Enable debug output
-                    echo "Setting up secondary interface via cloud-init"
-                    sleep 5
-
-                    # Find the secondary interface (not eth0)
-                    SECONDARY_IF=$(
-                      ip link show | grep -E '^[0-9]+: (eth|ens|enp)' |
-                      grep -v eth0 |
-                      head -1 | cut -d: -f2 | tr -d ' '
-                    )
-
-                    if [ -n "$SECONDARY_IF" ]; then
-                      echo "Found secondary interface: $SECONDARY_IF"
-                      # Remove any existing IP addresses
-                      ip addr flush dev "$SECONDARY_IF" \
-                        2>/dev/null || true
-                      # Configure the interface
-                      SECONDARY_ADDR="{{.secondaryNetwork.ip}}{{.secondaryNetwork.subnetMask}}"
-                      ip addr add "$SECONDARY_ADDR" \
-                        dev "$SECONDARY_IF"
-                      ip link set "$SECONDARY_IF" up
-
-                      echo "Secondary interface $SECONDARY_IF configured"
-                      ip addr show "$SECONDARY_IF"
-                    else
-                      echo "No secondary interface found"
-                      ip link show
-                    fi
               runcmd:
-                - /usr/local/bin/setup-secondary-network.sh
                 - netplan apply
                 - systemctl restart systemd-networkd
                 - systemctl restart systemd-resolved
