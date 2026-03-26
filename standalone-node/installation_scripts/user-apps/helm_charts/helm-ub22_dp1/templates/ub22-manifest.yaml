@@ -3,17 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 {{- range .Values.virtualMachines}}
-{{- if .secondaryNetwork }}
+{{- if .secondaryNetwork}}
 ---
 # Per-VM NetworkAttachmentDefinition with static IP from values.yaml.
 # Uses host-local IPAM with rangeStart=rangeEnd=ip to guarantee the
 # exact IP defined in values.yaml is assigned to this VM's secondary
-# interface. The bridge name must match the one created by network_config.sh (default: br0).
+# interface. The bridge name must match the one created by
+# network_config.sh (default: br0).
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
-  name: {{ .name }}-bridge-network
-  namespace: {{ .namespace }}
+  name: {{.name}}-bridge-network
+  namespace: {{.namespace}}
 spec:
   config: |
     {
