@@ -113,6 +113,14 @@ create-standalone-installer-pkg() {
 # Create the tar file for k8 scripts
 
 mv "$os_filename" out/ 
+# Select config-file based on INSTALL_TYPE
+if [[ "$INSTALL_TYPE" == "DV" ]]; then
+    echo "INSTALL_TYPE=DV detected: copying config-file-dv to config-file"
+    cp config-file-dv config-file || { echo "Failed to copy config-file-dv to config-file, please check!!"; exit 1; }
+else
+    echo "INSTALL_TYPE=NRT detected: copying config-file-nrt to config-file"
+    cp config-file-nrt config-file || { echo "Failed to copy config-file-nrt to config-file, please check!!"; exit 1; }
+fi
 cp bootable-usb-prepare.sh out/
 cp write-image-to-usb.sh out/
 cp config-file out/
@@ -164,6 +172,18 @@ popd || return 1
 
 }
 
+# Download Kubernetes artifacts (container images and manifest files)
+download-k3s-artifacts() {
+    echo "Downloading Kubernetes artifacts for INSTALL_TYPE=$INSTALL_TYPE..."
+    chmod +x download_images.sh
+    if bash download_images.sh "$INSTALL_TYPE"; then
+        echo "Kubernetes artifacts downloaded successfully"
+    else
+        echo "Kubernetes artifacts download failed, please check!!"
+        exit 1
+    fi
+}
+
 main(){
 
 echo "Main func: Disk space usage before build:"
@@ -176,6 +196,8 @@ download-uOS
 download-tvm
 
 create-emt-uos-iso
+
+download-k3s-artifacts
 
 create-standalone-installer-pkg
 

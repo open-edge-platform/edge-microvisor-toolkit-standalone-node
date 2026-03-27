@@ -1,0 +1,261 @@
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+##############################################################
+#                      Configuration File                    #
+##############################################################
+#
+# This configuration file provides inputs for:
+# - Proxy values: If the Edge node is behind a firewall.
+# - SSH key: For password-less SSH connection from a remote server 
+#            to the edge node.
+# - User credentials: Set the username and password for the edge node.
+#
+##############################################################
+
+# -------------------- Proxy Configuration --------------------
+# Example: http_proxy="http://proxy-org.com:port-number"
+
+http_proxy=http://proxy-dmz.intel.com:911
+https_proxy=http://proxy-dmz.intel.com:912
+no_proxy=localhost,*.intel.com,*intel.com,.intel.com,intel.com192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock
+HTTP_PROXY=http://proxy-dmz.intel.com:911
+HTTPS_PROXY=http://proxy-dmz.intel.com:912
+NO_PROXY=localhost,*.intel.com,*intel.com,.intel.com,intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock
+
+# -------------------- SSH Configuration ---------------------
+# Example: Use `cat ~/.ssh/id_rsa.pub` or `cat ~/.ssh/id_ed25519.pub` 
+#          to get the public key, or use any public key available 
+#          under the `.ssh` directory.
+# Copy the full key string and set it under the `ssh_key` variable.
+
+ssh_key="1234"
+
+# ------------------ User Credentials ------------------------
+# Choose Linux user as you wish to create. This is mandatory
+# Pswword will be taken from cmd line as input for security purpose
+# Example: user_name="user"
+
+user_name="user"
+
+# ------------------ Host type ------------------------
+# Choose the type of host to deploy: container or kubernetes.
+# Example: host_type="container" or host_type="kubernetes"
+# Default value is kubernetes.
+host_type="kubernetes"
+
+#------------------- Static IP Configuration ------------------------------------------------------
+# This section assigns a Static IP address to the Edge Node if no DHCP server is available.
+#
+# Ensure that the IP address, subnet mask, gateway, and DNS name server values
+#     are correctly configured according to your organization network settings.
+#
+## NOTE:
+#       This configuration is optional.
+#       If a valid IP is obtained from a DHCP server, the static IP configuration
+#       will be skipped, even if the static details are provided below
+# Example:
+# static_ip="192.168.1.24"
+# subnet_mak="24" i.e 192.168.1.24/24
+# dns_name_server="8.8.8.8,4.4.4.4" ## According to your organization's netwrok
+
+static_ip="192.168.1.2"
+subnet_mask="24"
+default_gate_way="192.168.1.1"
+dns_name_server="8.8.8.8,4.4.4.4"
+
+# ------------------ LVM partition size ------------------------
+# Set the LVM partition size in GB. This will be used for creating
+# the LVM partition that will be used for user data. By default,
+# `lvm_size_ingb` will be set to ZERO. Update the size in GB if required.
+# Example: lvm_size_ingb="20"
+
+# Note: If the Edge Node has only a single hard disk, update the lvm_size_ingb value; otherwise, skip it.
+lvm_size_ingb="0"
+
+# -------------------- Huge Page Size Configuration --------------------
+# Configure the huge page size for guest VMs (optional).
+# Set this value based on the requirements of your guest VMs.
+# Leave it empty if huge pages are not needed.
+#
+#  Default hugepage table size is 2048. 
+# If the hugepage table size is 2048, then the total memory allocated for hugepages is simply the product of these two values. For example, with a 2MB hugepage size, 2048 hugepages would consume 4GB of memory (2048 * 2MB = 4GB)
+# Example:
+#   huge_page_config="12 * 1024"
+# This sets up 24GB of huge pages, huge page size of 2MB (2048).
+# Calculation: 12 * 1024 * 2048 bytes = 24GB
+
+huge_page_config="12 * 1024"
+
+# -------------------- Custom NTP Server Configuration --------------------
+# Configure NTP server settings according to your organization's requirements.
+# This configuration is optional and should only be set if required.
+#
+# Example:
+#   USER_CUSTOM_NTP_SERVERS="pool.ntp.org"
+#   For multiple servers: USER_CUSTOM_NTP_SERVERS="pool1.ntp.org,pool2.ntp.org"
+
+USER_CUSTOM_NTP_SERVERS=""
+
+# -------------------Custom cloud-init Config file---------------------
+# This section is to customize the cloud-init config file as per User Wish
+
+# === Enable or disable systemd services ===
+# List services to enable or disable.
+# Note : Make sure Services should be part of the Base Image to enable or disable.
+# Example:
+#   services:
+#     enable: [docker, ssh]
+#     disable: [apache2]
+services:
+    enable: []
+    disable: []
+
+# === Create custom configuration files ===
+# To create a file, specify its path,permission and content.
+# Note : you can create as many files(shell,text,yaml) as you wish,just expand the write_files: with prefix -path for next file
+# Note : Make sure scripts/files passing to cloud-init file well tested,if any issues in the script/file error messages 
+#        will be present under /var/log/cloud-init-output.log file on EMT image.
+# Example:
+#   write_files:
+#     - path: /etc/cloud/test.sh
+#        permissions: '0644'
+#       content: |
+#         #!/bin/sh
+#         echo "This is Example"
+write_files:
+  - path: /etc/environment
+    append: true
+    content: |
+      export INTEL_IDV_GPU_PRODUCT_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/device | sed 's/^0x//')
+      export INTEL_IDV_GPU_VENDOR_ID=$(cat /sys/devices/pci0000:00/0000:00:02.0/vendor | sed 's/^0x//')  
+  - path: /etc/systemd/system/nw_custom_file.service
+    content: |
+      [Unit]
+      Description=network custom file services
+      After=network.target
+      [Service]
+      WorkingDirectory=/opt/user-apps/scripts/management/
+      ExecStart=bash /opt/user-apps/scripts/management/nw_custom_service.sh
+      Restart=on-failure
+      [Install]
+      WantedBy=multi-user.target
+  # autologin.conf configures automatic login for the specified user on tty1.
+  # Change AUTOLOGIN_USER to your intended username if not using 'guest' user.
+  - path: /etc/systemd/system/getty@tty1.service.d/autologin.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment="AUTOLOGIN_USER=user"
+      ExecStart=
+      ExecStart=-/sbin/agetty -o '-f -- \\u' --autologin $AUTOLOGIN_USER --noclear %I $TERM
+
+  # Change `guest` to your intended username if not using 'guest' user.
+  - path: /etc/sudoers.d/idv_scripts
+    permissions: '0644'
+    content: |
+      user ALL=(ALL) NOPASSWD: /usr/bin/X, \
+      /usr/bin/idv/init/setup_sriov_vfs.sh, \
+      /usr/bin/idv/init/setup_display.sh, \
+      /usr/bin/idv/launcher/start_vm.sh, \
+      /usr/bin/idv/launcher/start_all_vms.sh, \
+      /usr/bin/idv/launcher/stop_vm.sh, \
+      /usr/bin/idv/launcher/stop_all_vms.sh
+
+  - path: /etc/X11/xorg.conf.d/10-serverflags.conf
+    permissions: '0644'
+    content: |
+      Section "ServerFlags"
+           Option "StandbyTime" "0"
+           Option "SuspendTime" "0"
+           Option "OffTime"     "0"
+           Option "BlankTime"   "0"
+      EndSection
+
+  - path: /etc/X11/xorg.conf.d/10-extensions.conf
+    permissions: '0644'
+    content: |
+      Section "Extensions"
+          Option "DPMS" "false"
+      EndSection
+
+  - path: /etc/udev/rules.d/99-usb-qemu.rules
+    permissions: '0644'
+    content: |
+      ACTION=="add", SUBSYSTEM=="usb", MODE="0664", GROUP="qemu", OWNER="qemu"
+
+    # Change `guest` to your intended username if not using 'guest' user.
+  - path: /etc/cloud/rc.xml
+    permissions: '0644'
+    owner: 'user:user'
+    content: |
+      <openbox_config xmlns="http://openbox.org/3.6/rc">
+        <keyboard>
+          <keybind key="A-C-t">
+            <action name="Execute">
+              <command>xterm</command>
+            </action>
+          </keybind>
+        </keyboard>
+      </openbox_config>
+
+  - path: /etc/cloud/custom_network.conf
+    permissions: '0644'
+    content: |
+      # custom_network.conf
+      # Update this file to specify custom network settings for the bridge configuration script.
+      # Set the CIDR, gateway, netmask, IP range, and DNS server for your environment.
+      # If EdgeNode cannot reach Internet. DNS update needed.
+
+      BR_NAME="br0"                    # Bridge interface name
+      BR_CIDR="197.168.1.0/24"         # Bridge interface IP address and subnet (CIDR notation)
+      BR_GATEWAY="197.168.1.1"         # Default gateway for the bridge network
+      BR_NETMASK="24"                  # Netmask for the bridge network (as a number, e.g., 24)
+      BR_START_RANGE="197.168.1.2"     # Start of the DHCP/static IP range for clients
+      BR_END_RANGE="197.168.1.20"      # End of the DHCP/static IP range for clients
+      BR_DNS_NAMESERVER="8.8.8.8"      # DNS server to use for the bridge network.
+  - path: /etc/systemd/system/vm-cpu-pinning.service
+    content: |
+      [Unit]
+      Description=KubeVirt VM vCPU Pinning Watcher
+      After=cloud-init.service
+      [Service]
+      WorkingDirectory=/opt/user-apps/scripts/management/
+      ExecStart=bash /opt/user-apps/scripts/management/vm_cpu_pinning.sh start --vm1 emtd-vm --cpu1 1-8 --vm2 win11-vm --cpu2 9-11 --watch 60 --namespace user-apps --daemon
+      # NOTE: --vm1 can be either 'ub22-vm' or 'emtd-vm' depending on your deployment. --vm2 is always 'win11-vm'.
+      Restart=on-failure
+      [Install]
+      WantedBy=multi-user.target
+# === Custom run commands ===
+# List commands or scripts to run at boot.
+# Note : Make sure syntax is correct for the commands,if any issues in commands error messages will be present 
+#        under /var/log/cloud-init-output.log file on EMT image. 
+# Example:
+#   runcmd:
+#     - systemctl restart myservice
+#     - bash /etc/cloud/test.sh
+# If custom scripts in user-apps are getting not getting invoked. please make sure to add the scripts in "user-apps" folder
+# Example:
+#   runcmd:
+#     - bash /opt/user-apps/network-config.sh /etc/cloud/custom_network.conf
+runcmd:
+  # Source /etc/environment to ensure newly created environment variables are available to subsequent commands in this boot sequence
+  - source /etc/environment
+  # Set Local timezone to India
+  - timedatectl set-timezone Asia/Kolkata
+  - udevadm control --reload-rules
+  # Add the user to render group (assuming username is 'user')
+  - usermod -a -G render user
+  - sudo -u user mkdir -p /home/user/.config/openbox/
+  - sudo -u user mv /etc/cloud/rc.xml /home/user/.config/openbox/rc.xml  
+  # Change `guest` to your intended username if not using 'guest' user.
+  - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user enable idv-init.service
+  - sudo -u user XDG_RUNTIME_DIR=/run/user/$(id -u user) systemctl --user start idv-init.service
+  - systemctl start nw_custom_file.service
+  # Disable turbo mode
+  - echo 1 | tee /sys/devices/system/cpu/intel_pstate/no_turbo
+  # Set scaling governor to powersave mode for all cpus
+  - for i in {0..11}; do echo "powersave" | tee /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor;done
+  - test -f /opt/user-apps/scripts/management/apply_bridge_nad.sh && bash /opt/user-apps/scripts/management/apply_bridge_nad.sh /etc/cloud/custom_network.conf > /etc/cloud/apply_bridge_nad.log 2>&1
+  # --vm1 argument must be 'ubuntu' or 'emtd'; --vm2 must be 'windows'
+  - bash /opt/user-apps/scripts/management/app-deploy.sh ubuntu windows
