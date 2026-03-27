@@ -16,12 +16,12 @@
 # -------------------- Proxy Configuration --------------------
 # Example: http_proxy="http://proxy-org.com:port-number"
 
-http_proxy=http://proxy-dmz.intel.com:911
-https_proxy=http://proxy-dmz.intel.com:912
-no_proxy=localhost,*.intel.com,*intel.com,.intel.com,intel.com192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock
-HTTP_PROXY=http://proxy-dmz.intel.com:911
-HTTPS_PROXY=http://proxy-dmz.intel.com:912
-NO_PROXY=localhost,*.intel.com,*intel.com,.intel.com,intel.com,192.168.0.0/16,172.16.0.0/12,127.0.0.0/8,10.0.0.0/8,/var/run/docker.sock
+http_proxy=""
+https_proxy=""
+no_proxy=""
+HTTP_PROXY=""
+HTTPS_PROXY=""
+NO_PROXY=""
 
 # -------------------- SSH Configuration ---------------------
 # Example: Use `cat ~/.ssh/id_rsa.pub` or `cat ~/.ssh/id_ed25519.pub` 
