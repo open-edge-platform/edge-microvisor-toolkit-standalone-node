@@ -15,7 +15,8 @@ path = [
     "host_os/edge_microvisor_toolkit.raw.gz.sha256sum",
     "emt_uos/**",
     "installation_scripts/final_release/*",
-    "installation_scripts/temp_extraction/*"
+    "installation_scripts/temp_extraction/*",
+    "installation_scripts/user-apps/images/*"
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 Intel Corporation"
