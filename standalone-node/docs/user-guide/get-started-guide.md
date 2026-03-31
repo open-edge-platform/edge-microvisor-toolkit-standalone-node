@@ -39,15 +39,13 @@ See the diagram below to learn how USB-based provisioning of the standalone node
 flowchart TD
    A[Clone the edge-microvisor-standalone-node repository from GitHub]
    A --> B{Choose your Edge Microvisor Toolkit image}
-   B -- "Non-RT (default and applicable for most Edge AI apps)" --> C[Update the
-   config-file with your settings]
-   C --> D[Create a bootable USB drive]
-   D --> E[Plug the USB drive into the edge node and install]
-   E --> F[Start using your edge node for AI apps or other use cases]
-   B -- "Desktop Virtualization or custom image" --> G[Download your preferred image]
-   G --> H[Replace the default raw image in the installer directory]
-   H --> I[Refer to the cloud-init
-   configuration article and update the config-file with your settings]
+   B -- "Non-RT (default and applicable for most Edge AI apps)" --> C["Run: sudo make build\nauto-selects config-file-nrt and downloads K3s artifacts"]
+   C --> D[Update config-file with your settings]
+   D --> E[Create a bootable USB drive]
+   E --> F[Plug the USB drive into the edge node and install]
+   F --> G[Start using your edge node for AI apps or other use cases]
+   B -- "Desktop Virtualization or custom image" --> H["Run: sudo make build INSTALL_TYPE=DV PLATFORM_TYPE=RPL\nauto-selects config-file-dv and downloads DV K3s artifacts"]
+   H --> I[Update config-file with your settings]
    I --> J[Create a bootable USB drive using the installer]
    J --> K[Plug the USB into the edge node and install]
    K --> L[Start using your edge node for your specific use case]
@@ -70,26 +68,33 @@ cd edge-microvisor-toolkit-standalone-node
 
 #### 1.2: Create the Standalone Installer with NRT or DV image
 
-- To create a standalone installation tar file using a Non-RT (NRT) image and generate the necessary
-  files for preparing a bootable USB device, run the following command
+Running `sudo make build` will automatically:
+
+- Download the Microvisor image and Kubernetes artifacts for the selected `INSTALL_TYPE`
+- Select the correct `config-file` based on `INSTALL_TYPE`:
+  - `INSTALL_TYPE=NRT` → uses `config-file-nrt` as `config-file`
+  - `INSTALL_TYPE=DV` → uses `config-file-dv` as `config-file`
+- Package everything into `standalone-installation-files.tar.gz`
+
+- To create a standalone installation tar file using a Non-RT (NRT) image, run the following command:
 
    ```bash
    sudo make build
    ```
 
-- To create a standalone installation tar file with Display Virtualization (DV) for bootable USB
-  preparation, follow the procedure below. This process integrates the DV image directly instead
-  of the Non-RT image, eliminating the need for manual steps to replace the Non-RT image with the DV image.
-  Platform types available are PTL: Pantherlake, RPL:Raptorlake/Bartlettlake.
-  > **Note:** INSTALL_TYPE=DV is not supported for PTL platform.
-  > INSTALL_TYPE=NRT is supported for both RPL and PTL platforms.
+- To create a standalone installation tar file with Display Virtualization (DV). This process integrates the DV image directly instead of the Non-RT image, eliminating the need for manual steps to replace Non-RT image with DV:
 
-   ```bash
-   sudo make build INSTALL_TYPE=DV PLATFORM_TYPE=RPL
-   ```
+  Platform types available are PTL: Pantherlake, RPL: Raptorlake and BTL: Bartlettlake.
+
+  > **Note:** INSTALL_TYPE=DV is not supported for PTL platform.
+  > INSTALL_TYPE=NRT is supported for both RPL, BTL and PTL platforms.
+
+  ```bash
+  sudo make build INSTALL_TYPE=DV PLATFORM_TYPE=RPL
+  ```
 
 > **Note:** This command will generate the `standalone-installation-files.tar.gz` file.
-  The file will be located in the `$(pwd)/installation-scripts/out` directory.
+  The file will be located in the `$(pwd)/installation_scripts/out` directory.
 
 #### 1.3: Prepare the bootable USB Drive
 
@@ -153,26 +158,12 @@ cd edge-microvisor-toolkit-standalone-node
   download_images.sh
   ```
 
-- Download the kubernetes artifacts (container images and manifest files).
-
-  This step is done by executing the `./download_images.sh` script. If you are using EMT
-  image with desktop virtualization features then use `DV` parameter. For default EMT image,
-  which is a non-RT kernel, use the `NRT` parameter.
-
-   ```bash
-   sudo ./download_images.sh DV
-
-   or
-
-   sudo ./download_images.sh NRT
-   ```
-
-> **Note:** By default the script will only pull basic kubernetes artifacts to create a single node cluster.
+- Download the Kubernetes artifacts (container images and manifest files):
+  The `config-file` included in the archive is automatically pre-configured for the selected `INSTALL_TYPE` (`NRT` or `DV`). Kubernetes artifacts are also pre-downloaded and bundled during the `sudo make build` step — no manual `download_images.sh` execution is required. By default the script will only pull basic kubernetes artifacts to create a single-node cluster.
 
 - Update `config-file` with your deployment-specific settings.
 
-  This configuration file is used to provision the edge node during
-  its initial boot and should include the following parameters:
+  This configuration file is used to provision the edge node during its initial boot and should include the following parameters:
 
   - **Proxy settings:** Specify if the edge node requires a proxy to access external networks.
   - **SSH key:** Provide the public SSH key (typically your
@@ -229,11 +220,26 @@ meet specific edge deployment needs. You can choose from:
 ##### Option 1: Using the Default Non-RT Image
 
 If you opt for the default non-RT image, which is suggested for the majority of Edge AI applications,
-there is no need for further image setup. The `usb-bootable-files.tar.gz` installer includes this image.
+run `sudo make build` (default). The build process will automatically:
+
+- Use `config-file-nrt` as the `config-file`
+- Download NRT-specific Kubernetes artifacts
+- Bundle everything into `standalone-installation-files.tar.gz`
+
+There is no need for further image setup or manual config file selection.
 
 ##### Option 2: Using Desktop Virtualization or Custom created image
 
-If you need Desktop Virtualization features, follow these steps to replace the default image:
+If you need Desktop Virtualization features, run `sudo make build INSTALL_TYPE=DV PLATFORM_TYPE=RPL`.
+The build process will automatically:
+
+- Use `config-file-dv` as the `config-file`
+- Download DV-specific Kubernetes artifacts
+- Bundle everything into `standalone-installation-files.tar.gz`
+
+No manual config file copying or `download_images.sh` execution is needed for the standard DV flow.
+
+For a **custom image**, follow the steps below to replace the default image after building:
 
 1. Download the desktop virtualization image (DV) from the "no Auth" file server registry.
    The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260311.2000.raw.gz)
