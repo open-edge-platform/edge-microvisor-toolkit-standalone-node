@@ -208,11 +208,11 @@ write_files:
       # If EdgeNode cannot reach Internet. DNS update needed.
 
       BR_NAME="br0"                    # Bridge interface name
-      BR_CIDR="197.168.1.0/24"         # Bridge interface IP address and subnet (CIDR notation)
-      BR_GATEWAY="197.168.1.1"         # Default gateway for the bridge network
+      BR_CIDR="199.168.1.0/24"         # Bridge interface IP address and subnet (CIDR notation)
+      BR_GATEWAY="199.168.1.1"         # Default gateway for the bridge network
       BR_NETMASK="24"                  # Netmask for the bridge network (as a number, e.g., 24)
-      BR_START_RANGE="197.168.1.2"     # Start of the DHCP/static IP range for clients
-      BR_END_RANGE="197.168.1.20"      # End of the DHCP/static IP range for clients
+      BR_START_RANGE="199.168.1.2"     # Start of the DHCP/static IP range for clients
+      BR_END_RANGE="199.168.1.20"      # End of the DHCP/static IP range for clients
       BR_DNS_NAMESERVER="8.8.8.8"      # DNS server to use for the bridge network.
   - path: /etc/systemd/system/vm-cpu-pinning.service
     content: |
