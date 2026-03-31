@@ -20,7 +20,8 @@ Kubernetes web dashboard.
 ### Create a Bootable USB Drive Using Source Code
 
 A bootable USB drive can be created using the source code and your chosen version of the Edge Microvisor
-Toolkit Standalone Node. This process works for deployments using either kubernetes or container host_type configurations.
+Toolkit Standalone Node. This process works for deployments using either kubernetes or
+container host_type configurations.
 
 - Edge Microvisor Toolkit Non-RT (standard kernel)
 - Edge Microvisor Toolkit Desktop Virtualization
@@ -82,7 +83,8 @@ Running `sudo make build` will automatically:
    sudo make build
    ```
 
-- To create a standalone installation tar file with Display Virtualization (DV). This process integrates the DV image directly instead of the Non-RT image, eliminating the need for manual steps to replace Non-RT image with DV:
+- To create a standalone installation tar file with Display Virtualization (DV). This process integrates the DV image
+  directly instead of the Non-RT image, eliminating the need for manual steps to replace Non-RT image with DV:
 
   Platform types available are PTL: Pantherlake, RPL: Raptorlake and BTL: Bartlettlake.
 
@@ -159,11 +161,15 @@ Running `sudo make build` will automatically:
   ```
 
 - Download the Kubernetes artifacts (container images and manifest files):
-  The `config-file` included in the archive is automatically pre-configured for the selected `INSTALL_TYPE` (`NRT` or `DV`). Kubernetes artifacts are also pre-downloaded and bundled during the `sudo make build` step — no manual `download_images.sh` execution is required. By default the script will only pull basic kubernetes artifacts to create a single-node cluster.
+  The `config-file` included in the archive is automatically pre-configured for the selected `INSTALL_TYPE` (`NRT` or
+  `DV`). Kubernetes artifacts are also pre-downloaded and bundled during the `sudo make build` step — no manual
+  `download_images.sh` execution is required. By default the script will only pull basic kubernetes artifacts to
+  create a single-node cluster.
 
 - Update `config-file` with your deployment-specific settings.
 
-  This configuration file is used to provision the edge node during its initial boot and should include the following parameters:
+  This configuration file is used to provision the edge node during its initial boot and should
+  include the following parameters:
 
   - **Proxy settings:** Specify if the edge node requires a proxy to access external networks.
   - **SSH key:** Provide the public SSH key (typically your
@@ -173,7 +179,8 @@ Running `sudo make build` will automatically:
     - If `host_type` is set to `kubernetes`, k3s will be installed on the EMT after successful provisioning
     - If `host_type` is set to `container`, Docker will be installed on the EMT after successful provisioning
     - Both cannot co-exist on the provisioned EMT image
-  - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations for advanced setup requirements.
+  - **Cloud-init customization:** Optionally, include user-defined `cloud-init` configurations
+    for advanced setup requirements.
     - For the default EMT non-RT image, a basic
       Kubernetes installation will be performed automatically.
     - For deployments requiring Desktop Virtualization features,
@@ -364,8 +371,8 @@ Install and configure [kubectl](https://kubernetes.io/docs/tasks/tools/install-k
 
 ## Step 4: Installing tools
 
-When tools are not included in EMT (NRT/DV) immutable images, they can be installed on theStandalone edge Node using
-the following commands. Make sure to update the environment variables as needed.
+When tools are not included in EMT (NRT/DV) immutable images, they can be installed on the
+Standalone edge Node using the following commands. Make sure to update the environment variables as needed.
 
   ```bash
   # Install required tools like git, wget etc.
