@@ -249,8 +249,8 @@ No manual config file copying or `download_images.sh` execution is needed for th
 For a **custom image**, follow the steps below to replace the default image after building:
 
 1. Download the desktop virtualization image (DV) from the "no Auth" file server registry.
-   The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260311.2000.raw.gz)
-   Link to the [sha256sum for this image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-3.0.20260311.2000.raw.gz.sha256sum)
+   The DV image is available here [Download DV Image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-26.06.20260413.0120.raw.gz)
+   Link to the [sha256sum for this image](https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository/microvisor/dv/edge-readonly-dv-26.06.20260413.0120.raw.gz.sha256sum)
 
    > **Note:** A custom image can be copied locally from your development system to the 5th
    > partition, as shown in **Step 2** below.
