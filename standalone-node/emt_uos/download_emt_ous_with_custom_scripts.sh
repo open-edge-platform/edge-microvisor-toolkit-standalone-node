@@ -14,15 +14,15 @@ FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/reposi
 if [ "$PLATFORM_TYPE" == "PTL" ]; then
     # PTL Platform (To be updated with PV release images)
     # RPL/BTL Platform
-    EMB_BUILD_DATE=20260310
-    EMB_FILE_NAME="microvisor/uos/next/emb_uos_x86_64_${EMB_BUILD_DATE}"
+    EMB_BUILD_DATE=20260413
+    EMB_FILE_NAME="microvisor/uos/26.06/emb_uos_x86_64_${EMB_BUILD_DATE}"
     EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
     EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
     echo "PTL Platform uOS is selected"
 else
     # RPL/BTL Platform
-    EMB_BUILD_DATE=20251204
-    EMB_FILE_NAME="microvisor/uos/emb_uos_x86_64_${EMB_BUILD_DATE}"
+    EMB_BUILD_DATE=20260413
+    EMB_FILE_NAME="microvisor/uos/26.06/emb_uos_x86_64_${EMB_BUILD_DATE}"
     EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
     EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
     echo "RPL/BTL Platform uOS is selected"
