@@ -1,7 +1,7 @@
-# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-FileCopyrightText: (C) 2026 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
 ---
+
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -12,12 +12,12 @@ updates:
     commit-message:
       prefix: "[gha] "
 
-  - package-ecosystem: pip
-    directory: /
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
       interval: weekly
 
-  - package-ecosystem: pip
-    directory: /standalone-node
+  - package-ecosystem: "pip"
+    directory: "/standalone-node"
     schedule:
       interval: weekly
