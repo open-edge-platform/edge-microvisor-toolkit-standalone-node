@@ -35,9 +35,9 @@ else
 	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
     else
         # EMTS build with NRT image for RPL/BTL
-	      EMT_VERSION=26.06
-	      EMT_BUILD_DATE=20260413
-	      EMT_BUILD_NO=0543
+	      EMT_VERSION=3.0
+	      EMT_BUILD_DATE=20260428
+	      EMT_BUILD_NO=2200
 	      EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
