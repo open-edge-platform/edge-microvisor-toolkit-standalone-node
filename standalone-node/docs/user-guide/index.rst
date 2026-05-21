@@ -6,3 +6,4 @@
    desktop-virtualization-image-guide
    pre-loading-user-apps
    emt-update-guide
+   pkgwatt-idle-analysis
