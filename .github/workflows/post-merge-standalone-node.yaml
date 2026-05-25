@@ -11,6 +11,8 @@ on:
       - release-*
     paths:
       - "standalone-node/**"
+    tags:
+      - '*'
 
 permissions:
   contents: read
