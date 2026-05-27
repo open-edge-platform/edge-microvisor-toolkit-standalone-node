@@ -18,8 +18,8 @@ if [ "$INSTALL_TYPE" == "DV" ]; then
     EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
     EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-    curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-    curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+    curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz || { echo "Failed to download ${EMT_RAW_GZ}"; exit 1; }
+    curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/dv/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum || { echo "Failed to download ${EMT_SHA256SUM}"; exit 1; }
 else
     if [ "$PLATFORM_TYPE" == "PTL" ]; then
         # EMTS build with NRT image for PTL
@@ -31,8 +31,8 @@ else
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+	      curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz || { echo "Failed to download ${EMT_RAW_GZ}"; exit 1; }
+	      curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum || { echo "Failed to download ${EMT_SHA256SUM}"; exit 1; }
     else
         # EMTS build with NRT image for RPL/BTL
 	      EMT_VERSION=26.06
@@ -42,8 +42,8 @@ else
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
 
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz
-	      curl -k --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum
+	      curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_RAW_GZ} -o edge_microvisor_toolkit.raw.gz || { echo "Failed to download ${EMT_RAW_GZ}"; exit 1; }
+	      curl -fk --noproxy "" ${FILE_RS_URL}/files-edge-orch/repository/microvisor/non_rt/26.06/${EMT_SHA256SUM} -o edge_microvisor_toolkit.raw.gz.sha256sum || { echo "Failed to download ${EMT_SHA256SUM}"; exit 1; }
     fi
 fi
 # Verify the SHA256 checksum
