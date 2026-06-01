@@ -55,7 +55,7 @@ if bash download_tmv.sh "$INSTALL_TYPE" "$PLATFORM_TYPE"; then
     os_filename=$(printf "%s\n" *.raw.gz 2>/dev/null | head -n 1)
     mv "$os_filename" ../installation_scripts/
 else
-    echo "Microvisor Image download failed,please check!!!" "$(INSTALL_TYPE)"
+    echo "Microvisor Image download failed,please check!!!" "${INSTALL_TYPE}"
     popd || return 1
     exit 1
 fi
