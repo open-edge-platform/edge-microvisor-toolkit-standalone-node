@@ -24,8 +24,8 @@ else
     if [ "$PLATFORM_TYPE" == "PTL" ]; then
         # EMTS build with NRT image for PTL
 	      EMT_VERSION=26.06
-	      EMT_BUILD_DATE=20260526
-	      EMT_BUILD_NO=0123
+	      EMT_BUILD_DATE=20260514
+	      EMT_BUILD_NO=0241
 	      EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
@@ -36,8 +36,8 @@ else
     else
         # EMTS build with NRT image for RPL/BTL
 	      EMT_VERSION=26.06
-	      EMT_BUILD_DATE=20260526
-	      EMT_BUILD_NO=0123
+	      EMT_BUILD_DATE=20260514
+	      EMT_BUILD_NO=0241
 	      EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
