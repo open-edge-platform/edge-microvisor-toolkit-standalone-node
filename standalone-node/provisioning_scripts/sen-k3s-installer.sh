@@ -18,6 +18,7 @@ write-kubeconfig-mode: "0644"
 cluster-cidr: "10.42.0.0/16"
 cluster-dns: "10.43.0.10"
 data-dir : /var/lib/rancher/k3s
+snapshotter: native
 disable-kube-proxy: false
 kube-apiserver-arg:
   - "feature-gates=PortForwardWebsockets=true"
