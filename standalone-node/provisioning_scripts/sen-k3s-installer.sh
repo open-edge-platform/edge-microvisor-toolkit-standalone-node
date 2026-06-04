@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-K3S_BIN_PATH="${1:-/var/lib/rancher/k3s/bin}"
+K3S_BIN_PATH="${1:-/opt/rancher/k3s/bin}"
 AIRGAP="${2:-true}"
 BINARY_INSTALL="${3:-true}"
 
@@ -17,8 +17,7 @@ sudo bash -c 'cat << EOF >  /etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
 cluster-cidr: "10.42.0.0/16"
 cluster-dns: "10.43.0.10"
-data-dir : /var/lib/rancher/k3s
-snapshotter: native
+data-dir : /opt/rancher/k3s
 disable-kube-proxy: false
 kube-apiserver-arg:
   - "feature-gates=PortForwardWebsockets=true"
@@ -36,7 +35,7 @@ disable:
 EOF'
 
 
-sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
+sudo mkdir -p /opt/rancher/k3s/server/manifests/
 sudo mkdir -p $K3S_BIN_PATH
 
 # Set up mirrors
@@ -50,9 +49,9 @@ mirrors:
 EOF'
 
 if [ "$AIRGAP" = true ]; then
-  mkdir -p /var/lib/rancher/k3s/agent/images/
+  mkdir -p /opt/rancher/k3s/agent/images/
   echo "Copying k3s airgap images and binary"
-  sudo cp /opt/user-apps/images/k3s-airgap-images-amd64.tar.zst /var/lib/rancher/k3s/agent/images/
+  sudo cp /opt/user-apps/images/k3s-airgap-images-amd64.tar.zst /opt/rancher/k3s/agent/images/
 fi
 
 if [ "$BINARY_INSTALL" = true ]; then
@@ -73,13 +72,13 @@ if [ "$BINARY_INSTALL" = true ]; then
 fi
 
 if [ -d /opt/user-apps/images ]; then
-  sudo mkdir -p /var/lib/rancher/k3s/agent/images/
-	sudo cp /opt/user-apps/images/* /var/lib/rancher/k3s/agent/images
+  sudo mkdir -p /opt/rancher/k3s/agent/images/
+	sudo cp /opt/user-apps/images/* /opt/rancher/k3s/agent/images
 fi
 
 if [ -d /opt/user-apps/manifests ]; then
-  sudo mkdir -p /var/lib/rancher/k3s/server/manifests/
-  sudo cp /opt/user-apps/manifests/* /var/lib/rancher/k3s/server/manifests
+  sudo mkdir -p /opt/rancher/k3s/server/manifests/
+  sudo cp /opt/user-apps/manifests/* /opt/rancher/k3s/server/manifests
 fi
 
 echo "$(date): Installing k3s 2/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty0
@@ -143,7 +142,7 @@ echo "$(date): The cluster installation is complete!"
 
 # Print banner
 IP=$(sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}')
-IPCHECK="/var/lib/rancher/ip.log"
+IPCHECK="/opt/rancher/ip.log"
 
 if [ ! -f "$IPCHECK" ]; then
     echo "$IP" | sudo tee "$IPCHECK"
@@ -151,7 +150,7 @@ fi
 
 # Add k3s installation flag, so that on next reboot it will not start again from beginning.
 
-K3S_STATUS="/var/lib/rancher/k3s_status"
+K3S_STATUS="/opt/rancher/k3s_status"
 
 if [ ! -f "$K3S_STATUS" ]; then
     echo "success" | sudo tee "$K3S_STATUS"

@@ -359,7 +359,7 @@ update_ssh_settings() {
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
     # Update the k3s path
-    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/k3s/bin"|' /mnt/etc/environment
+    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/opt/rancher/k3s/bin"|' /mnt/etc/environment
     
     # Get the lvm_size_ingb from config-file for creating the LVM
     lvm_size=$(grep '^lvm_size_ingb=' "$CONFIG_FILE" | cut -d '=' -f2)
@@ -391,7 +391,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /opt/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
