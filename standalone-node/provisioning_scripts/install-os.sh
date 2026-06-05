@@ -975,6 +975,8 @@ system_readiness_check() {
 # /etc on the running system is overlay-on-tmpfs and resets on every reboot;
 # writing here ensures data-dir persists in the dm-verity lower layer.
 create_k3s_base_config() {
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
     mkdir -p /mnt/etc/rancher/k3s
     cat << 'EOF' > /mnt/etc/rancher/k3s/config.yaml
 write-kubeconfig-mode: "0644"
@@ -996,6 +998,7 @@ disable:
   - traefik
   - servicelb
 EOF
+    umount /mnt
     success "k3s base config written to /mnt/etc/rancher/k3s/config.yaml"
     return 0
 }
