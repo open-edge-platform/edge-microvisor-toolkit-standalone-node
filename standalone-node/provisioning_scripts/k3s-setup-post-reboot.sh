@@ -4,7 +4,36 @@
 # SPDX-License-Identifier: Apache-2.0
 # shellcheck disable=all
 
-IPCHECK="/var/lib/rancher/ip.log"
+# Ensure k3s config.yaml is always present before k3s is restarted.
+# /etc overlay is persistent (upper on ext4), but config may be missing
+# if the system was provisioned without create_k3s_base_config in install-os.sh.
+mkdir -p /etc/rancher/k3s
+if [ ! -f /etc/rancher/k3s/config.yaml ]; then
+    cat << 'EOF' > /etc/rancher/k3s/config.yaml
+write-kubeconfig-mode: "0644"
+cluster-cidr: "10.42.0.0/16"
+cluster-dns: "10.43.0.10"
+data-dir : /opt/rancher/k3s
+disable-kube-proxy: false
+kube-apiserver-arg:
+  - "feature-gates=PortForwardWebsockets=true"
+  - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+service-cidr: "10.43.0.0/16"
+kubelet-arg:
+  - "topology-manager-policy=best-effort"
+  - "max-pods=250"
+  - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+  - "volume-plugin-dir=/var/lib/kubelet/volumeplugins"
+protect-kernel-defaults: true
+disable:
+  - traefik
+  - servicelb
+EOF
+    echo "k3s config.yaml was missing; written and restarting k3s" | sudo tee /dev/tty0
+    sudo systemctl restart k3s
+fi
+
+IPCHECK="/opt/rancher/ip.log"
 # Check if the IP address changes, if changes print the banner
 host_prev_ip=$(cat "$IPCHECK")
 
@@ -54,7 +83,7 @@ do
    if [[ "$k3s_status" == "active" ]]; then
 
        echo "Waiting for all extensions to complete the deployment..." | sudo tee /dev/tty0
-       while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
+       while sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml /opt/rancher/k3s/bin/k3s kubectl get pods --all-namespaces --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers | grep -q .; do
        echo "Some pods are still not ready. Checking again in 5 seconds..." | sudo tee /dev/tty0
        sleep 5
        done

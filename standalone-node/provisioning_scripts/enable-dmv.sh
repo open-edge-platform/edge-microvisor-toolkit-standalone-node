@@ -597,7 +597,7 @@ enable_dmv(){
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /etc/intel-manageability
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /var/cache/manageability
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /var/intel-manageability
-    setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /var/lib/rancher
+    setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /opt/rancher
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /etc/kubernetes
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /etc/cni
     setfiles -m -v /etc/selinux/targeted/contexts/files/file_contexts /etc/netplan
@@ -627,7 +627,7 @@ enable_dmv(){
     restorecon -R -v /etc/intel-manageability
     restorecon -R -v /var/cache/manageability
     restorecon -R -v /var/intel-manageability
-    restorecon -R -v /var/lib/rancher
+    restorecon -R -v /opt/rancher
     restorecon -R -v /etc/kubernetes
     restorecon -R -v /etc/cni
     restorecon -R -v /etc/netplan

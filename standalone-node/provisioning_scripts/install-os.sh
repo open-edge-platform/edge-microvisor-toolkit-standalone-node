@@ -359,7 +359,7 @@ update_ssh_settings() {
     CONFIG_FILE="/mnt/etc/cloud/config-file"
 
     # Update the k3s path
-    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/var/lib/rancher/k3s/bin"|' /mnt/etc/environment
+    sed -i 's|^PATH="\(.*\)"$|PATH="\1:/opt/rancher/k3s/bin"|' /mnt/etc/environment
     
     # Get the lvm_size_ingb from config-file for creating the LVM
     lvm_size=$(grep '^lvm_size_ingb=' "$CONFIG_FILE" | cut -d '=' -f2)
@@ -391,7 +391,7 @@ EOF
 	echo "source /etc/environment" >> /home/$user_name/.bashrc
         echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
         echo "export KUBE_CONFIG_PATH=/etc/rancher/k3s/k3s.yaml" >> /home/$user_name/.bashrc
-        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
+        echo "alias k='KUBECONFIG=/etc/rancher/k3s/k3s.yaml /opt/rancher/k3s/bin/k3s kubectl'" >> /home/$user_name/.bashrc
         #exit the su -$user_name
         exit
 EOT
@@ -971,6 +971,38 @@ system_readiness_check() {
     get_block_device_details || return 1
 }
 
+# Write k3s config into the rootfs before dm-verity seals it.
+# /etc on the running system is overlay-on-tmpfs and resets on every reboot;
+# writing here ensures data-dir persists in the dm-verity lower layer.
+create_k3s_base_config() {
+    check_mnt_mount_exist
+    mount "$os_disk$os_rootfs_part" /mnt
+    mkdir -p /mnt/etc/rancher/k3s
+    cat << 'EOF' > /mnt/etc/rancher/k3s/config.yaml
+write-kubeconfig-mode: "0644"
+cluster-cidr: "10.42.0.0/16"
+cluster-dns: "10.43.0.10"
+data-dir : /opt/rancher/k3s
+disable-kube-proxy: false
+kube-apiserver-arg:
+  - "feature-gates=PortForwardWebsockets=true"
+  - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+service-cidr: "10.43.0.0/16"
+kubelet-arg:
+  - "topology-manager-policy=best-effort"
+  - "max-pods=250"
+  - "tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+  - "volume-plugin-dir=/var/lib/kubelet/volumeplugins"
+protect-kernel-defaults: true
+disable:
+  - traefik
+  - servicelb
+EOF
+    umount /mnt
+    success "k3s base config written to /mnt/etc/rancher/k3s/config.yaml"
+    return 0
+}
+
 # Configure the system with username/proxy/cloud-init files
 platform_config_manager() {
 
@@ -989,6 +1021,8 @@ platform_config_manager() {
     custom_ntp_server_configuration || return 1
 
     boot_order_change_to_disk || return 1
+
+    create_k3s_base_config || return 1
 }
 
 # Post installation tasks
