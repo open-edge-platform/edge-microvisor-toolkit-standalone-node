@@ -118,6 +118,11 @@ done
 
 echo "$(date): Namespaces created 7/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 
+## Create user-apps namespace
+echo "$(date): Creating user-apps namespace" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
+sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl create namespace user-apps --dry-run=client -o yaml | \
+  sudo -E KUBECONFIG=/etc/rancher/k3s/k3s.yaml $K3S_BIN_PATH/k3s kubectl apply -f -
+
 echo "$(date): Permissive network policies created 8/12" | sudo tee -a /var/log/cluster-init.log | sudo tee /dev/tty1
 
 ## Wait for all pods to deploy

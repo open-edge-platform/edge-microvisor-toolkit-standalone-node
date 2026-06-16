@@ -45,15 +45,15 @@ KUBECTL_CMD=""
 
 # Function to detect the appropriate kubectl command (inspired by old-context.sh)
 detect_kubectl_command() {
-    if command -v /var/lib/rancher/k3s/bin/k3s >/dev/null 2>&1 && /var/lib/rancher/k3s/bin/k3s kubectl version --client >/dev/null 2>&1; then
-        KUBECTL_CMD="/var/lib/rancher/k3s/bin/k3s kubectl"
+    if command -v /opt/rancher/k3s/bin/k3s >/dev/null 2>&1 && /opt/rancher/k3s/bin/k3s kubectl version --client >/dev/null 2>&1; then
+        KUBECTL_CMD="/opt/rancher/k3s/bin/k3s kubectl"
         log "Found working kubectl command: 'k3s kubectl'"
     elif command -v kubectl >/dev/null 2>&1; then
         KUBECTL_CMD="kubectl"
         log "Found working kubectl command: 'kubectl'"
     else
         KUBECTL_CMD=""
-        error "Neither '/var/lib/rancher/k3s/bin/k3s kubectl' nor 'kubectl' found or working"
+        error "Neither '/opt/rancher/k3s/bin/k3s kubectl' nor 'kubectl' found or working"
     fi
 }
 

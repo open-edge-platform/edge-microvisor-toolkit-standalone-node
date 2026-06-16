@@ -68,7 +68,7 @@ parse_custom_network_config() {
 
 # Check if K3s is installed
 check_k3s_installed() {
-    if command -v k3s >/dev/null 2>&1 || command -v /var/lib/rancher/k3s/bin/k3s kubectl >/dev/null 2>&1; then
+    if command -v k3s >/dev/null 2>&1 || command -v /opt/rancher/k3s/bin/k3s kubectl >/dev/null 2>&1; then
         return 0
     else
         return 1
@@ -77,7 +77,7 @@ check_k3s_installed() {
 
 # Check if NetworkAttachmentDefinition CRD exists
 check_nad_crd() {
-    if /var/lib/rancher/k3s/bin/k3s kubectl get crd network-attachment-definitions.k8s.cni.cncf.io >/dev/null 2>&1; then
+    if /opt/rancher/k3s/bin/k3s kubectl get crd network-attachment-definitions.k8s.cni.cncf.io >/dev/null 2>&1; then
         return 0
     else
         return 1
@@ -92,7 +92,7 @@ apply_network_attachment_definition() {
     local range_start="$4"
     local range_end="$5"
     local gateway="$6"
-    cat <<EOF | /var/lib/rancher/k3s/bin/k3s kubectl apply -f -
+    cat <<EOF | /opt/rancher/k3s/bin/k3s kubectl apply -f -
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -145,7 +145,7 @@ main() {
         br_check_custom_network_config "$CONF_FILE"
         parse_custom_network_config "$CONF_FILE"
 
-        # Wait for K3s (or /var/lib/rancher/k3s/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
+        # Wait for K3s (or /opt/rancher/k3s/bin/k3s kubectl) and NetworkAttachmentDefinition CRD to be available
         retries=0
         max_retries=600   # 10 minute
         until check_k3s_installed && check_nad_crd; do
@@ -161,7 +161,7 @@ main() {
         echo "Waiting for multus pods to be created..."
         retries=0
         max_retries=600  # 10 minute
-        until /var/lib/rancher/k3s/bin/k3s kubectl get pods -l app=multus -n kube-system --no-headers 2>/dev/null | grep -q .; do
+        until /opt/rancher/k3s/bin/k3s kubectl get pods -l app=multus -n kube-system --no-headers 2>/dev/null | grep -q .; do
           retries=$((retries + 1))
           if ((retries > max_retries)); then
             echo "Timeout waiting for multus pods to be created."
@@ -172,14 +172,14 @@ main() {
 
         # wait for multus pods to be ready
         echo "Waiting for multus pods to be ready..."
-        /var/lib/rancher/k3s/bin/k3s kubectl wait --for=condition=Ready pod -l app=multus -n kube-system --timeout=600s
+        /opt/rancher/k3s/bin/k3s kubectl wait --for=condition=Ready pod -l app=multus -n kube-system --timeout=600s
 
         # Create user-apps namespace if it doesn't exist
-        /var/lib/rancher/k3s/bin/k3s kubectl create ns user-apps || echo "Namespace user-apps already exists or failed to create"
+        /opt/rancher/k3s/bin/k3s kubectl create ns user-apps || echo "Namespace user-apps already exists or failed to create"
 
         # Create Multus symbolic links after successful NAD application
-        sudo ln -sf /etc/cni/net.d/00-multus.conf /var/lib/rancher/k3s/agent/etc/cni/net.d/00-multus.conf
-        sudo ln -sf /opt/cni/bin/multus /var/lib/rancher/k3s/data/cni/multus
+        sudo ln -sf /etc/cni/net.d/00-multus.conf /opt/rancher/k3s/agent/etc/cni/net.d/00-multus.conf
+        sudo ln -sf /opt/cni/bin/multus /opt/rancher/k3s/data/cni/multus
 
         sleep 3
         

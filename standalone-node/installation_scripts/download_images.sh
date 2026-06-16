@@ -66,9 +66,16 @@ download_k3s_artifacts () {
 	echo "Downloading k3s artifacts"
 	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
 	cd ${OUT_DIR}/${ARTIFACT_DIR} || exit
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/sha256sum-amd64.txt
-	curl -sfL https://get.k3s.io --output install.sh
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s
+	curl -fOLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/sha256sum-amd64.txt \
+	    || { echo "Failed to download k3s sha256sum"; exit 1; }
+	curl -fsfL https://get.k3s.io --output install.sh \
+	    || { echo "Failed to download k3s install.sh"; exit 1; }
+	curl -fOLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s \
+	    || { echo "Failed to download k3s binary"; exit 1; }
+	# Verify k3s binary sha256
+	grep " k3s$" sha256sum-amd64.txt | sha256sum -c - \
+	    || { echo "ERROR: k3s binary sha256 verification failed"; exit 1; }
+	chmod +x k3s
 	cd ../../
 }
 
@@ -77,7 +84,8 @@ download_airgap_images () {
 	echo "Downloading kubernetes container images"
 	mkdir -p ${OUT_DIR}/${IMG_DIR}
 	cd ${OUT_DIR}/${IMG_DIR} || exit
-	curl -OLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst
+	curl -fOLs https://github.com/k3s-io/k3s/releases/download/v1.32.4%2Bk3s1/k3s-airgap-images-amd64.tar.zst \
+	    || { echo "Failed to download k3s airgap images"; exit 1; }
 	cd ../../
 }
 
@@ -141,7 +149,8 @@ download_idv_kubevirt_images_and_manifests () {
 	# download the artifacts
 	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
 	cd ${OUT_DIR}/${ARTIFACT_DIR} || exit
-	curl -OLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-kubevirt-1.0.0-rc2.tar.gz
+	curl -fOLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-kubevirt-1.0.0-rc2.tar.gz \
+	    || { echo "Failed to download intel-idv-kubevirt"; exit 1; }
 	# untar
 	tar -xzf intel-idv-kubevirt-1.0.0-rc2.tar.gz -C .
 	# copy all the images (.zst) to required destination
@@ -161,7 +170,8 @@ download_idv_device_plugins_images_and_manifests () {
 	# download the artifacts
 	mkdir -p ${OUT_DIR}/${ARTIFACT_DIR}
 	cd ${OUT_DIR}/${ARTIFACT_DIR} || exit
-	curl -OLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-device-plugin-1.0.0-rc2.tar.gz
+	curl -fOLs https://github.com/open-edge-platform/edge-desktop-virtualization/releases/download/1.0.0-rc2/intel-idv-device-plugin-1.0.0-rc2.tar.gz \
+	    || { echo "Failed to download intel-idv-device-plugin"; exit 1; }
 	# untar
 	tar -xzf intel-idv-device-plugin-1.0.0-rc2.tar.gz -C .
 	# copy all the images (.zst) to required destination
