@@ -5,7 +5,7 @@
 
 # Define a function to run kubectl with proper KUBECONFIG
 k3s_kubectl() {
-    KUBECONFIG=/etc/rancher/k3s/k3s.yaml /var/lib/rancher/k3s/bin/k3s kubectl "$@"
+    KUBECONFIG=/etc/rancher/k3s/k3s.yaml /opt/rancher/k3s/bin/k3s kubectl "$@"
 }
 
 k3s_helm() {

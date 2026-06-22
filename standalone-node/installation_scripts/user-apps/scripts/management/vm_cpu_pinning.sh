@@ -126,7 +126,7 @@ find_vm_pid() {
         namespaces="$target_namespace"
     else
         # Get all namespaces, excluding system ones
-        namespaces=$(/var/lib/rancher/k3s/bin/k3s kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | tr ' ' '\n' | grep -v -E '^(kube-system|kube-public|kube-node-lease|kubevirt)$' | tr '\n' ' ')
+        namespaces=$(/opt/rancher/k3s/bin/k3s kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | tr ' ' '\n' | grep -v -E '^(kube-system|kube-public|kube-node-lease|kubevirt)$' | tr '\n' ' ')
     fi
     
     # Try to find QEMU process in each namespace
