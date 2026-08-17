@@ -9,18 +9,28 @@ os_filename=""
 INSTALL_TYPE="${1:-NRT}"
 PLATFORM_TYPE="${2:-PTL}"
 
+# PLATFORM_TYPE may be passed as a comma-separated list in CI (for example: "PTL, NVL").
+# Use the first platform for this build flow and normalize whitespace.
+PLATFORM_TYPE="${PLATFORM_TYPE%%,*}"
+PLATFORM_TYPE="${PLATFORM_TYPE//[[:space:]]/}"
+
+if [[ "$INSTALL_TYPE" != "DV" && "$INSTALL_TYPE" != "NRT" ]]; then
+    echo "Exiting: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
+    exit 1
+fi
+
+if [[ -z "$PLATFORM_TYPE" ]]; then
+    echo "Exiting: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
+    exit 1
+fi
+
 # Check for unsupported combinations
 if [[ "$INSTALL_TYPE" == "DV" && "$PLATFORM_TYPE" == "PTL" ]]; then
     echo "Exiting: PTL with DV is not supported (INSTALL_TYPE: $INSTALL_TYPE, PLATFORM_TYPE: $PLATFORM_TYPE)"
     exit 1
 fi
 
-if [[ ("$INSTALL_TYPE" == "DV" || "$INSTALL_TYPE" == "NRT") && ("$PLATFORM_TYPE" == "RPL" || "$PLATFORM_TYPE" == "PTL") ]]; then
-    echo "Continuing: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
-else
-    echo "Exiting: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
-    exit 1
-fi
+echo "Continuing: INSTALL_TYPE is $INSTALL_TYPE and PLATFORM_TYPE is $PLATFORM_TYPE"
 
 # Install system dependent packages
 instll-dep-pks() {
@@ -206,4 +216,3 @@ create-standalone-installer-pkg
 
 ######@main#####
 main
-
