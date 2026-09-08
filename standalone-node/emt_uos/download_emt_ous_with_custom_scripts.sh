@@ -6,8 +6,7 @@
 # Download the Edge Microvisor Toolkit uOS(EMB) from open source no-auth file server
 # The file server URL is defined in FILE_RS_URL
 
-export PLATFORM_TYPE="${1:-PTL}"
-export PLATFORM_TYPE="${2:-NVL}"
+export PLATFORM_TYPE="${1:-PTL, NVL}"
 
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/repository"
 
@@ -15,7 +14,7 @@ FILE_RS_URL="https://files-rs.edgeorchestration.intel.com/files-edge-orch/reposi
 if [ "$PLATFORM_TYPE" == "PTL" ]; then
     # PTL Platform (To be updated with PV release images)
     # RPL/BTL Platform
-    EMB_BUILD_DATE=20260722
+    EMB_BUILD_DATE=20260907
     EMB_FILE_NAME="microvisor/uos/26.06/emb_uos_x86_64_${EMB_BUILD_DATE}"
     EMB_RAW_GZ="${EMB_FILE_NAME}.tar.gz"
     EMB_IMAGE_URL="${FILE_RS_URL}/${EMB_RAW_GZ}"
