@@ -7,8 +7,8 @@
 FILE_RS_URL="https://files-rs.edgeorchestration.intel.com"
 
 export INSTALL_TYPE="${1:-NRT}"
-export PLATFORM_TYPE="${2:-PTL}"
-export PLATFORM_TYPE="${3:-NVL}"
+export PLATFORM_TYPE="${2:-PTL, NVL}"
+
 
 if [ "$INSTALL_TYPE" == "DV" ]; then
     # EMTS build with DV image non-PTL (RPL/BTL) platforms
@@ -25,8 +25,8 @@ else
     if [ "$PLATFORM_TYPE" == "PTL" ]; then
         # EMTS build with NRT image for PTL
 	      EMT_VERSION=26.06
-	      EMT_BUILD_DATE=20260722
-	      EMT_BUILD_NO=0750
+	      EMT_BUILD_DATE=20260907
+	      EMT_BUILD_NO=0056
 	      EMT_FILE_NAME="edge-readonly-${EMT_VERSION}.${EMT_BUILD_DATE}.${EMT_BUILD_NO}"
 	      EMT_RAW_GZ="${EMT_FILE_NAME}.raw.gz"
 	      EMT_SHA256SUM="${EMT_FILE_NAME}.raw.gz.sha256sum"
