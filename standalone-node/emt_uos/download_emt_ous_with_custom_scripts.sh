@@ -35,7 +35,7 @@ else
     echo "RPL/BTL Platform uOS is selected"
 fi
 
-curl -k --noproxy '' ${EMB_IMAGE_URL} -o uos.tar.gz || { echo "download of uos failed, please check";exit 1;}
+curl --noproxy '' ${EMB_IMAGE_URL} -o uos.tar.gz || { echo "download of uos failed, please check";exit 1;}
 
 echo "Current working directory is: $PWD"
 
