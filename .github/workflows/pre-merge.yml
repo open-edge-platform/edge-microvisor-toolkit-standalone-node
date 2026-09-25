@@ -103,7 +103,7 @@ jobs:
       run_dep_version_check: true
       run_freeup_ubuntu_space: true
       run_build: true
-      run_lint: true
+      run_lint: false
       run_test: false
       run_validate_clean_folder: false
       run_docker_build: true
@@ -116,12 +116,56 @@ jobs:
     secrets:
       NO_AUTH_ECR_PUSH_USERNAME: ${{ secrets.NO_AUTH_ECR_PUSH_USERNAME }}
       NO_AUTH_ECR_PUSH_PASSWD: ${{ secrets.NO_AUTH_ECR_PUSH_PASSWD }}
+  pre-merge-pipeline-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: pre-checks
+    if: ${{ contains(needs.pre-checks.outputs.filtered_projects, 'standalone-node') }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1  # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Bootstrap CI environment
+        uses: open-edge-platform/orch-ci/.github/actions/bootstrap@547a9b246177a30455df6b332eded93577a6d5ca  # 2026.1.4
+        with:
+          bootstrap_tools: "python,nodejs,shellcheck"
+      - name: Lint standalone-node
+        run: make -C standalone-node lint
+  pre-merge-pipeline-lint-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [pre-checks, pre-merge-pipeline-lint]
+    if: ${{ always() }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1  # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Validate standalone-node lint result
+        env:
+          filtered_projects: ${{ needs.pre-checks.outputs.filtered_projects }}
+          lint_result: ${{ needs.pre-merge-pipeline-lint.result }}
+        run: |
+          if [[ "${filtered_projects}" == *"standalone-node"* ]]; then
+            echo "pre-merge-pipeline-lint result: ${lint_result}"
+            [[ "${lint_result}" == "success" ]]
+          else
+            echo "No standalone-node changes detected; standalone-node lint is not required."
+          fi
   final-check:
       runs-on: ubuntu-latest
       permissions:
         contents: read
       if: ${{ always() }}
-      needs: [pre-merge-root, pre-merge-pipeline]
+      needs: [pre-merge-root, pre-merge-pipeline, pre-merge-pipeline-lint-gate]
       steps:
         - name: Harden the runner (Audit all outbound calls)
           uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1  # v2.21.1
@@ -132,8 +176,9 @@ jobs:
           env:
             pre_merge_root_pipeline: ${{ needs.pre-merge-root.result }}
             pre_merge_pipeline: ${{ needs.pre-merge-pipeline.result }}
+            pre_merge_pipeline_lint_gate: ${{ needs.pre-merge-pipeline-lint-gate.result }}
           run: |
-            results=("pre_merge_root_pipeline" "pre_merge_pipeline")
+            results=("pre_merge_root_pipeline" "pre_merge_pipeline" "pre_merge_pipeline_lint_gate")
             status="OK"
 
             for result in "${results[@]}"; do
