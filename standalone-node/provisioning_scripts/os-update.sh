@@ -476,13 +476,13 @@ if $URL_MODE; then
   # Download the Microvisor image
   IMAGE_PATH="$TEMP_DIR/edge_microvisor_toolkit.raw.gz"
   echo "Downloading microvisor image from $IMAGE_URL..."
-  curl -k "$IMAGE_URL" -o "$IMAGE_PATH" || error_exit "Failed to download microvisor image"
+  curl  "$IMAGE_URL" -o "$IMAGE_PATH" || error_exit "Failed to download microvisor image"
 
   # Download the SHA256 checksum file
   SHA_FILE="$TEMP_DIR/edge_microvisor_readonly.sha256sum"
   SHA_URL="${IMAGE_URL}.sha256sum"
   echo "Downloading SHA256 checksum from $SHA_URL..."
-  curl -k "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
+  curl  "$SHA_URL" -o "$SHA_FILE" || error_exit "Failed to download SHA256 checksum"
 
   # Extract the SHA256 checksum
   SHA_ID=$(extract_sha256_checksum "$SHA_FILE")
