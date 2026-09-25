@@ -121,7 +121,6 @@ jobs:
     permissions:
       contents: read
     needs: pre-checks
-    if: ${{ contains(needs.pre-checks.outputs.filtered_projects, 'standalone-node') }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1  # v2.21.1
@@ -129,13 +128,16 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        if: ${{ contains(needs.pre-checks.outputs.filtered_projects, 'standalone-node') }}
         with:
           persist-credentials: false
       - name: Bootstrap CI environment
+        if: ${{ contains(needs.pre-checks.outputs.filtered_projects, 'standalone-node') }}
         uses: open-edge-platform/orch-ci/.github/actions/bootstrap@547a9b246177a30455df6b332eded93577a6d5ca  # 2026.1.4
         with:
           bootstrap_tools: "python,nodejs,shellcheck"
       - name: Lint standalone-node
+        if: ${{ contains(needs.pre-checks.outputs.filtered_projects, 'standalone-node') }}
         run: make -C standalone-node lint
   final-check:
       runs-on: ubuntu-latest
